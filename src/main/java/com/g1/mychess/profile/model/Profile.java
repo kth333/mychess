@@ -1,8 +1,11 @@
 package com.g1.mychess.profile.model;
 
+import com.g1.mychess.enums.CustomChessRank;
+import com.g1.mychess.enums.Gender;
 import com.g1.mychess.user.model.Player;
 
 import jakarta.persistence.*;
+import java.time.LocalDate;
 
 @Entity
 @Table(name = "profiles")
@@ -27,6 +30,16 @@ public class Profile {
     private String avatarUrl;
 
     @Enumerated(EnumType.STRING)
+    @Column(name = "gender")
+    private Gender gender;
+
+    @Column(name = "location")
+    private String location;
+
+    @Column(name = "birth_date")
+    private LocalDate birthDate;
+
+    @Enumerated(EnumType.STRING)
     @Column(name = "rank")
     private CustomChessRank rank;
 
@@ -42,7 +55,7 @@ public class Profile {
     @Column(name = "elo_rating")
     private int eloRating;
 
-    @Column(name = "glickoRating")
+    @Column(name = "glicko_rating")
     private int glickoRating;
 
     @Column(name = "rating_deviation")
@@ -91,6 +104,30 @@ public class Profile {
 
     public void setAvatarUrl(String avatarUrl) {
         this.avatarUrl = avatarUrl;
+    }
+
+    public Gender getGender() {
+        return gender;
+    }
+
+    public void setGender(Gender gender) {
+        this.gender = gender;
+    }
+
+    public String getLocation() {
+        return location;
+    }
+
+    public void setLocation(String location) {
+        this.location = location;
+    }
+
+    public LocalDate getBirthDate() {
+        return birthDate;
+    }
+
+    public void setBirthDate(LocalDate birthDate) {
+        this.birthDate = birthDate;
     }
 
     public CustomChessRank getRank() {
@@ -153,7 +190,11 @@ public class Profile {
         return isPublic;
     }
 
-    public void setPublic(boolean aPublic) {
-        isPublic = aPublic;
+    public void setPublic(boolean isPublic) {
+        this.isPublic = isPublic;
+    }
+
+    public int getAge() {
+        return LocalDate.now().getYear() - birthDate.getYear();
     }
 }
