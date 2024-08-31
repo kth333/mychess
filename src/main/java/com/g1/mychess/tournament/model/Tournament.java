@@ -3,6 +3,7 @@ package com.g1.mychess.tournament.model;
 import com.g1.mychess.enums.GameMode;
 import com.g1.mychess.enums.Gender;
 import com.g1.mychess.enums.TournamentFormat;
+import com.g1.mychess.location.model.Location;
 import com.g1.mychess.user.model.Admin;
 import com.g1.mychess.user.model.Player;
 
@@ -68,8 +69,12 @@ public class Tournament {
     @Column(name = "required_gender")
     private Gender requiredGender;
 
-    @Column(name = "required_location")
-    private String requiredLocation;
+    @ManyToOne
+    @JoinColumn(name = "location_id", nullable = false)
+    private Location location;
+
+    @Column(name = "address", nullable = false)
+    private String address;
 
     @ManyToMany
     @JoinTable(
@@ -209,12 +214,12 @@ public class Tournament {
         this.requiredGender = requiredGender;
     }
 
-    public String getRequiredLocation() {
-        return requiredLocation;
+    public Location getLocation() {
+        return location;
     }
 
-    public void setRequiredLocation(String requiredLocation) {
-        this.requiredLocation = requiredLocation;
+    public void setLocation(Location location) {
+        this.location = location;
     }
 
     public Set<Player> getParticipants() {
