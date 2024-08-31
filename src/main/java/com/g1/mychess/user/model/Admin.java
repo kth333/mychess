@@ -8,7 +8,10 @@ import java.time.LocalDateTime;
 @PrimaryKeyJoinColumn(name = "user_id")
 public class Admin extends User {
 
+    @Column(name = "managed_tournament_count")
     private Integer managedTournamentCount;
+
+    @Column(name = "last_login")
     private LocalDateTime lastLogin;
 
     // Getters and Setters

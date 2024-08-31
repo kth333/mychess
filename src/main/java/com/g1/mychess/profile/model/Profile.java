@@ -17,19 +17,38 @@ public class Profile {
     @JoinColumn(name = "user_id")
     private Player player;
 
+    @Column(name = "full_name")
     private String fullName;
+
+    @Column(name = "bio")
     private String bio;
+
+    @Column(name = "avatar_url")
     private String avatarUrl;
 
     @Enumerated(EnumType.STRING)
+    @Column(name = "rank")
     private CustomChessRank rank;
 
+    @Column(name = "total_wins")
     private int totalWins;
+
+    @Column(name = "total_losses")
     private int totalLosses;
+
+    @Column(name = "total_draws")
     private int totalDraws;
+
+    @Column(name = "elo_rating")
     private int eloRating;
+
+    @Column(name = "glickoRating")
     private int glickoRating;
+
+    @Column(name = "rating_deviation")
     private int ratingDeviation;
+
+    @Column(name = "is_public")
     private boolean isPublic;
 
     // Getters and Setters

@@ -12,8 +12,13 @@ public class Player extends User {
     @OneToOne(mappedBy = "player", cascade = CascadeType.ALL)
     private Profile profile;
 
+    @Column(name = "joined_date")
     private LocalDate joinedDate;
+
+    @Column(name = "tournament_count")
     private Integer tournamentCount;
+
+    @Column(name = "is_active")
     private Boolean isActive;
 
     // Getters and Setters
