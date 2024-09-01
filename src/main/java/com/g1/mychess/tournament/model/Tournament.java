@@ -1,6 +1,7 @@
 package com.g1.mychess.tournament.model;
 
-import com.g1.mychess.enums.GameMode;
+import com.g1.mychess.enums.TimeControl;
+import com.g1.mychess.enums.Increment;
 import com.g1.mychess.enums.Gender;
 import com.g1.mychess.enums.TournamentFormat;
 import com.g1.mychess.location.model.Location;
@@ -44,11 +45,16 @@ public class Tournament {
     private TournamentFormat format;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "game_mode", nullable = false)
-    private GameMode gameMode;
+    @Column(name = "time_control", nullable = false)
+    private TimeControl timeControl;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "increment", nullable = false)
+    private Increment increment;
+
+    @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false)
-    private String status;
+    private TournamentStatus status;
 
     @Column(name = "min_rating")
     private Integer minRating;
@@ -76,13 +82,16 @@ public class Tournament {
     @Column(name = "address", nullable = false)
     private String address;
 
-    @ManyToMany
-    @JoinTable(
-            name = "tournament_participants",
-            joinColumns = @JoinColumn(name = "tournament_id"),
-            inverseJoinColumns = @JoinColumn(name = "player_id")
-    )
-    private Set<Player> participants;
+    @OneToMany(mappedBy = "tournament", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<TournamentPlayer> participants;
+
+    public enum TournamentStatus {
+        UPCOMING,
+        ONGOING,
+        COMPLETED,
+        CANCELED,
+        PAUSED
+    }
 
     // Getters and Setters
 
@@ -150,19 +159,19 @@ public class Tournament {
         this.format = format;
     }
 
-    public GameMode getGameMode() {
-        return gameMode;
+    public TimeControl getTimeControl() {
+        return timeControl;
     }
 
-    public void setGameMode(GameMode gameMode) {
-        this.gameMode = gameMode;
+    public void setTimeControl(TimeControl timeControl) {
+        this.timeControl = timeControl;
     }
 
-    public String getStatus() {
+    public TournamentStatus getStatus() {
         return status;
     }
 
-    public void setStatus(String status) {
+    public void setStatus(TournamentStatus status) {
         this.status = status;
     }
 
@@ -222,11 +231,11 @@ public class Tournament {
         this.location = location;
     }
 
-    public Set<Player> getParticipants() {
+    public Set<TournamentPlayer> getParticipants() {
         return participants;
     }
 
-    public void setParticipants(Set<Player> participants) {
+    public void setParticipants(Set<TournamentPlayer> participants) {
         this.participants = participants;
     }
 }

@@ -42,7 +42,7 @@ public class Profile {
     private LocalDate birthDate;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "rank")
+    @Column(name = "chess_rank")
     private CustomChessRank rank;
 
     @Column(name = "total_wins")

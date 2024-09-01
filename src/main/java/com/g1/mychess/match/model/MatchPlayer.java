@@ -1,0 +1,98 @@
+package com.g1.mychess.match.model;
+
+import com.g1.mychess.user.model.Player;
+import jakarta.persistence.*;
+
+@Entity
+@Table(name = "match_player")
+public class MatchPlayer {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @ManyToOne
+    @JoinColumn(name = "match_id", nullable = false)
+    private Match match;
+
+    @ManyToOne
+    @JoinColumn(name = "player_id", nullable = false)
+    private Player player;
+
+    @Column(name = "predicted_win_rate")
+    private Double predictedWinRate;
+
+    @Column(name = "performance_rating")
+    private Integer performanceRating;
+
+    @Column(name = "game_duration")
+    private Long gameDuration;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "result")
+    private Result result;
+
+    public enum Result {
+        WIN,
+        LOSS,
+        DRAW
+    }
+
+    // Getters and Setters
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public Match getMatch() {
+        return match;
+    }
+
+    public void setMatch(Match match) {
+        this.match = match;
+    }
+
+    public Player getPlayer() {
+        return player;
+    }
+
+    public void setPlayer(Player player) {
+        this.player = player;
+    }
+
+    public Double getPredictedWinRate() {
+        return predictedWinRate;
+    }
+
+    public void setPredictedWinRate(Double predictedWinRate) {
+        this.predictedWinRate = predictedWinRate;
+    }
+
+    public Result getResult() {
+        return result;
+    }
+
+    public void setResult(Result result) {
+        this.result = result;
+    }
+
+    public Integer getPerformanceRating() {
+        return performanceRating;
+    }
+
+    public void setPerformanceRating(Integer performanceRating) {
+        this.performanceRating = performanceRating;
+    }
+
+    public Long getGameDuration() {
+        return gameDuration;
+    }
+
+    public void setGameDuration(Long gameDuration) {
+        this.gameDuration = gameDuration;
+    }
+}
