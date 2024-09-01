@@ -1,12 +1,9 @@
 package com.g1.mychess.tournament.model;
 
-import com.g1.mychess.enums.TimeControl;
-import com.g1.mychess.enums.Increment;
 import com.g1.mychess.enums.Gender;
 import com.g1.mychess.enums.TournamentFormat;
 import com.g1.mychess.location.model.Location;
 import com.g1.mychess.user.model.Admin;
-import com.g1.mychess.user.model.Player;
 
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
@@ -28,6 +25,9 @@ public class Tournament {
     @Column(name = "name", nullable = false)
     private String name;
 
+    @Column(name = "description", nullable = false)
+    private String description;
+
     @Column(name = "start_date_time", nullable = false)
     private LocalDateTime startDateTime;
 
@@ -44,13 +44,18 @@ public class Tournament {
     @Column(name = "format", nullable = false)
     private TournamentFormat format;
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "time_control", nullable = false)
-    private TimeControl timeControl;
+    @Embedded
+    private TimeControlSetting timeControlSetting;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "increment", nullable = false)
-    private Increment increment;
+    @Column(name = "time_control_type", nullable = false)
+    private TimeControlSetting.TimeControlType timeControlType;
+
+    @PrePersist
+    @PreUpdate
+    public void updateTimeControlType() {
+        this.timeControlType = timeControlSetting.getTimeControlType();
+    }
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false)
@@ -115,9 +120,11 @@ public class Tournament {
         return name;
     }
 
-    public void setName(String name) {
-        this.name = name;
-    }
+    public void setName(String name) { this.name = name; }
+
+    public String getDescription() { return description; }
+
+    public void setDescription(String description) { this.description = description; }
 
     public LocalDateTime getStartDateTime() {
         return startDateTime;
@@ -139,17 +146,13 @@ public class Tournament {
         return registrationStartDate;
     }
 
-    public void setRegistrationStartDate(LocalDateTime registrationStartDate) {
-        this.registrationStartDate = registrationStartDate;
-    }
+    public void setRegistrationStartDate(LocalDateTime registrationStartDate) { this.registrationStartDate = registrationStartDate; }
 
     public LocalDateTime getRegistrationEndDate() {
         return registrationEndDate;
     }
 
-    public void setRegistrationEndDate(LocalDateTime registrationEndDate) {
-        this.registrationEndDate = registrationEndDate;
-    }
+    public void setRegistrationEndDate(LocalDateTime registrationEndDate) { this.registrationEndDate = registrationEndDate; }
 
     public TournamentFormat getFormat() {
         return format;
@@ -159,21 +162,19 @@ public class Tournament {
         this.format = format;
     }
 
-    public TimeControl getTimeControl() {
-        return timeControl;
-    }
+    public TimeControlSetting getTimeControlSetting() { return timeControlSetting; }
 
-    public void setTimeControl(TimeControl timeControl) {
-        this.timeControl = timeControl;
-    }
+    public void setTimeControlSetting(TimeControlSetting timeControlSetting) { this.timeControlSetting = timeControlSetting; }
+
+    public TimeControlSetting.TimeControlType getTimeControlType() { return timeControlType; }
+
+    public void setTimeControlType(TimeControlSetting.TimeControlType timeControlType) { this.timeControlType = timeControlType; }
 
     public TournamentStatus getStatus() {
         return status;
     }
 
-    public void setStatus(TournamentStatus status) {
-        this.status = status;
-    }
+    public void setStatus(TournamentStatus status) { this.status = status; }
 
     public Integer getMinRating() {
         return minRating;
@@ -230,6 +231,10 @@ public class Tournament {
     public void setLocation(Location location) {
         this.location = location;
     }
+
+    public String getAddress() { return address; }
+
+    public void setAddress(String address) { this.address = address; }
 
     public Set<TournamentPlayer> getParticipants() {
         return participants;
