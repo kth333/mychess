@@ -14,6 +14,11 @@ public class Admin extends User {
     @Column(name = "last_login")
     private LocalDateTime lastLogin;
 
+    public Admin() {
+        super();
+        this.setRole(Role.ADMIN);
+    }
+
     // Getters and Setters
 
     public Integer getManagedTournamentCount() {

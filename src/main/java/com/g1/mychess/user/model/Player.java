@@ -21,6 +21,11 @@ public class Player extends User {
     @Column(name = "is_active")
     private Boolean isActive;
 
+    public Player() {
+        super();
+        this.setRole(Role.PLAYER);
+    }
+
     // Getters and Setters
 
     public Profile getProfile() {
