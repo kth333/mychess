@@ -1,6 +1,5 @@
 package com.g1.mychess.tournament.model;
 
-import com.g1.mychess.user.model.Player;
 import jakarta.persistence.*;
 
 import java.time.LocalDateTime;
