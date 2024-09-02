@@ -2,7 +2,6 @@ package com.g1.mychess.profile.model;
 
 import com.g1.mychess.enums.CustomChessRank;
 import com.g1.mychess.enums.Gender;
-import com.g1.mychess.location.model.Location;
 import com.g1.mychess.user.model.Player;
 
 import jakarta.persistence.*;
@@ -34,9 +33,14 @@ public class Profile {
     @Column(name = "gender")
     private Gender gender;
 
-    @ManyToOne
-    @JoinColumn(name = "location_id")
-    private Location location;
+    @Column(name = "country")
+    private String country;
+
+    @Column(name = "region")
+    private String region;
+
+    @Column(name = "city")
+    private String city;
 
     @Column(name = "birth_date")
     private LocalDate birthDate;
@@ -116,13 +120,17 @@ public class Profile {
         this.gender = gender;
     }
 
-    public Location getLocation() {
-        return location;
-    }
+    public String getCountry() { return country; }
 
-    public void setLocation(Location location) {
-        this.location = location;
-    }
+    public void setCountry(String country) { this.country = country; }
+
+    public String getRegion() { return region; }
+
+    public void setRegion(String region) { this.region = region; }
+
+    public String getCity() { return city; }
+
+    public void setCity(String city) { this.city = city; }
 
     public LocalDate getBirthDate() {
         return birthDate;
