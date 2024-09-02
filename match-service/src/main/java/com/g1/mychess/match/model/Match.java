@@ -1,7 +1,5 @@
 package com.g1.mychess.match.model;
 
-import com.g1.mychess.tournament.model.Tournament;
-import com.g1.mychess.user.model.Player;
 import jakarta.persistence.*;
 
 import java.time.LocalDateTime;
@@ -15,9 +13,8 @@ public class Match {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne
-    @JoinColumn(name = "tournament_id", nullable = false)
-    private Tournament tournament;
+    @Column(name = "tournament_id", nullable = false)
+    private Long tournamentId;
 
     @OneToMany(mappedBy = "match", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<MatchPlayer> participants;
@@ -49,13 +46,9 @@ public class Match {
         this.id = id;
     }
 
-    public Tournament getTournament() {
-        return tournament;
-    }
+    public Long getTournamentId() { return tournamentId; }
 
-    public void setTournament(Tournament tournament) {
-        this.tournament = tournament;
-    }
+    public void setTournamentId(Long tournamentId) { this.tournamentId = tournamentId; }
 
     public Set<MatchPlayer> getParticipants() {
         return participants;

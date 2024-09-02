@@ -17,9 +17,8 @@ public class TournamentPlayer {
     @JoinColumn(name = "tournament_id", nullable = false)
     private Tournament tournament;
 
-    @ManyToOne
-    @JoinColumn(name = "player_id", nullable = false)
-    private Player player;
+    @Column(name = "player_id", nullable = false)
+    private Long playerId;
 
     @Column(name = "sign_up_date_time", nullable = false)
     private LocalDateTime signUpDateTime;
@@ -60,12 +59,12 @@ public class TournamentPlayer {
         this.tournament = tournament;
     }
 
-    public Player getPlayer() {
-        return player;
+    public Long getPlayerId() {
+        return playerId;
     }
 
-    public void setPlayer(Player player) {
-        this.player = player;
+    public void setPlayerId(Long playerId) {
+        this.playerId = playerId;
     }
 
     public LocalDateTime getSignUpDateTime() {

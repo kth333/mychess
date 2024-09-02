@@ -1,6 +1,5 @@
 package com.g1.mychess.match.model;
 
-import com.g1.mychess.user.model.Player;
 import jakarta.persistence.*;
 
 @Entity
@@ -15,9 +14,8 @@ public class MatchPlayer {
     @JoinColumn(name = "match_id", nullable = false)
     private Match match;
 
-    @ManyToOne
-    @JoinColumn(name = "player_id", nullable = false)
-    private Player player;
+    @Column(name = "player_id", nullable = false)
+    private Long playerId;
 
     @Column(name = "predicted_win_rate")
     private Double predictedWinRate;
@@ -56,13 +54,9 @@ public class MatchPlayer {
         this.match = match;
     }
 
-    public Player getPlayer() {
-        return player;
-    }
+    public Long getPlayerId() { return playerId; }
 
-    public void setPlayer(Player player) {
-        this.player = player;
-    }
+    public void setPlayerId(Long playerId) { this.playerId = playerId; }
 
     public Double getPredictedWinRate() {
         return predictedWinRate;

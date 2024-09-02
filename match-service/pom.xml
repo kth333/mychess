@@ -11,18 +11,4 @@
     </parent>
 
     <artifactId>match-service</artifactId>
-    <dependencies>
-        <dependency>
-            <groupId>com.g1</groupId>
-            <artifactId>tournament-service</artifactId>
-            <version>0.0.1-SNAPSHOT</version>
-            <scope>compile</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.g1</groupId>
-            <artifactId>user-service</artifactId>
-            <version>0.0.1-SNAPSHOT</version>
-            <scope>compile</scope>
-        </dependency>
-    </dependencies>
 </project>

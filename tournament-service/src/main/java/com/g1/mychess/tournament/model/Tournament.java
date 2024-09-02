@@ -2,7 +2,7 @@ package com.g1.mychess.tournament.model;
 
 import com.g1.mychess.common.enums.Gender;
 import com.g1.mychess.common.enums.TournamentFormat;
-import com.g1.mychess.user.model.Admin;
+import com.g1.mychess.common.enums.TimeControlType;
 
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
@@ -17,9 +17,8 @@ public class Tournament {
     @Column(name = "tournament_id")
     private Long id;
 
-    @ManyToOne
-    @JoinColumn(name = "admin_id", nullable = false)
-    private Admin admin;
+    @Column(name = "admin_id", nullable = false)
+    private Long adminId;
 
     @Column(name = "name", nullable = false)
     private String name;
@@ -45,16 +44,6 @@ public class Tournament {
 
     @Embedded
     private TimeControlSetting timeControlSetting;
-
-    @Enumerated(EnumType.STRING)
-    @Column(name = "time_control_type", nullable = false)
-    private TimeControlSetting.TimeControlType timeControlType;
-
-    @PrePersist
-    @PreUpdate
-    public void updateTimeControlType() {
-        this.timeControlType = timeControlSetting.getTimeControlType();
-    }
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false)
@@ -94,6 +83,10 @@ public class Tournament {
     @OneToMany(mappedBy = "tournament", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<TournamentPlayer> participants;
 
+    public TimeControlType getTimeControlType() {
+        return timeControlSetting.getTimeControlType();
+    }
+
     public enum TournamentStatus {
         UPCOMING,
         ONGOING,
@@ -104,25 +97,15 @@ public class Tournament {
 
     // Getters and Setters
 
-    public Long getId() {
-        return id;
-    }
+    public Long getId() { return id; }
 
-    public void setId(Long id) {
-        this.id = id;
-    }
+    public void setId(Long id) { this.id = id; }
 
-    public Admin getAdmin() {
-        return admin;
-    }
+    public Long getAdminId() { return adminId; }
 
-    public void setAdmin(Admin admin) {
-        this.admin = admin;
-    }
+    public void setAdminId(Long adminId) { this.adminId = adminId; }
 
-    public String getName() {
-        return name;
-    }
+    public String getName() { return name; }
 
     public void setName(String name) { this.name = name; }
 
@@ -130,103 +113,57 @@ public class Tournament {
 
     public void setDescription(String description) { this.description = description; }
 
-    public LocalDateTime getStartDateTime() {
-        return startDateTime;
-    }
+    public LocalDateTime getStartDateTime() { return startDateTime; }
 
-    public void setStartDateTime(LocalDateTime startDateTime) {
-        this.startDateTime = startDateTime;
-    }
+    public void setStartDateTime(LocalDateTime startDateTime) { this.startDateTime = startDateTime; }
 
-    public LocalDateTime getEndDateTime() {
-        return endDateTime;
-    }
+    public LocalDateTime getEndDateTime() { return endDateTime; }
 
-    public void setEndDateTime(LocalDateTime endDateTime) {
-        this.endDateTime = endDateTime;
-    }
+    public void setEndDateTime(LocalDateTime endDateTime) { this.endDateTime = endDateTime; }
 
-    public LocalDateTime getRegistrationStartDate() {
-        return registrationStartDate;
-    }
+    public LocalDateTime getRegistrationStartDate() { return registrationStartDate; }
 
     public void setRegistrationStartDate(LocalDateTime registrationStartDate) { this.registrationStartDate = registrationStartDate; }
 
-    public LocalDateTime getRegistrationEndDate() {
-        return registrationEndDate;
-    }
+    public LocalDateTime getRegistrationEndDate() { return registrationEndDate; }
 
     public void setRegistrationEndDate(LocalDateTime registrationEndDate) { this.registrationEndDate = registrationEndDate; }
 
-    public TournamentFormat getFormat() {
-        return format;
-    }
+    public TournamentFormat getFormat() { return format; }
 
-    public void setFormat(TournamentFormat format) {
-        this.format = format;
-    }
+    public void setFormat(TournamentFormat format) { this.format = format; }
 
     public TimeControlSetting getTimeControlSetting() { return timeControlSetting; }
 
     public void setTimeControlSetting(TimeControlSetting timeControlSetting) { this.timeControlSetting = timeControlSetting; }
 
-    public TimeControlSetting.TimeControlType getTimeControlType() { return timeControlType; }
-
-    public void setTimeControlType(TimeControlSetting.TimeControlType timeControlType) { this.timeControlType = timeControlType; }
-
-    public TournamentStatus getStatus() {
-        return status;
-    }
+    public TournamentStatus getStatus() { return status; }
 
     public void setStatus(TournamentStatus status) { this.status = status; }
 
-    public Integer getMinRating() {
-        return minRating;
-    }
+    public Integer getMinRating() { return minRating; }
 
-    public void setMinRating(Integer minRating) {
-        this.minRating = minRating;
-    }
+    public void setMinRating(Integer minRating) { this.minRating = minRating; }
 
-    public Integer getMaxRating() {
-        return maxRating;
-    }
+    public Integer getMaxRating() { return maxRating; }
 
-    public void setMaxRating(Integer maxRating) {
-        this.maxRating = maxRating;
-    }
+    public void setMaxRating(Integer maxRating) { this.maxRating = maxRating; }
 
-    public boolean isAffectsElo() {
-        return affectsElo;
-    }
+    public boolean isAffectsElo() { return affectsElo; }
 
-    public void setAffectsElo(boolean affectsElo) {
-        this.affectsElo = affectsElo;
-    }
+    public void setAffectsElo(boolean affectsElo) { this.affectsElo = affectsElo; }
 
-    public Integer getMinAge() {
-        return minAge;
-    }
+    public Integer getMinAge() { return minAge; }
 
-    public void setMinAge(Integer minAge) {
-        this.minAge = minAge;
-    }
+    public void setMinAge(Integer minAge) { this.minAge = minAge; }
 
-    public Integer getMaxAge() {
-        return maxAge;
-    }
+    public Integer getMaxAge() { return maxAge; }
 
-    public void setMaxAge(Integer maxAge) {
-        this.maxAge = maxAge;
-    }
+    public void setMaxAge(Integer maxAge) { this.maxAge = maxAge; }
 
-    public Gender getRequiredGender() {
-        return requiredGender;
-    }
+    public Gender getRequiredGender() { return requiredGender; }
 
-    public void setRequiredGender(Gender requiredGender) {
-        this.requiredGender = requiredGender;
-    }
+    public void setRequiredGender(Gender requiredGender) { this.requiredGender = requiredGender; }
 
     public String getCountry() { return country; }
 
@@ -244,11 +181,7 @@ public class Tournament {
 
     public void setAddress(String address) { this.address = address; }
 
-    public Set<TournamentPlayer> getParticipants() {
-        return participants;
-    }
+    public Set<TournamentPlayer> getParticipants() { return participants; }
 
-    public void setParticipants(Set<TournamentPlayer> participants) {
-        this.participants = participants;
-    }
+    public void setParticipants(Set<TournamentPlayer> participants) { this.participants = participants; }
 }

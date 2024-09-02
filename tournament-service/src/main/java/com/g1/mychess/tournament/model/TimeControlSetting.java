@@ -1,5 +1,6 @@
 package com.g1.mychess.tournament.model;
 
+import com.g1.mychess.common.enums.TimeControlType;
 import jakarta.persistence.Embeddable;
 
 @Embeddable
@@ -47,12 +48,5 @@ public class TimeControlSetting {
     @Override
     public String toString() {
         return baseTimeMinutes + "+" + incrementSeconds;
-    }
-
-    public enum TimeControlType {
-        BULLET,
-        BLITZ,
-        RAPID,
-        CLASSICAL
     }
 }
