@@ -1,8 +1,5 @@
 package com.g1.mychess.user.model;
 
-import com.g1.mychess.common.enums.CustomChessRank;
-import com.g1.mychess.common.enums.Gender;
-
 import jakarta.persistence.*;
 import java.time.LocalDate;
 
@@ -28,9 +25,8 @@ public class Profile {
     @Column(name = "avatar_url")
     private String avatarUrl;
 
-    @Enumerated(EnumType.STRING)
     @Column(name = "gender")
-    private Gender gender;
+    private String gender;
 
     @Column(name = "country")
     private String country;
@@ -111,11 +107,9 @@ public class Profile {
         this.avatarUrl = avatarUrl;
     }
 
-    public Gender getGender() {
-        return gender;
-    }
+    public String getGender() { return gender; }
 
-    public void setGender(Gender gender) {
+    public void setGender(String gender) {
         this.gender = gender;
     }
 

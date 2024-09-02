@@ -1,4 +1,4 @@
-package com.g1.mychess.common.enums;
+package com.g1.mychess.user.model;
 
 public enum CustomChessRank {
     NOVICE("Novice", 0, 1199),

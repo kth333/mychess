@@ -1,9 +1,5 @@
 package com.g1.mychess.tournament.model;
 
-import com.g1.mychess.common.enums.Gender;
-import com.g1.mychess.common.enums.TournamentFormat;
-import com.g1.mychess.common.enums.TimeControlType;
-
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 import java.util.Set;
@@ -64,9 +60,8 @@ public class Tournament {
     @Column(name = "max_age")
     private Integer maxAge;
 
-    @Enumerated(EnumType.STRING)
     @Column(name = "required_gender")
-    private Gender requiredGender;
+    private String requiredGender;
 
     @Column(name = "country")
     private String country;
@@ -83,8 +78,14 @@ public class Tournament {
     @OneToMany(mappedBy = "tournament", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<TournamentPlayer> participants;
 
-    public TimeControlType getTimeControlType() {
+    public TimeControlSetting.TimeControlType getTimeControlType() {
         return timeControlSetting.getTimeControlType();
+    }
+
+    public enum TournamentFormat {
+        KNOCKOUT,
+        ROUND_ROBIN,
+        SWISS
     }
 
     public enum TournamentStatus {
@@ -161,9 +162,9 @@ public class Tournament {
 
     public void setMaxAge(Integer maxAge) { this.maxAge = maxAge; }
 
-    public Gender getRequiredGender() { return requiredGender; }
+    public String getRequiredGender() { return requiredGender; }
 
-    public void setRequiredGender(Gender requiredGender) { this.requiredGender = requiredGender; }
+    public void setRequiredGender(String requiredGender) { this.requiredGender = requiredGender; }
 
     public String getCountry() { return country; }
 
