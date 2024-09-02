@@ -2,7 +2,6 @@ package com.g1.mychess.tournament.model;
 
 import com.g1.mychess.common.enums.Gender;
 import com.g1.mychess.common.enums.TournamentFormat;
-import com.g1.mychess.location.model.Location;
 import com.g1.mychess.user.model.Admin;
 
 import jakarta.persistence.*;
@@ -80,9 +79,14 @@ public class Tournament {
     @Column(name = "required_gender")
     private Gender requiredGender;
 
-    @ManyToOne
-    @JoinColumn(name = "location_id", nullable = false)
-    private Location location;
+    @Column(name = "country")
+    private String country;
+
+    @Column(name = "region")
+    private String region;
+
+    @Column(name = "city")
+    private String city;
 
     @Column(name = "address", nullable = false)
     private String address;
@@ -224,13 +228,17 @@ public class Tournament {
         this.requiredGender = requiredGender;
     }
 
-    public Location getLocation() {
-        return location;
-    }
+    public String getCountry() { return country; }
 
-    public void setLocation(Location location) {
-        this.location = location;
-    }
+    public void setCountry(String country) { this.country = country; }
+
+    public String getRegion() { return region; }
+
+    public void setRegion(String region) { this.region = region; }
+
+    public String getCity() { return city; }
+
+    public void setCity(String city) { this.city = city; }
 
     public String getAddress() { return address; }
 

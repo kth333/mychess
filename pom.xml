@@ -16,7 +16,6 @@
 		<module>tournament-service</module>
 		<module>match-service</module>
 		<module>auth-service</module>
-		<module>location-service</module>
 		<module>common</module>
 	</modules>
 
