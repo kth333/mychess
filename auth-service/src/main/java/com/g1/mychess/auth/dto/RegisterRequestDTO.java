@@ -1,4 +1,4 @@
-package com.g1.mychess.user.dto;
+package com.g1.mychess.auth.dto;
 
 import com.g1.mychess.user.model.User;
 

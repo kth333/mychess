@@ -2,23 +2,24 @@ package com.g1.mychess.auth.service;
 
 import com.g1.mychess.user.model.User;
 import com.g1.mychess.auth.dto.*;
-import com.g1.mychess.user.repository.UserRepository;
+//import com.g1.mychess.user.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-//import org.springframework.web.reactive.function.client.WebClient;
+
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
 @Service
 public class AuthService {
 
-//    private final WebClient webClient;
-    private final UserRepository userRepository;
+    private final WebClient webClient;
+//    private final UserRepository userRepository;
 
     @Autowired
-    public AuthService(/*WebClient webClient*/UserRepository userRepository) {
-//        this.webClient = webClient;
-        this.userRepository = userRepository;
+    public AuthService(WebClient.Builder webClientBuilder) {
+        this.webClient = webClientBuilder.build();
+
     }
 
     // Registration method
@@ -26,8 +27,8 @@ public class AuthService {
         // Logic for user registration, including email/phone verification
             
     
-        User u = new User(registerRequestDTO.getUsername(), registerRequestDTO.getPassword(), registerRequestDTO.getEmail(), User.Role.PLAYER);
-           
+
+//        User u = new User(registerRequestDTO.getUsername(), registerRequestDTO.getPassword(), registerRequestDTO.getEmail(), User.Role.PLAYER);
 
         // // Example: External API call using WebClient (if needed)
         // Mono<String> response = webClient.post()
@@ -37,7 +38,7 @@ public class AuthService {
         //         .bodyToMono(String.class);
 
         // Further registration logic, such as saving user to database
-        userRepository.save(u); 
+//        userRepository.save(u);
         return ResponseEntity.ok("User registered successfully!");
     }
 
