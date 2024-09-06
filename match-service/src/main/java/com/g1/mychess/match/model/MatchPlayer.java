@@ -17,6 +17,12 @@ public class MatchPlayer {
     @Column(name = "player_id", nullable = false)
     private Long playerId;
 
+    @Column(name = "initial_rating", nullable = false)
+    private int initialRating;
+
+    @Column(name = "new_rating", nullable = false)
+    private int newRating;
+
     @Column(name = "predicted_win_rate")
     private Double predictedWinRate;
 
@@ -57,6 +63,14 @@ public class MatchPlayer {
     public Long getPlayerId() { return playerId; }
 
     public void setPlayerId(Long playerId) { this.playerId = playerId; }
+
+    public int getInitialRating() { return initialRating; }
+
+    public void setInitialRating(int initialRating) { this.initialRating = initialRating; }
+
+    public int getNewRating() { return newRating; }
+
+    public void setNewRating(int newRating) { this.newRating = newRating; }
 
     public Double getPredictedWinRate() {
         return predictedWinRate;
