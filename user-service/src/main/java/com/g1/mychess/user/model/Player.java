@@ -17,8 +17,8 @@ public class Player extends User {
     @Column(name = "tournament_count")
     private Integer tournamentCount;
 
-    @Column(name = "is_active")
-    private Boolean isActive;
+    @Column(name = "last_active", nullable = false)
+    private LocalDate lastActive;
 
     public Player() {
         super();
@@ -51,11 +51,11 @@ public class Player extends User {
         this.tournamentCount = tournamentCount;
     }
 
-    public Boolean getActive() {
-        return isActive;
+    public LocalDate getLastActive() {
+        return lastActive;
     }
 
-    public void setActive(Boolean active) {
-        isActive = active;
+    public void setLastActive(LocalDate lastActive) {
+        this.lastActive = lastActive;
     }
 }

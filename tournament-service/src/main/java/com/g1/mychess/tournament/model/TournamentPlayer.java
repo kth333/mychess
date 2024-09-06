@@ -22,8 +22,11 @@ public class TournamentPlayer {
     @Column(name = "sign_up_date_time", nullable = false)
     private LocalDateTime signUpDateTime;
 
-    @Column(name = "score")
-    private Integer score;
+    @Column(name = "points")
+    private double points = 0.0;
+
+    @Column(name = "rounds_played")
+    private int roundsPlayed = 0;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false)
@@ -74,12 +77,14 @@ public class TournamentPlayer {
         this.signUpDateTime = signUpDateTime;
     }
 
-    public Integer getScore() {
-        return score;
-    }
+    public double getPoints() { return points; }
 
-    public void setScore(Integer score) {
-        this.score = score;
+    public void setPoints(double points) { this.points = points; }
+
+    public int getRoundsPlayed() { return roundsPlayed; }
+
+    public void setRoundsPlayed(int roundsPlayed) {
+        this.roundsPlayed = roundsPlayed;
     }
 
     public TournamentPlayerStatus getStatus() {
