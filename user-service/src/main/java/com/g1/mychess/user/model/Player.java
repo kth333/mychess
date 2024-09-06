@@ -17,7 +17,7 @@ public class Player extends User {
     @Column(name = "tournament_count")
     private Integer tournamentCount;
 
-    @Column(name = "last_active", nullable = false)
+    @Column(name = "last_active")
     private LocalDate lastActive;
 
     public Player() {

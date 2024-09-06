@@ -1,7 +1,7 @@
-package com.g1.mychess.auth.dto;
+package com.g1.mychess.user.dto;
 
 public class RegisterRequestDTO {
-    
+
     private String username;
     private String password;
     private String email;
@@ -42,4 +42,3 @@ public class RegisterRequestDTO {
         this.email = email;
     }
 }
-

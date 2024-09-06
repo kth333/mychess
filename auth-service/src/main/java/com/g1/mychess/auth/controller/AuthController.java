@@ -6,6 +6,9 @@ import com.g1.mychess.auth.dto.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import jakarta.validation.Valid;
+
+import org.springframework.web.reactive.function.client.WebClient;
 
 @RestController
 @RequestMapping("/api/v1/auth")
@@ -13,16 +16,35 @@ public class AuthController {
 
     private final AuthService authService;
 
+    private final WebClient.Builder webClientBuilder;
+
+    // Constructor-based injection
+
     @Autowired
-    public AuthController(AuthService authService) {
+    public AuthController(AuthService authService, WebClient.Builder webClientBuilder) {
         this.authService = authService;
+        this.webClientBuilder = webClientBuilder;
     }
 
     // POST /auth/register: User registration (including email/phone verification)
     @PostMapping("/register")
-    public ResponseEntity<String> register(@RequestBody RegisterRequestDTO registerRequestDTO) {
-        return authService.registerUser(registerRequestDTO);
+    public ResponseEntity<String> register(@RequestBody @Valid RegisterRequestDTO registerRequestDTO) {
+
+        ResponseEntity<String> userServiceResponse = webClientBuilder.build()
+                .post()
+                .uri("http://localhost:8081/users") // Assuming your User Service is available at /users endpoint
+                .bodyValue(registerRequestDTO)
+                .retrieve()
+                .toEntity(String.class)
+                .block();  // Block to wait for response (synchronous)
+
+        if (userServiceResponse.getStatusCode().is2xxSuccessful()) {
+            return ResponseEntity.ok("Registration successful!");
+        } else {
+            return ResponseEntity.status(400).body("Registration failed: " + userServiceResponse.getBody());
+        }
     }
+
 
     // // POST /auth/login: User login with JWT generation
     // @PostMapping("/login")
