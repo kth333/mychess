@@ -15,14 +15,13 @@ public class UserService {
     public boolean createUser(RegisterRequestDTO registerRequestDTO) {
         // Check if the user already exists by email or username
         if (playerRepository.existsByEmail(registerRequestDTO.getEmail()) || playerRepository.existsByUsername(registerRequestDTO.getUsername())) {
-            return false; // User already exists
+            return false;
         }
 
-        // Create new Player entity
         Player newPlayer = new Player();
         newPlayer.setUsername(registerRequestDTO.getUsername());
         newPlayer.setEmail(registerRequestDTO.getEmail());
-        newPlayer.setPassword(registerRequestDTO.getPassword()); // Hash password in real implementation
+        newPlayer.setPassword(registerRequestDTO.getPassword());
 
         // Save to database
         playerRepository.save(newPlayer);

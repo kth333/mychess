@@ -29,21 +29,9 @@ public class AuthController {
     // POST /auth/register: User registration (including email/phone verification)
     @PostMapping("/register")
     public ResponseEntity<String> register(@RequestBody @Valid RegisterRequestDTO registerRequestDTO) {
-
-        ResponseEntity<String> userServiceResponse = webClientBuilder.build()
-                .post()
-                .uri("http://localhost:8081/users") // Assuming your User Service is available at /users endpoint
-                .bodyValue(registerRequestDTO)
-                .retrieve()
-                .toEntity(String.class)
-                .block();  // Block to wait for response (synchronous)
-
-        if (userServiceResponse.getStatusCode().is2xxSuccessful()) {
-            return ResponseEntity.ok("Registration successful!");
-        } else {
-            return ResponseEntity.status(400).body("Registration failed: " + userServiceResponse.getBody());
-        }
+        return authService.registerUser(registerRequestDTO);
     }
+
 
 
     // // POST /auth/login: User login with JWT generation

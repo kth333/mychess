@@ -1,45 +1,54 @@
 package com.g1.mychess.auth.service;
 
-import com.g1.mychess.user.model.User;
 import com.g1.mychess.auth.dto.*;
-//import com.g1.mychess.user.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.reactive.function.client.WebClient;
-import reactor.core.publisher.Mono;
 
 @Service
 public class AuthService {
 
-    private final WebClient webClient;
+    private final WebClient.Builder webClientBuilder;
+    private final PasswordEncoder passwordEncoder;
 //    private final UserRepository userRepository;
 
     @Autowired
-    public AuthService(WebClient.Builder webClientBuilder) {
-        this.webClient = webClientBuilder.build();
-
+    public AuthService(WebClient.Builder webClientBuilder, PasswordEncoder passwordEncoder) {
+        this.webClientBuilder = webClientBuilder;
+        this.passwordEncoder = passwordEncoder;
     }
 
     // Registration method
-    public ResponseEntity<String> registerUser(RegisterRequestDTO registerRequestDTO) {
-        // Logic for user registration, including email/phone verification
-            
-    
+        public ResponseEntity<String> registerUser(RegisterRequestDTO registerRequestDTO) {
 
-//        User u = new User(registerRequestDTO.getUsername(), registerRequestDTO.getPassword(), registerRequestDTO.getEmail(), User.Role.PLAYER);
+            String hashedPassword = passwordEncoder.encode(registerRequestDTO.getPassword());
 
-        // // Example: External API call using WebClient (if needed)
-        // Mono<String> response = webClient.post()
-        //         .uri("/external-api/verify-email")
-        //         .bodyValue(registerRequest)
-        //         .retrieve()
-        //         .bodyToMono(String.class);
+            RegisterRequestDTO userDTO = new RegisterRequestDTO(
+                    registerRequestDTO.getUsername(),
+                    hashedPassword,
+                    registerRequestDTO.getEmail()
+            );
 
-        // Further registration logic, such as saving user to database
-//        userRepository.save(u);
-        return ResponseEntity.ok("User registered successfully!");
+            ResponseEntity<String> userServiceResponse = webClientBuilder.build()
+                    .post()
+                    .uri("http://localhost:8081/users")
+                    .bodyValue(userDTO)
+                    .retrieve()
+                    .toEntity(String.class)
+                    .block();
+
+            if (userServiceResponse.getStatusCode().is2xxSuccessful()) {
+                return ResponseEntity.ok("Registration successful!");
+            } else if (userServiceResponse.getStatusCode() == HttpStatus.CONFLICT) {
+                return ResponseEntity.status(HttpStatus.CONFLICT).body("User already exists.");
+            } else {
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Registration failed.");
+            }
+        }
     }
 
     // // Login method with JWT generation
@@ -127,4 +136,3 @@ public class AuthService {
 
     //     return ResponseEntity.ok("User logged out successfully!");
     // }
-}
