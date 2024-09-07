@@ -24,8 +24,10 @@ class Register extends Component {
     console.log("user  => " + JSON.stringify(user))
 
     try {
-        const response = await AuthService.registerUser(user);
-        console.log('Registration successful:', response.data);
+        await AuthService.registerUser(user).then((res) => {
+          if (res.data) {console.log("success");
+            console.log(res.data)}});
+        
       } catch (error) {
         console.error('Registration error:', error.response ? error.response.data : error.message);
       }
