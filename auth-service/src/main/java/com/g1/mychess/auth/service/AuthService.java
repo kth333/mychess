@@ -45,6 +45,14 @@ public class AuthService {
 
     public ResponseEntity<String> registerUser(RegisterRequestDTO registerRequestDTO) {
 
+        String password = registerRequestDTO.getPassword();
+
+        
+        if (!isValidPassword(password)) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body("Password must be at least 8 characters long and contain at least one number.");
+        }
+
         String hashedPassword = passwordEncoder.encode(registerRequestDTO.getPassword());
 
         RegisterRequestDTO userDTO = new RegisterRequestDTO(
@@ -97,6 +105,9 @@ public class AuthService {
         }
     }
 
+    private boolean isValidPassword(String password) {
+        return password.length() >= 8 && password.matches(".*\\d.*");
+    }
 
     public String login(String username, String password) throws Exception {
         try {
