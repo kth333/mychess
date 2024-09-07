@@ -53,15 +53,6 @@ public class Profile {
     @Column(name = "total_draws")
     private int totalDraws;
 
-    @Column(name = "elo_rating")
-    private int eloRating;
-
-    @Column(name = "glicko_rating")
-    private int glickoRating;
-
-    @Column(name = "rating_deviation")
-    private int ratingDeviation;
-
     @Column(name = "is_public")
     private boolean isPublic;
 
@@ -163,30 +154,6 @@ public class Profile {
 
     public void setTotalDraws(int totalDraws) {
         this.totalDraws = totalDraws;
-    }
-
-    public int getEloRating() {
-        return eloRating;
-    }
-
-    public void setEloRating(int eloRating) {
-        this.eloRating = eloRating;
-    }
-
-    public int getGlickoRating() {
-        return glickoRating;
-    }
-
-    public void setGlickoRating(int glickoRating) {
-        this.glickoRating = glickoRating;
-    }
-
-    public int getRatingDeviation() {
-        return ratingDeviation;
-    }
-
-    public void setRatingDeviation(int ratingDeviation) {
-        this.ratingDeviation = ratingDeviation;
     }
 
     public boolean isPublic() {

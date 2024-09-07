@@ -51,8 +51,8 @@ public class Tournament {
     @Column(name = "max_rating")
     private Integer maxRating;
 
-    @Column(name = "affects_elo", nullable = false)
-    private boolean affectsElo;
+    @Column(name = "affects_rating", nullable = false)
+    private boolean affectsRating;
 
     @Column(name = "min_age")
     private Integer minAge;
@@ -150,9 +150,9 @@ public class Tournament {
 
     public void setMaxRating(Integer maxRating) { this.maxRating = maxRating; }
 
-    public boolean isAffectsElo() { return affectsElo; }
+    public boolean isAffectsRating() { return affectsRating; }
 
-    public void setAffectsElo(boolean affectsElo) { this.affectsElo = affectsElo; }
+    public void setAffectsRating(boolean affectsRating) { this.affectsRating = affectsRating; }
 
     public Integer getMinAge() { return minAge; }
 
