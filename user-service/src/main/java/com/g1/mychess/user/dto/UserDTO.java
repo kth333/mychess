@@ -3,6 +3,7 @@ package com.g1.mychess.user.dto;
 public class UserDTO {
     private Long id;
     private String username;
+    private String password;
     private String email;
     private String role;
 
@@ -10,9 +11,10 @@ public class UserDTO {
 
     public UserDTO() {}
 
-    public UserDTO(Long id, String username, String email, String role) {
+    public UserDTO(Long id, String username, String password, String email, String role) {
         this.id = id;
         this.username = username;
+        this.password = password;
         this.email = email;
         this.role = role;
     }
@@ -32,6 +34,10 @@ public class UserDTO {
     public void setUsername(String username) {
         this.username = username;
     }
+
+    public String getPassword() { return password; }
+
+    public void setPassword(String password) { this.password = password;}
 
     public String getEmail() {
         return email;

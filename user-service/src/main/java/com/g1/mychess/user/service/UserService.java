@@ -56,6 +56,6 @@ public class UserService {
                 .orElseThrow(() -> new IllegalArgumentException("User not found with username: " + username));
 
         // Convert User to UserDTO
-        return new UserDTO(user.getId(), user.getUsername(), user.getEmail(), user.getRole());
+        return new UserDTO(user.getId(), user.getUsername(), user.getPassword(), user.getEmail(), user.getRole());
     }
 }

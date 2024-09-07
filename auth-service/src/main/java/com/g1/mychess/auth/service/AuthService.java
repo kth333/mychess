@@ -18,6 +18,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.reactive.function.client.WebClient;
 
 import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.Map;
 import java.util.UUID;
 
@@ -99,44 +100,52 @@ public class AuthService {
 
     public String login(String username, String password) throws Exception {
         try {
-            System.out.println("Authentication successful for user: " + username);
-
-            // Authenticate the user using the provided credentials
-            Authentication authentication = authenticationManager.authenticate(
-                    new UsernamePasswordAuthenticationToken(username, password)
-            );
-            System.out.println("Authentication successful for user: " + username);
-            System.out.println("Authentication object: " + authentication);
-
             // Fetch user details from User microservice
-            UserDetails userDetails = (UserDetails) authentication.getPrincipal();
-            System.out.println("User details fetched: " + userDetails.getUsername());
-
-            Long userId = fetchUserIdFromUserService(username);  // Fetch the user ID from User service
-            System.out.println("User ID fetched from user service: " + userId);
-
-            // Check if email is verified using VerificationToken
-            if (!isEmailVerified(userId)) {
-                System.out.println("Email not verified for user ID: " + userId);
-
-                throw new IllegalStateException("Email is not verified. Please verify your email before logging in.");
+            UserDTO userDTO = fetchUserFromUserService(username);
+            if (userDTO == null) {
+                throw new Exception("User not found.");
             }
 
-            System.out.println("Email verified for user ID: " + userId);
+            // Log: User found
+            System.out.println("User found: " + userDTO.getUsername());
 
-            // Generate JWT token after successful authentication and email verification
-            return jwtUtil.generateToken(userDetails);
+            // Manually verify the password
+            if (!passwordEncoder.matches(password, userDTO.getPassword())) {
+                System.out.println("Invalid credentials for user: " + username);
+                throw new Exception("Invalid username or password.");
+            }
 
-        } catch (BadCredentialsException e) {
-            throw new BadCredentialsException("Invalid username or password.");
-        } catch (IllegalStateException e) {
-            // Re-throw the exception if email is not verified with a descriptive message
-            System.out.println("Error: " + e.getMessage());
-            throw new IllegalStateException(e.getMessage());
+            // Check if the verification token has been used
+            Long userId = userDTO.getId();  // Fetch userId from userDTO
+            System.out.println("User ID fetched from user service: " + userId);
+
+            if (!isEmailVerified(userId)) {
+                System.out.println("Verification token not used for user ID: " + userId);
+                throw new IllegalStateException("Please verify your email before logging in.");
+            }
+
+            // Log: Verification token check successful
+            System.out.println("Token has been used for user ID: " + userId);
+
+            // Generate JWT token after successful authentication and token verification
+            UserDetails userDetails = new org.springframework.security.core.userdetails.User(
+                    userDTO.getUsername(),
+                    userDTO.getPassword(),
+                    Collections.singleton(new org.springframework.security.core.authority.SimpleGrantedAuthority(userDTO.getRole()))
+            );
+
+            String token = jwtUtil.generateToken(userDetails);
+
+            // Log: Token generated
+            System.out.println("Generated JWT token: " + token);
+
+            // Return the generated token
+            return token;
+
         } catch (Exception e) {
-            // Catch any other exceptions and throw a generic exception
+            // Log and rethrow the exception
             System.out.println("An error occurred during login: " + e.getMessage());
-            e.printStackTrace();  // Print the stack trace for more information
+            e.printStackTrace();
             throw new Exception("An error occurred during login.", e);
         }
     }
@@ -170,15 +179,13 @@ public class AuthService {
                 .block();
     }
 
-    private Long fetchUserIdFromUserService(String username) {
-        // Make a call to the User microservice to retrieve the user's ID
-        String url = "http://localhost:8081/api/v1/users/userId/" + username; // Assuming this is your User service endpoint
+    public UserDTO fetchUserFromUserService(String username) {
         return webClientBuilder.build()
                 .get()
-                .uri(url)
+                .uri("http://localhost:8081/api/v1/users/username/" + username)
                 .retrieve()
-                .bodyToMono(Long.class)
-                .block();  // Synchronous block for simplicity, but you can use reactive if desired
+                .bodyToMono(UserDTO.class)
+                .block(); // Blocking call for simplicity
     }
 
     public boolean verifyEmail(String token) {

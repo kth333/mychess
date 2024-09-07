@@ -4,6 +4,7 @@ public class UserDTO {
     private Long id;
     private String username;
     private String password;
+    private String email;
     private String role;
 
     // Getters and setters
@@ -29,6 +30,14 @@ public class UserDTO {
 
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
     }
 
     public String getRole() {
