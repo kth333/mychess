@@ -44,34 +44,14 @@ class Register extends Component {
     const { username, password, email } = this.state;
 
     return (
-      <div className="flex justify-center items-center min-h-screen bg-gray-100">
+      <div className="flex justify-center items-center min-h-screen">
         <div className="relative w-full max-w-md">
-          {/* Back Arrow */}
-          <Link
-            to="/"
-            className="absolute top-4 left-4 text-gray-500 hover:text-gray-700 focus:outline-none"
-          >
-            <svg
-              className="w-6 h-6"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth="2"
-                d="M15 19l-7-7 7-7"
-              />
-            </svg>
-          </Link>
 
           {/* Register Form */}
-          <form className="bg-white p-8 rounded-lg shadow-lg" onSubmit={this.handleSubmit}>
+          <form className="p-8 rounded-lg shadow-lg" onSubmit={this.handleSubmit}>
             <h2 className="text-2xl font-bold text-center mb-6">Register</h2>
             <div className="mb-4">
-              <label className="block text-gray-700 text-sm font-bold mb-2">Username</label>
+              <label className="block text-primary text-sm font-bold mb-2">Username</label>
               <input
                 type="text"
                 name="username"
@@ -82,7 +62,7 @@ class Register extends Component {
               />
             </div>
             <div className="mb-4">
-              <label className="block text-gray-700 text-sm font-bold mb-2">Email</label>
+              <label className="block text-primary text-sm font-bold mb-2">Email</label>
               <input
                 type="email"
                 name="email"
@@ -93,7 +73,7 @@ class Register extends Component {
               />
             </div>
             <div className="mb-6">
-              <label className="block text-gray-700 text-sm font-bold mb-2">Password</label>
+              <label className="block text-primary text-sm font-bold mb-2">Password</label>
               <input
                 type="password"
                 name="password"
@@ -105,7 +85,7 @@ class Register extends Component {
             </div>
             <button
               type="submit"
-              className="w-full bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+              className="btn btn-secondary w-full font-bold"
             >
               Register
             </button>
