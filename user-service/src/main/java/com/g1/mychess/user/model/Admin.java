@@ -16,7 +16,7 @@ public class Admin extends User {
 
     public Admin() {
         super();
-        this.setRole("PLAYER");
+        this.setRole("ROLE_ADMIN");
     }
 
     // Getters and Setters

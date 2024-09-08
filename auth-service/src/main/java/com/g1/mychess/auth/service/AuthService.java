@@ -47,7 +47,6 @@ public class AuthService {
 
         String password = registerRequestDTO.getPassword();
 
-        
         if (!isValidPassword(password)) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body("Password must be at least 8 characters long and contain at least one number.");
@@ -70,20 +69,16 @@ public class AuthService {
                 })
                 .block();
 
-        System.out.println("Response Status: " + userServiceResponse.getStatusCode());
-        System.out.println("Response Body: " + userServiceResponse.getBody());
-
         if (userServiceResponse.getStatusCode().is2xxSuccessful()) {
+
             Map<String, Object> responseBody = userServiceResponse.getBody();
 
             if (responseBody != null && responseBody.containsKey("userId")) {
-                // Try to handle userId whether it's an Integer or Long
                 Object userIdObj = responseBody.get("userId");
-
                 Long userId = null;
                 if (userIdObj instanceof Integer) {
-                    userId = ((Integer) userIdObj).longValue();  // Cast Integer to Long
-                } else if (userIdObj instanceof Long) {
+                    userId = ((Integer) userIdObj).longValue();
+                } else {
                     userId = (Long) userIdObj;
                 }
 
@@ -117,28 +112,18 @@ public class AuthService {
                 throw new Exception("User not found.");
             }
 
-            // Log: User found
-            System.out.println("User found: " + userDTO.getUsername());
-
-            // Manually verify the password
             if (!passwordEncoder.matches(password, userDTO.getPassword())) {
                 System.out.println("Invalid credentials for user: " + username);
                 throw new Exception("Invalid username or password.");
             }
 
-            // Check if the verification token has been used
-            Long userId = userDTO.getId();  // Fetch userId from userDTO
-            System.out.println("User ID fetched from user service: " + userId);
+            Long userId = userDTO.getId();
 
             if (!isEmailVerified(userId)) {
-                System.out.println("Verification token not used for user ID: " + userId);
                 throw new IllegalStateException("Please verify your email before logging in.");
             }
 
-            // Log: Verification token check successful
-            System.out.println("Token has been used for user ID: " + userId);
-
-            // Generate JWT token after successful authentication and token verification
+            // Generate JWT token after successful authentication
             UserDetails userDetails = new org.springframework.security.core.userdetails.User(
                     userDTO.getUsername(),
                     userDTO.getPassword(),
@@ -147,16 +132,8 @@ public class AuthService {
 
             String token = jwtUtil.generateToken(userDetails);
 
-            // Log: Token generated
-            System.out.println("Generated JWT token: " + token);
-
-            // Return the generated token
             return token;
-
         } catch (Exception e) {
-            // Log and rethrow the exception
-            System.out.println("An error occurred during login: " + e.getMessage());
-            e.printStackTrace();
             throw new Exception("An error occurred during login.", e);
         }
     }
