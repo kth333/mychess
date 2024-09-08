@@ -22,7 +22,7 @@ public class Player extends User {
 
     public Player() {
         super();
-        this.setRole(Role.PLAYER);
+        this.setRole("ROLE_PLAYER");
     }
 
     // Getters and Setters

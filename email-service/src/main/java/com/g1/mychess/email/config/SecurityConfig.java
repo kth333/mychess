@@ -1,4 +1,4 @@
-package com.g1.mychess.user.config;
+package com.g1.mychess.email.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -18,7 +18,7 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http.csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(authorize -> authorize
-                        .requestMatchers("/api/v1/users", "/api/v1/users/userId/*", "/api/v1/users/username/*").permitAll()  // Allow public access to /users
+                        .requestMatchers("/api/v1/email/send-verification").permitAll()
                         .anyRequest().authenticated()           // Protect other endpoints
                 )
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
