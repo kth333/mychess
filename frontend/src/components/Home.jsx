@@ -12,7 +12,7 @@ class Home extends Component {
 
         <main className="flex-grow">
           <section className="py-20 px-6 text-center bg-gradient-to-r from-blue-500 to-purple-600 text-white">
-            <h1 className="text-4xl font-bold mb-4">Welcome to myChess</h1>
+            <h1 className="text-4xl font-bold mb-4">Welcome to MyChess</h1>
             <p className="text-xl mb-8">Manage and participate in chess tournaments with ease</p>
             <Button size="lg" asChild>
               <a href="/tournaments">Explore Tournaments</a>
@@ -50,7 +50,7 @@ class Home extends Component {
           </section>
 
           <section className="py-16 px-6 bg-muted">
-            <h2 className="text-3xl font-bold text-center mb-12">Why Choose myChess?</h2>
+            <h2 className="text-3xl font-bold text-center mb-12">Why Choose MyChess?</h2>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
               <div className="text-center">
                 <CalendarIcon className="mx-auto h-12 w-12 mb-4 text-primary" />
@@ -72,7 +72,7 @@ class Home extends Component {
         </main>
 
         <footer className="bg-background border-t py-6 px-6 text-center">
-          <p>&copy; 2023 myChess. All rights reserved.</p>
+          <p>&copy; 2023 MyChess. All rights reserved.</p>
           <div className="mt-2">
             <a href="/about" className="text-primary hover:underline">About</a>
             <span className="mx-2">|</span>

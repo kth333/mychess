@@ -10,7 +10,7 @@ class NavBar extends React.Component {
         <div className="flex items-center space-x-2">
           {/* <ChessIcon className="h-8 w-8" /> */}
           <span className="text-2xl font-bold">
-                <Link to="/">myChess</Link>
+                <Link to="/">MyChess</Link>
             </span>
         </div>
         <nav className="space-x-4">
