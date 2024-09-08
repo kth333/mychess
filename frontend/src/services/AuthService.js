@@ -1,13 +1,13 @@
 import { API } from "./API";
 
 class AuthService {
-  async loginUser(credentials) {
-    return await API.post("/auth/login", credentials);
-  }
+    async loginUser(credentials) {
+      return await API.post("/auth/login", credentials);
+    }
 
-  async registerUser(userData){
-    return await API.post("/auth/register", userData);
-  }
+    async registerUser(userData){
+      return await API.post("/auth/register", userData);
+    }
 
 }
 
