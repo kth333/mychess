@@ -73,14 +73,14 @@ class Login extends Component {
           <div className="flex flex-col space-y-4">
                 <button
                     type="submit"
-                    className="btn btn-secondary w-full font-bold"
+                    className="btn btn-primary w-full font-bold"
                 >
                     Login
                 </button>
                 <Link to="/register">
                     <button
                         type="submit"
-                        className="btn btn-secondary w-full font-bold"
+                        className="btn btn-primary w-full font-bold"
                     >
                         Register
                     </button>
