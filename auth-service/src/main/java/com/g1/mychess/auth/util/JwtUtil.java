@@ -1,6 +1,5 @@
 package com.g1.mychess.auth.util;
 
-import io.github.cdimascio.dotenv.Dotenv;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -23,8 +22,7 @@ public class JwtUtil {
     private final long refreshExpirationInMs = 2592000000L; // 30 days
 
     public JwtUtil() {
-        Dotenv dotenv = Dotenv.load();
-        String secret = dotenv.get("JWT_SECRET");
+        String secret = System.getenv("JWT_SECRET");
         if (secret == null) {
             throw new IllegalStateException("JWT_SECRET environment variable not set");
         }
