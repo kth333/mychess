@@ -20,6 +20,7 @@ import org.springframework.web.reactive.function.client.WebClient;
 import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -136,21 +137,34 @@ public class AuthService {
         } catch (Exception e) {
             throw new Exception("An error occurred during login.", e);
         }
+
     }
 
     private String generateVerificationToken(Long userId) {
+        // First, check if there's already a token for this userId
+        Optional<VerificationToken> existingToken = verificationTokenRepository.findByUserIdAndTokenType(userId, VerificationToken.TokenType.EMAIL_VERIFICATION);
+
+        // If a token exists, remove it
+        existingToken.ifPresent(verificationTokenRepository::delete);
+
+        // Generate a new token
         String token = UUID.randomUUID().toString();
 
+        // Create a new VerificationToken object
         VerificationToken verificationToken = new VerificationToken(
                 token,
                 LocalDateTime.now().plusDays(1),  // Set expiration to 1 day
                 VerificationToken.TokenType.EMAIL_VERIFICATION,
                 userId
         );
+
+        // Save the new token to the database
         verificationTokenRepository.save(verificationToken);
 
+        // Return the newly generated token
         return token;
     }
+
 
     public void sendVerificationEmail(String email, String username, String verificationToken) {
         EmailRequestDTO emailRequestDTO = new EmailRequestDTO();
