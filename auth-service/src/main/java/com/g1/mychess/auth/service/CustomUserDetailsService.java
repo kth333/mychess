@@ -22,7 +22,7 @@ public class CustomUserDetailsService implements UserDetailsService {
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         UserDTO userDTO = webClientBuilder.build()
                 .get()
-                .uri("http://localhost:8081/api/v1/users/username/" + username)
+                .uri("http://user-service:8081/api/v1/users/username/" + username)
                 .retrieve()
                 .bodyToMono(UserDTO.class)
                 .block();

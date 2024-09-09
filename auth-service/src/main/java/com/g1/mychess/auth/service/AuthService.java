@@ -63,7 +63,7 @@ public class AuthService {
 
         ResponseEntity<Map<String, Object>> userServiceResponse = webClientBuilder.build()
                 .post()
-                .uri("http://localhost:8081/api/v1/users")
+                .uri("http://user-service:8081/api/v1/users")
                 .bodyValue(userDTO)
                 .retrieve()
                 .toEntity(new ParameterizedTypeReference<Map<String, Object>>() {
@@ -174,7 +174,7 @@ public class AuthService {
 
         webClientBuilder.build()
                 .post()
-                .uri("http://localhost:8085/api/v1/email/send-verification")
+                .uri("http://email-service:8085/api/v1/email/send-verification")
                 .bodyValue(emailRequestDTO)
                 .retrieve()
                 .bodyToMono(String.class)
@@ -184,7 +184,7 @@ public class AuthService {
     public UserDTO fetchUserFromUserService(String username) {
         return webClientBuilder.build()
                 .get()
-                .uri("http://localhost:8081/api/v1/users/username/" + username)
+                .uri("http://user-service:8081/api/v1/users/username/" + username)
                 .retrieve()
                 .bodyToMono(UserDTO.class)
                 .block(); // Blocking call for simplicity
