@@ -1,7 +1,5 @@
 package com.g1.mychess.email.service;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import io.github.cdimascio.dotenv.Dotenv;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
