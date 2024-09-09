@@ -1,7 +1,6 @@
 import React from "react";
 import { Outlet, useLocation } from "react-router-dom";
 import NavBar from './NavBar';
-import ThemeSwitcher from "./ThemeSwitcher";
 
 
 const Layout = ({ children }) => {

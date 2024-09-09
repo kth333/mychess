@@ -1,5 +1,4 @@
-import React, { Component, FormEvent } from 'react';
-import { Link } from 'react-router-dom';
+import React, { Component } from 'react';
 import AuthService from "../services/AuthService";
 
 class Register extends Component {
