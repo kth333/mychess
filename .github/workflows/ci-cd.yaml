@@ -48,6 +48,9 @@ jobs:
           java-package: 'jdk'
           check-latest: false
 
+      - name: Set executable permission for mvnw
+        run: chmod +x ./mvnw
+
       - name: Build and Test Spring Boot Services (All Microservices)
         run: ./mvnw clean package
 
