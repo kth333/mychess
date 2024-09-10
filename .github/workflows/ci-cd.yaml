@@ -43,6 +43,9 @@ jobs:
         uses: actions/setup-java@v3
         with:
           java-version: '17'
+          distribution: 'adoptopenjdk'
+          java-package: 'jdk'
+          check-latest: false
 
       - name: Build and Test Spring Boot Services (All Microservices)
         run: ./mvnw clean package
