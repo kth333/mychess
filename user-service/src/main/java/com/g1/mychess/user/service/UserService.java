@@ -1,6 +1,7 @@
 package com.g1.mychess.user.service;
 
 import com.g1.mychess.user.dto.RegisterRequestDTO;
+import com.g1.mychess.user.dto.UserCreationResponseDTO;
 import com.g1.mychess.user.dto.UserDTO;
 import com.g1.mychess.user.model.Player;
 import com.g1.mychess.user.model.User;
@@ -29,19 +30,19 @@ public class UserService {
         this.userRepository = userRepository;
     }
 
-    public ResponseEntity<Map<String, Object>> createUser(RegisterRequestDTO registerRequestDTO) {
-        Map<String, Object> response = new HashMap<>();
-        // Create the new user
+    public ResponseEntity<UserCreationResponseDTO> createUser(RegisterRequestDTO registerRequestDTO) {
+        if (userRepository.findByUsername(registerRequestDTO.getUsername()).isPresent()) {
+            return ResponseEntity.status(HttpStatus.CONFLICT)
+                    .body(new UserCreationResponseDTO(null, "User already exists"));
+        }
+
         Player newPlayer = new Player();
         newPlayer.setUsername(registerRequestDTO.getUsername());
         newPlayer.setPassword(registerRequestDTO.getPassword());
         newPlayer.setEmail(registerRequestDTO.getEmail());
-        userRepository.save(newPlayer);
+        playerRepository.save(newPlayer);
 
-        // Return success response
-        response.put("userId", newPlayer.getId());
-        response.put("message", "User created successfully");
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(new UserCreationResponseDTO(newPlayer.getId(), "User created successfully"));
     }
 
     public Long findUserIdByUsername(String username) {

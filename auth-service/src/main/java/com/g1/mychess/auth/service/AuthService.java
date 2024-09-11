@@ -54,13 +54,12 @@ public class AuthService {
                 registerRequestDTO.getEmail()
         );
 
-        ResponseEntity<Map<String, Object>> userServiceResponse = webClientBuilder.build()
+        ResponseEntity<UserCreationResponseDTO> userServiceResponse = webClientBuilder.build()
                 .post()
                 .uri("http://user-service:8081/api/v1/users")
                 .bodyValue(userDTO)
                 .retrieve()
-                .toEntity(new ParameterizedTypeReference<Map<String, Object>>() {
-                })
+                .toEntity(UserCreationResponseDTO.class)
                 .block();
 
         if (userServiceResponse == null) {
@@ -68,37 +67,27 @@ public class AuthService {
         }
 
         if (userServiceResponse.getStatusCode().is2xxSuccessful()) {
-            Map<String, Object> responseBody = userServiceResponse.getBody();
+            UserCreationResponseDTO responseBody = userServiceResponse.getBody();
 
-            if (responseBody != null && responseBody.containsKey("userId")) {
-                Object userIdObj = responseBody.get("userId");
-                Long userId = null;
-                if (userIdObj instanceof Integer) {
-                    userId = ((Integer) userIdObj).longValue();
-                } else {
-                    userId = (Long) userIdObj;
+            if (responseBody != null && responseBody.getId() != null) {
+                // Generate verification token and send the email
+                String verificationToken = generateVerificationToken(responseBody.getId());
+                try {
+                    sendVerificationEmail(registerRequestDTO.getEmail(), registerRequestDTO.getUsername(), verificationToken);
+                } catch (Exception e) {
+                    throw new EmailSendFailedException("Failed to send verification email.");
                 }
-
-                if (userId != null) {
-                    // Generate verification token and send the email
-                    String verificationToken = generateVerificationToken(userId);
-                    try {
-                        sendVerificationEmail(registerRequestDTO.getEmail(), registerRequestDTO.getUsername(), verificationToken);
-                    } catch (Exception e) {
-                        throw new EmailSendFailedException("Failed to send verification email.");
-                    }
-                    return ResponseEntity.ok("Registration successful! Check your email to verify your account.");
-                } else {
-                    throw new UserServiceException("Failed to retrieve userId from the user service.");
-                }
+                return ResponseEntity.ok("Registration successful! Check your email to verify your account.");
             } else {
                 throw new UserServiceException("userId is missing in the response from the user service.");
             }
-        } else if (userServiceResponse.getStatusCode() == HttpStatus.CONFLICT) {
-            throw new UserAlreadyExistsException("User with the given email or username already exists.");
-        } else {
-            throw new UserServiceException("User service failed to register the user.");
         }
+
+        if (userServiceResponse.getStatusCode() == HttpStatus.CONFLICT) {
+            throw new UserAlreadyExistsException("User with the given email or username already exists.");
+        }
+
+        throw new UserServiceException("User service failed to register the user. Status code: " + userServiceResponse.getStatusCode());
     }
 
     private boolean isValidPassword(String password) {
