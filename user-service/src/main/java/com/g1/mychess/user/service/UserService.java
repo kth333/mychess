@@ -33,7 +33,12 @@ public class UserService {
     public ResponseEntity<UserCreationResponseDTO> createUser(RegisterRequestDTO registerRequestDTO) {
         if (userRepository.findByUsername(registerRequestDTO.getUsername()).isPresent()) {
             return ResponseEntity.status(HttpStatus.CONFLICT)
-                    .body(new UserCreationResponseDTO(null, "User already exists"));
+                    .body(new UserCreationResponseDTO(null, "Username already exists"));
+        }
+
+        if (userRepository.findByEmail(registerRequestDTO.getEmail()).isPresent()) {
+            return ResponseEntity.status(HttpStatus.CONFLICT)
+                    .body(new UserCreationResponseDTO(null, "Email already exists"));
         }
 
         Player newPlayer = new Player();

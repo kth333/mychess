@@ -84,7 +84,10 @@ public class AuthService {
         }
 
         if (userServiceResponse.getStatusCode() == HttpStatus.CONFLICT) {
-            throw new UserAlreadyExistsException("User with the given email or username already exists.");
+            UserCreationResponseDTO responseBody = userServiceResponse.getBody();
+            if (responseBody != null) {
+                throw new UserAlreadyExistsException(responseBody.getMessage());
+            }
         }
 
         throw new UserServiceException("User service failed to register the user. Status code: " + userServiceResponse.getStatusCode());
