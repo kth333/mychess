@@ -37,32 +37,18 @@ public class AuthController {
 
     @GetMapping("/verify-email")
     public ResponseEntity<String> verifyEmail(@RequestParam("token") String token) {
-        boolean isVerified = authService.verifyEmail(token);
-        if (isVerified) {
-            return ResponseEntity.ok("Email successfully verified!");
-        } else {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Invalid or expired verification token.");
-        }
+        authService.verifyEmail(token);
+        return ResponseEntity.ok("Email successfully verified!");
     }
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody LoginRequestDTO loginRequestDTO) {
-        try {
-            // Call the AuthService login method
-            String token = authService.login(loginRequestDTO.getUsername(), loginRequestDTO.getPassword());
+        String token = authService.login(loginRequestDTO.getUsername(), loginRequestDTO.getPassword());
 
-            // Create response with the token
-            Map<String, String> response = new HashMap<>();
-            response.put("token", token);
+        Map<String, String> response = new HashMap<>();
+        response.put("token", token);
 
-            return ResponseEntity.ok(response);
-        } catch (BadCredentialsException e) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid username or password");
-        } catch (IllegalStateException e) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(e.getMessage());
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occurred during login");
-        }
+        return ResponseEntity.ok(response);
     }
 
 //    @GetMapping("/resend-verification")
