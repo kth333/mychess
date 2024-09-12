@@ -27,6 +27,11 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(ex.getMessage(), HttpStatus.FORBIDDEN);
     }
 
+    @ExceptionHandler(EmailAlreadyVerifiedException.class)
+    public ResponseEntity<String> handleEmailAlreadyVerifiedException(EmailAlreadyVerifiedException ex) {
+        return new ResponseEntity<>(ex.getMessage(), HttpStatus.CONFLICT);
+    }
+
     // Handle EmailSendFailedException
     @ExceptionHandler(EmailSendFailedException.class)
     public ResponseEntity<String> handleEmailSendFailedException(EmailSendFailedException ex) {
@@ -51,9 +56,9 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(ex.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
-    // Handle VerificationTokenException
-    @ExceptionHandler(VerificationTokenException.class)
-    public ResponseEntity<String> handleVerificationTokenException(VerificationTokenException ex) {
+    // Handle UserTokenException
+    @ExceptionHandler(UserTokenException.class)
+    public ResponseEntity<String> handleVerificationTokenException(UserTokenException ex) {
         return new ResponseEntity<>(ex.getMessage(), HttpStatus.BAD_REQUEST);
     }
 

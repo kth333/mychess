@@ -4,8 +4,8 @@ import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "verification_tokens")
-public class VerificationToken {
+@Table(name = "user_tokens")
+public class UserToken {
 
     @Id
     @Column(name = "token", nullable = false, unique = true)
@@ -29,9 +29,9 @@ public class VerificationToken {
         PASSWORD_RESET
     }
 
-    public VerificationToken() {}
+    public UserToken() {}
 
-    public VerificationToken(String token, LocalDateTime expirationTime, TokenType tokenType, Long userId) {
+    public UserToken(String token, LocalDateTime expirationTime, TokenType tokenType, Long userId) {
         this.token = token;
         this.expirationTime = expirationTime;
         this.tokenType = tokenType;

@@ -4,7 +4,7 @@ public class EmailRequestDTO {
     private String to;
 
     private String username;
-    private String verificationToken;
+    private String userToken;
 
     // Getters and Setters
     public String getTo() {
@@ -23,11 +23,11 @@ public class EmailRequestDTO {
         this.username = username;
     }
 
-    public String getVerificationToken() {
-        return verificationToken;
+    public String getUserToken() {
+        return userToken;
     }
 
-    public void setVerificationToken(String verificationToken) {
-        this.verificationToken = verificationToken;
+    public void setUserToken(String userToken) {
+        this.userToken = userToken;
     }
 }

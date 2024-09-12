@@ -5,10 +5,8 @@ import com.g1.mychess.auth.service.*;
 import com.g1.mychess.auth.dto.*;
 import com.g1.mychess.auth.util.JwtUtil;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.authentication.BadCredentialsException;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.web.bind.annotation.*;
 import jakarta.validation.Valid;
 
@@ -57,72 +55,32 @@ public class AuthController {
         return ResponseEntity.ok(response);
     }
 
-//    @GetMapping("/resend-verification")
-//    public ResponseEntity<String> resendVerificationEmail(@RequestParam("userId") Long userId) {
-//        // Check if the user is already verified
-//        if (authService.isEmailVerified(userId)) {
-//            return ResponseEntity.ok("Email already verified.");
-//        }
-//
-//        // Fetch the username from the user microservice based on userId
-//        String username;
-//        try {
-//            username = authService.fetchUsernameFromUserId(userId);
-//        } catch (Exception e) {
-//            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found.");
-//        }
-//
-//        // Resend verification email logic
-//        authService.sendVerificationEmail(username, userId);
-//
-//        return ResponseEntity.ok("Verification email sent.");
-//    }
+    @PostMapping("/resend-verification-email")
+    public ResponseEntity<String> resendVerificationEmail(@RequestBody String email) {
+        return authService.resendVerificationEmail(email);
+    }
 
-    // // POST /auth/login: User login with JWT generation
-    // @PostMapping("/login")
-    // public ResponseEntity<?> login(@RequestBody LoginRequest loginRequest) {
-    //     return authService.loginUser(loginRequest);
-    // }
+    @PostMapping("/request-password-reset")
+    public ResponseEntity<String> requestPasswordReset(@RequestBody String email) {
+        return authService.requestPasswordReset(email);
+    }
 
-    // // POST /auth/refresh-token: Refresh JWT tokens
-    // @PostMapping("/refresh-token")
-    // public ResponseEntity<?> refreshToken(@RequestBody RefreshTokenRequest refreshTokenRequest) {
-    //     return authService.refreshToken(refreshTokenRequest);
-    // }
+    @PostMapping("/reset-password")
+    public ResponseEntity<String> resetPassword(@RequestBody ResetPasswordRequestDTO resetPasswordRequest) {
+        return authService.resetPassword(resetPasswordRequest.getResetToken(), resetPasswordRequest.getNewPassword());
+    }
 
-    // // POST /auth/verify-email: Verify email with token
-    // @PostMapping("/verify-email")
-    // public ResponseEntity<?> verifyEmail(@RequestBody VerifyEmailRequestDTO verifyEmailRequestDTO) {
-    //     return authService.verifyEmail(verifyEmailRequest);
-    // }
-
-    // // POST /auth/request-password-reset: Initiate password reset
-    // @PostMapping("/request-password-reset")
-    // public ResponseEntity<?> requestPasswordReset(@RequestBody PasswordResetRequest passwordResetRequest) {
-    //     return authService.requestPasswordReset(passwordResetRequest);
-    // }
-
-    // // POST /auth/reset-password: Complete password reset
-    // @PostMapping("/reset-password")
-    // public ResponseEntity<?> resetPassword(@RequestBody ResetPasswordRequest resetPasswordRequest) {
-    //     return authService.resetPassword(resetPasswordRequest);
-    // }
-
-    // // POST /auth/logout: User logout
-    // @PostMapping("/logout")
-    // public ResponseEntity<?> logout(@RequestBody LogoutRequest logoutRequest) {
-    //     return authService.logoutUser(logoutRequest);
-    // }
-
-    @PostMapping("/validateToken")
-    public ResponseEntity<AuthResponseDTO> validateToken(@RequestBody String token) {
+    @PostMapping("/validate-jwt")
+    public ResponseEntity<AuthResponseDTO> validateJwt(@RequestBody String token) {
         // Extract username from the token
         String username = jwtUtil.extractUsername(token);
 
         // Validate the token and check if it's valid
         if (username != null && jwtUtil.validateToken(token)) {
-            // If valid, create an AuthResponseDTO with user details and return it
-            List<SimpleGrantedAuthority> authorities = jwtUtil.extractRoles(token);
+            // Extract roles and return as GrantedAuthority
+            List<GrantedAuthority> authorities = jwtUtil.extractRoles(token); // Now returns List<GrantedAuthority>
+
+            // Create AuthResponseDTO and return it
             AuthResponseDTO response = new AuthResponseDTO(username, authorities);
             return ResponseEntity.ok(response);
         } else {
@@ -130,5 +88,6 @@ public class AuthController {
             return ResponseEntity.status(401).build();
         }
     }
+
 }
 
