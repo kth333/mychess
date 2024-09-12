@@ -11,7 +11,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 import static org.junit.jupiter.api.Assertions.*;
 import java.time.LocalDate;
 
-class PlayerTest {
+class ProfileTest {
 
     private Profile profile;
 
