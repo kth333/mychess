@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import withNavigateandLocation from './withNavigateandLocation';
 import { Link } from "react-router-dom";
 import AuthService from '../services/AuthService';
+import { jwtDecode } from 'jwt-decode';
 
 class Login extends Component {
   constructor(props) {
@@ -28,6 +29,15 @@ class Login extends Component {
             console.log("login success");
             console.log(res.data);
             localStorage.setItem("token", res.data.token);
+            const token = localStorage.getItem('token');
+            // decoding token to get role
+            if (token) {
+                const decodedToken = jwtDecode(token);
+                console.log(decodedToken.role[0].authority);
+                const role = decodedToken.role[0].authority
+                localStorage.setItem("role", role);
+            }
+            
           }});
         
       } catch (error) {
