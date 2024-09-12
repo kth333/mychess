@@ -5,11 +5,13 @@ import java.util.stream.Collectors;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
+import java.util.HashSet;
 import java.util.Set;
 
 import com.g1.mychess.tournament.dto.TournamentDTO;
 import com.g1.mychess.tournament.dto.TournamentPlayerDTO;
 import com.g1.mychess.tournament.model.Tournament;
+import com.g1.mychess.tournament.exception.TournamentAlreadyExistsException;
 import com.g1.mychess.tournament.repository.TournamentRepository;
 
 public class TournamentService {
@@ -20,12 +22,64 @@ public class TournamentService {
         this.tournamentRepository = tournamentRepository;
     }
 
-    public ResponseEntity<TournamentDTO> createTournament(TournamentDTO tournamentDTO){
-        // if (tournamentRepository.findByName(tournamentDTO.getName()).isPresent()) {
-        //     return ResponseEntity.status(HttpStatus.CONFLICT)
-        //             .body(new TournamentDTO(null, "Name already exists"));
-        // }
-        return null;
+    public ResponseEntity<TournamentDTO> createTournament(TournamentDTO tournamentDTO) {
+        // Check if a tournament with the same name already exists
+        if (tournamentRepository.findByName(tournamentDTO.getName()).isPresent()) {
+            throw new TournamentAlreadyExistsException("Tournament with the name " + tournamentDTO.getName() + " already exists.");
+        }
+
+        // Map TournamentDTO to Tournament entity
+        Tournament tournament = new Tournament();
+        tournament.setAdminId(tournamentDTO.getAdminId());
+        tournament.setName(tournamentDTO.getName());
+        tournament.setDescription(tournamentDTO.getDescription());
+        tournament.setStartDateTime(tournamentDTO.getStartDateTime());
+        tournament.setEndDateTime(tournamentDTO.getEndDateTime());
+        tournament.setRegistrationStartDate(tournamentDTO.getRegistrationStartDate());
+        tournament.setRegistrationEndDate(tournamentDTO.getRegistrationEndDate());
+        tournament.setFormat(Tournament.TournamentFormat.valueOf(tournamentDTO.getFormat()));
+        tournament.setStatus(Tournament.TournamentStatus.valueOf(tournamentDTO.getStatus()));
+        tournament.setMinRating(tournamentDTO.getMinRating());
+        tournament.setMaxRating(tournamentDTO.getMaxRating());
+        tournament.setAffectsRating(tournamentDTO.isAffectsRating());
+        tournament.setMinAge(tournamentDTO.getMinAge());
+        tournament.setMaxAge(tournamentDTO.getMaxAge());
+        tournament.setRequiredGender(tournamentDTO.getRequiredGender());
+        tournament.setCountry(tournamentDTO.getCountry());
+        tournament.setRegion(tournamentDTO.getRegion());
+        tournament.setCity(tournamentDTO.getCity());
+        tournament.setAddress(tournamentDTO.getAddress());
+
+        // Save the tournament to the repository
+        Tournament savedTournament = tournamentRepository.save(tournament);
+
+        // Map the saved Tournament entity back to a TournamentDTO
+        TournamentDTO savedTournamentDTO = new TournamentDTO(
+                savedTournament.getId(),
+                savedTournament.getAdminId(),
+                savedTournament.getName(),
+                savedTournament.getDescription(),
+                savedTournament.getStartDateTime(),
+                savedTournament.getEndDateTime(),
+                savedTournament.getRegistrationStartDate(),
+                savedTournament.getRegistrationEndDate(),
+                savedTournament.getFormat().name(),
+                savedTournament.getStatus().name(),
+                savedTournament.getMinRating(),
+                savedTournament.getMaxRating(),
+                savedTournament.isAffectsRating(),
+                savedTournament.getMinAge(),
+                savedTournament.getMaxAge(),
+                savedTournament.getRequiredGender(),
+                savedTournament.getCountry(),
+                savedTournament.getRegion(),
+                savedTournament.getCity(),
+                savedTournament.getAddress(),
+                new HashSet<>()
+        );
+
+        // Return the saved tournament details
+        return ResponseEntity.status(HttpStatus.CREATED).body(savedTournamentDTO);
     }
 
     public TournamentDTO convertToDTO(Tournament tournament) {
@@ -67,6 +121,7 @@ public class TournamentService {
             participantDTOs // Pass the converted set of participant DTOs
         );
     }
+    
     
 
 }

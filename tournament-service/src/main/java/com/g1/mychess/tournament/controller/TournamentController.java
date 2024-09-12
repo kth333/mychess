@@ -1,5 +1,24 @@
 package com.g1.mychess.tournament.controller;
 
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import com.g1.mychess.tournament.service.*;
+import org.springframework.web.bind.annotation.RestController;
+import com.g1.mychess.tournament.dto.*;
+
+@RestController
+@RequestMapping("/api/v1/tournament")
 public class TournamentController {
-    
+    private final TournamentService tournamentService;
+
+    public TournamentController(TournamentService tournamentService) {
+        this.tournamentService = tournamentService;
+    }
+
+    @PostMapping
+    public ResponseEntity<TournamentDTO> createTournament(@RequestBody TournamentDTO tournamentDTO) {
+        return tournamentService.createTournament(tournamentDTO);
+    }
 }
