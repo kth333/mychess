@@ -82,6 +82,47 @@ public class TournamentService {
         return ResponseEntity.status(HttpStatus.CREATED).body(savedTournamentDTO);
     }
 
+    public TournamentDTO findTournamentByName(String name) {
+        Tournament tournament = tournamentRepository.findByName(name)
+                .orElseThrow(() -> new IllegalArgumentException("Tournament not found with name: " + name));
+    
+        // Convert Tournament to TournamentDTO
+        return new TournamentDTO(
+                tournament.getId(),
+                tournament.getAdminId(),  // Assuming there is an admin relation in Tournament entity
+                tournament.getName(),
+                tournament.getDescription(),
+                tournament.getStartDateTime(),
+                tournament.getEndDateTime(),
+                tournament.getRegistrationStartDate(),
+                tournament.getRegistrationEndDate(),
+                tournament.getFormat().name(),
+                tournament.getStatus().name(),
+                tournament.getMinRating(),
+                tournament.getMaxRating(),
+                tournament.isAffectsRating(),
+                tournament.getMinAge(),
+                tournament.getMaxAge(),
+                tournament.getRequiredGender(),
+                tournament.getCountry(),
+                tournament.getRegion(),
+                tournament.getCity(),
+                tournament.getAddress(),
+                tournament.getParticipants().stream()
+                    .map(participant -> new TournamentPlayerDTO(
+                        participant.getId(),
+                        participant.getTournament().getId(),  
+                        participant.getPlayerId(),      
+                        participant.getSignUpDateTime(),
+                        participant.getPoints(),
+                        participant.getRoundsPlayed(),
+                        participant.getStatus().name()))
+                    .collect(Collectors.toSet())
+        );
+    }
+    
+    
+
     public TournamentDTO convertToDTO(Tournament tournament) {
         // Convert each TournamentPlayer to TournamentPlayerDTO using the correct fields
         Set<TournamentPlayerDTO> participantDTOs = tournament.getParticipants().stream()
