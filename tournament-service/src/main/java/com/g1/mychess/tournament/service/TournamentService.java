@@ -4,6 +4,7 @@ import java.util.stream.Collectors;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Service;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -14,6 +15,7 @@ import com.g1.mychess.tournament.model.Tournament;
 import com.g1.mychess.tournament.exception.TournamentAlreadyExistsException;
 import com.g1.mychess.tournament.repository.TournamentRepository;
 
+@Service
 public class TournamentService {
     
     private final TournamentRepository tournamentRepository;

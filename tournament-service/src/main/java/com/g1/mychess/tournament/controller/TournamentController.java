@@ -17,7 +17,7 @@ public class TournamentController {
         this.tournamentService = tournamentService;
     }
 
-    @PostMapping
+    @PostMapping("/admin/create-tournament")
     public ResponseEntity<TournamentDTO> createTournament(@RequestBody TournamentDTO tournamentDTO) {
         return tournamentService.createTournament(tournamentDTO);
     }

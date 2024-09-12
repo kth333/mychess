@@ -19,7 +19,7 @@ public class EmailController {
     @PostMapping("/send-verification")
     public ResponseEntity<String> sendVerificationEmail(@RequestBody EmailRequestDTO emailRequestDTO) {
         try {
-            emailService.sendVerificationEmail(emailRequestDTO.getTo(), emailRequestDTO.getUsername(), emailRequestDTO.getVerificationToken());
+            emailService.sendVerificationEmail(emailRequestDTO.getTo(), emailRequestDTO.getUsername(), emailRequestDTO.getUserToken());
             return ResponseEntity.ok("Verification email sent successfully.");
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
