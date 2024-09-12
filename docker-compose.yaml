@@ -1,0 +1,69 @@
+
+services:
+  auth-service:
+    build:
+      context: ./auth-service
+      dockerfile: Dockerfile
+    image: "${DOCKER_USERNAME}/auth-service:latest"
+    ports:
+      - "8080:8080"
+    env_file:
+      ./.env
+
+  user-service:
+    build:
+      context: ./user-service
+      dockerfile: Dockerfile
+    image: "${DOCKER_USERNAME}/user-service:latest"
+    ports:
+      - "8081:8081"
+    env_file:
+      ./.env
+
+  match-service:
+    build:
+      context: ./match-service
+      dockerfile: Dockerfile
+    image: "${DOCKER_USERNAME}/match-service:latest"
+    ports:
+      - "8082:8082"
+    env_file:
+      ./.env
+
+  tournament-service:
+    build:
+      context: ./tournament-service
+      dockerfile: Dockerfile
+    image: "${DOCKER_USERNAME}/tournament-service:latest"
+    ports:
+      - "8083:8083"
+    env_file:
+      ./.env
+
+  matchmaking-service:
+    build:
+      context: ./matchmaking-service
+      dockerfile: Dockerfile
+    image: "${DOCKER_USERNAME}/matchmaking-service:latest"
+    ports:
+      - "8084:8084"
+    env_file:
+      ./.env
+
+  email-service:
+    build:
+      context: ./email-service
+      dockerfile: Dockerfile
+    image: "${DOCKER_USERNAME}/email-service:latest"
+    ports:
+      - "8085:8085"
+    env_file:
+      ./.env
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    image: "${DOCKER_USERNAME}/frontend:latest"
+    ports:
+      - "3000:3000"
