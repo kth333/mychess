@@ -41,7 +41,7 @@ public class JwtRequestFilter extends OncePerRequestFilter {
             try {
                 AuthResponseDTO authResponseDTO = webClientBuilder.build()
                         .post()
-                        .uri("http://auth-service:8080/auth/validate-jwt")
+                        .uri("http://auth-service:8080/api/v1/auth/validate-jwt")
                         .bodyValue(token)  // Send token to auth-service
                         .retrieve()
                         .bodyToMono(AuthResponseDTO.class)

@@ -78,7 +78,7 @@ public class AuthController {
         // Validate the token and check if it's valid
         if (username != null && jwtUtil.validateToken(token)) {
             // Extract roles and return as GrantedAuthority
-            List<GrantedAuthority> authorities = jwtUtil.extractRoles(token); // Now returns List<GrantedAuthority>
+            List<GrantedAuthority> authorities = jwtUtil.extractRoles(token); // Returns List<GrantedAuthority>
 
             // Create AuthResponseDTO and return it
             AuthResponseDTO response = new AuthResponseDTO(username, authorities);
@@ -88,6 +88,5 @@ public class AuthController {
             return ResponseEntity.status(401).build();
         }
     }
-
 }
 

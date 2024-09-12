@@ -12,6 +12,7 @@ import org.springframework.stereotype.Component;
 import javax.crypto.SecretKey;
 import java.util.*;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @Component
 public class JwtUtil {
@@ -52,7 +53,11 @@ public class JwtUtil {
 
     public String generateToken(UserDetails userDetails) {
         Map<String, Object> claims = new HashMap<>();
-        claims.put("role", userDetails.getAuthorities()); // Include role in the claims
+        // Convert authorities to a list of role names (strings)
+        List<String> roles = userDetails.getAuthorities().stream()
+                .map(GrantedAuthority::getAuthority)
+                .toList(); // or toList() in Java 16+
+        claims.put("role", roles); // Store roles as a list of strings
         return createToken(claims, userDetails.getUsername(), jwtExpirationInMs);
     }
 
@@ -81,7 +86,11 @@ public class JwtUtil {
 
     public List<GrantedAuthority> extractRoles(String token) {
         Claims claims = extractAllClaims(token);
-        String role = claims.get("role", String.class);
-        return Collections.singletonList(new SimpleGrantedAuthority(role));
+        // Assuming the role is stored as a list of strings in the token
+        List<String> roles = claims.get("role", List.class);  // Extract roles as a list of strings
+        // Convert each role into a GrantedAuthority (SimpleGrantedAuthority is an implementation of GrantedAuthority)
+        return roles.stream()
+                .map(SimpleGrantedAuthority::new)  // Convert each role to SimpleGrantedAuthority
+                .collect(Collectors.toList());  // Return a list of GrantedAuthority
     }
 }
