@@ -69,24 +69,4 @@ public class AuthController {
     public ResponseEntity<String> resetPassword(@RequestBody ResetPasswordRequestDTO resetPasswordRequest) {
         return authService.resetPassword(resetPasswordRequest.getResetToken(), resetPasswordRequest.getNewPassword());
     }
-
-    @PostMapping("/validate-jwt")
-    public ResponseEntity<AuthResponseDTO> validateJwt(@RequestBody String token) {
-        // Extract username from the token
-        String username = jwtUtil.extractUsername(token);
-
-        // Validate the token and check if it's valid
-        if (username != null && jwtUtil.validateToken(token)) {
-            // Extract roles and return as GrantedAuthority
-            List<GrantedAuthority> authorities = jwtUtil.extractRoles(token); // Returns List<GrantedAuthority>
-
-            // Create AuthResponseDTO and return it
-            AuthResponseDTO response = new AuthResponseDTO(username, authorities);
-            return ResponseEntity.ok(response);
-        } else {
-            // Return unauthorized status if token is invalid
-            return ResponseEntity.status(401).build();
-        }
-    }
 }
-

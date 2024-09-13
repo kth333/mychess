@@ -1,11 +1,13 @@
 package com.g1.mychess.tournament.filter;
 
-import com.g1.mychess.tournament.dto.AuthResponseDTO;
+import com.g1.mychess.tournament.util.JwtUtil;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
-import org.springframework.web.reactive.function.client.WebClient;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -16,10 +18,13 @@ import java.io.IOException;
 @Component
 public class JwtRequestFilter extends OncePerRequestFilter {
 
-    private final WebClient.Builder webClientBuilder;
+    private final JwtUtil jwtUtil;
 
-    public JwtRequestFilter(WebClient.Builder webClientBuilder) {
-        this.webClientBuilder = webClientBuilder;
+    private final UserDetailsService userDetailsService;
+
+    public JwtRequestFilter(JwtUtil jwtUtil, UserDetailsService userDetailsService) {
+        this.jwtUtil = jwtUtil;
+        this.userDetailsService = userDetailsService;
     }
 
     @Override
@@ -28,34 +33,26 @@ public class JwtRequestFilter extends OncePerRequestFilter {
 
         final String authorizationHeader = request.getHeader("Authorization");
 
-        String token = null;
+        String username = null;
+        String jwt = null;
 
-        // Check if the Authorization header contains a Bearer token
+        // Extract JWT and username from Authorization header
         if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
-            token = authorizationHeader.substring(7);
+            jwt = authorizationHeader.substring(7);
+            username = jwtUtil.extractUsername(jwt);
         }
 
-        // If there is a token, validate it with the auth-service
-        if (token != null) {
-            // Call auth-service to validate the token
-            try {
-                AuthResponseDTO authResponseDTO = webClientBuilder.build()
-                        .post()
-                        .uri("http://auth-service:8080/api/v1/auth/validate-jwt")
-                        .bodyValue(token)  // Send token to auth-service
-                        .retrieve()
-                        .bodyToMono(AuthResponseDTO.class)
-                        .block();  // Blocking for simplicity (use async/reactive in production)
+        // Validate token and set authentication in the security context
+        if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+            UserDetails userDetails = this.userDetailsService.loadUserByUsername(username);
 
-                // If valid, set the security context
-                if (authResponseDTO != null) {
-                    UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(
-                            authResponseDTO.getUsername(), null, authResponseDTO.getAuthorities());
-                    SecurityContextHolder.getContext().setAuthentication(authenticationToken);
-                }
-            } catch (Exception e) {
-                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);  // Invalid token
-                return;
+            if (jwtUtil.validateToken(jwt)) {
+                UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
+                        userDetails, null, userDetails.getAuthorities());
+                authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+
+                // Set authentication in the context
+                SecurityContextHolder.getContext().setAuthentication(authToken);
             }
         }
 

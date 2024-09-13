@@ -1,4 +1,4 @@
-package com.g1.mychess.auth;
+package com.g1.mychess.auth.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
