@@ -54,73 +54,20 @@ public class TournamentService {
 
         // Save the tournament to the repository
         Tournament savedTournament = tournamentRepository.save(tournament);
-
+       
         // Map the saved Tournament entity back to a TournamentDTO
-        TournamentDTO savedTournamentDTO = new TournamentDTO(
-                savedTournament.getId(),
-                savedTournament.getAdminId(),
-                savedTournament.getName(),
-                savedTournament.getDescription(),
-                savedTournament.getStartDateTime(),
-                savedTournament.getEndDateTime(),
-                savedTournament.getRegistrationStartDate(),
-                savedTournament.getRegistrationEndDate(),
-                savedTournament.getFormat().name(),
-                savedTournament.getStatus().name(),
-                savedTournament.getMinRating(),
-                savedTournament.getMaxRating(),
-                savedTournament.isAffectsRating(),
-                savedTournament.getMinAge(),
-                savedTournament.getMaxAge(),
-                savedTournament.getRequiredGender(),
-                savedTournament.getCountry(),
-                savedTournament.getRegion(),
-                savedTournament.getCity(),
-                savedTournament.getAddress(),
-                new HashSet<>()
-        );
+        TournamentDTO savedTournamentDTO = convertToDTO(savedTournament);
 
         // Return the saved tournament details
         return ResponseEntity.status(HttpStatus.CREATED).body(savedTournamentDTO);
     }
 
-    public TournamentDTO findTournamentByName(String name) {
+    public ResponseEntity<TournamentDTO> findTournamentByName(String name) {
         Tournament tournament = tournamentRepository.findByName(name)
                 .orElseThrow(() -> new IllegalArgumentException("Tournament not found with name: " + name));
     
         // Convert Tournament to TournamentDTO
-        return new TournamentDTO(
-                tournament.getId(),
-                tournament.getAdminId(),  // Assuming there is an admin relation in Tournament entity
-                tournament.getName(),
-                tournament.getDescription(),
-                tournament.getStartDateTime(),
-                tournament.getEndDateTime(),
-                tournament.getRegistrationStartDate(),
-                tournament.getRegistrationEndDate(),
-                tournament.getFormat().name(),
-                tournament.getStatus().name(),
-                tournament.getMinRating(),
-                tournament.getMaxRating(),
-                tournament.isAffectsRating(),
-                tournament.getMinAge(),
-                tournament.getMaxAge(),
-                tournament.getRequiredGender(),
-                tournament.getCountry(),
-                tournament.getRegion(),
-                tournament.getCity(),
-                tournament.getAddress(),
-                tournament.getParticipants().stream()
-                    .map(participant -> new TournamentPlayerDTO(
-                        participant.getId(),
-                        participant.getTournament().getId(),  
-                        participant.getPlayerId(),      
-                        participant.getSignUpDateTime(),
-                        participant.getPoints(),
-                        participant.getRoundsPlayed(),
-                        participant.getStatus().name()))
-                    .collect(Collectors.toSet())
-        );
+        return ResponseEntity.status(HttpStatus.OK).body(convertToDTO(tournament));
     }
     
     
