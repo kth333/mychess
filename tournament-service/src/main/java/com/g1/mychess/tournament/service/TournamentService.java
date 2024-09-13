@@ -3,14 +3,11 @@ package com.g1.mychess.tournament.service;
 import java.util.stream.Collectors;
 
 import jakarta.transaction.Transactional;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-
 import java.util.HashSet;
 import java.util.Set;
-
 import com.g1.mychess.tournament.dto.TournamentDTO;
 import com.g1.mychess.tournament.dto.TournamentPlayerDTO;
 import com.g1.mychess.tournament.model.Tournament;
@@ -22,7 +19,6 @@ public class TournamentService {
     
     private final TournamentRepository tournamentRepository;
 
-    @Autowired
     public TournamentService(TournamentRepository tournamentRepository) {
         this.tournamentRepository = tournamentRepository;
     }
