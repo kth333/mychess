@@ -47,7 +47,7 @@ class Register extends Component {
         <div className="relative w-full max-w-md">
 
           {/* Register Form */}
-          <form className="p-8 rounded-lg shadow-lg" onSubmit={this.handleSubmit}>
+          <form className="p-8 rounded-lg border border-accent shadow-lg bg-secondary" onSubmit={this.handleSubmit}>
             <h2 className="text-2xl font-bold text-center mb-6">Register</h2>
             <div className="mb-4">
               <label className="block text-primary text-sm font-bold mb-2">Username</label>
@@ -57,7 +57,7 @@ class Register extends Component {
                 value={username}
                 onChange={this.handleInputChange}
                 required
-                className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 border border-accent rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
             <div className="mb-4">
@@ -68,7 +68,7 @@ class Register extends Component {
                 value={email}
                 onChange={this.handleInputChange}
                 required
-                className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 border border-accent rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
             <div className="mb-6">
@@ -79,7 +79,7 @@ class Register extends Component {
                 value={password}
                 onChange={this.handleInputChange}
                 required
-                className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 border border-accent rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
             <button
