@@ -2,6 +2,8 @@ package com.g1.mychess.tournament.service;
 
 import java.util.stream.Collectors;
 
+import jakarta.transaction.Transactional;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -20,10 +22,12 @@ public class TournamentService {
     
     private final TournamentRepository tournamentRepository;
 
+    @Autowired
     public TournamentService(TournamentRepository tournamentRepository) {
         this.tournamentRepository = tournamentRepository;
     }
 
+    @Transactional
     public ResponseEntity<TournamentDTO> createTournament(TournamentDTO tournamentDTO) {
         // Check if a tournament with the same name already exists
         if (tournamentRepository.findByName(tournamentDTO.getName()).isPresent()) {
