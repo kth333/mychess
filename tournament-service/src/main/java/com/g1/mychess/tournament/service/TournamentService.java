@@ -4,6 +4,8 @@ import java.util.stream.Collectors;
 
 import com.g1.mychess.tournament.util.JwtUtil;
 import jakarta.transaction.Transactional;
+
+import org.apache.el.stream.Optional;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import jakarta.servlet.http.HttpServletRequest;
@@ -124,7 +126,41 @@ public class TournamentService {
         return ResponseEntity.status(HttpStatus.OK).body(updatedTournamentDTO);
     }
     
+    public ResponseEntity<String> signUpToTournament(Long tournamentId, Long userId) {
+        // Fetch the tournament from the repository
+        Optional<Tournament> optionalTournament = tournamentRepository.findById(tournamentId);
+        if (!optionalTournament.isPresent()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Tournament not found");
+        }
+        Tournament tournament = optionalTournament.get();
     
+        // Fetch the user from the repository
+        Optional<User> optionalUser = userRepository.findById(userId);
+        if (!optionalUser.isPresent()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
+        }
+        User user = optionalUser.get();
+    
+        // Check if the user meets the tournament's requirements
+        if (user.getRating() < tournament.getMinRating() || user.getRating() > tournament.getMaxRating()) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("User does not meet the rating requirements");
+        }
+        if (user.getAge() < tournament.getMinAge() || user.getAge() > tournament.getMaxAge()) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("User does not meet the age requirements");
+        }
+        if (tournament.getRequiredGender() != null && !tournament.getRequiredGender().equals(user.getGender())) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("User does not meet the gender requirements");
+        }
+    
+        // Add the user to the tournament's list of participants
+        tournament.getParticipants().add(user);
+    
+        // Save the updated tournament to the repository
+        tournamentRepository.save(tournament);
+    
+        // Return a success response
+        return ResponseEntity.status(HttpStatus.OK).body("User successfully signed up to the tournament");
+    }
 
     public TournamentDTO convertToDTO(Tournament tournament) {
         // Convert each TournamentPlayer to TournamentPlayerDTO using the correct fields

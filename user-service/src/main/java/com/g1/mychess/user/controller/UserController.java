@@ -1,6 +1,7 @@
 package com.g1.mychess.user.controller;
 
 import com.g1.mychess.user.dto.RegisterRequestDTO;
+import com.g1.mychess.user.dto.TournamentPlayerDTO;
 import com.g1.mychess.user.dto.UpdatePasswordRequestDTO;
 import com.g1.mychess.user.dto.UserCreationResponseDTO;
 import com.g1.mychess.user.dto.UserDTO;
@@ -47,4 +48,11 @@ public class UserController {
         userService.updateUserPassword(updatePasswordRequest.getUserId(), updatePasswordRequest.getNewPassword());
         return ResponseEntity.ok("Password updated successfully.");
     }
+
+    @GetMapping("/tournament-player/{player-id}")
+    public ResponseEntity<TournamentPlayerDTO> getTournamentPlayer(@PathVariable Long playerId) {
+        TournamentPlayerDTO tournamentPlayerDTO = userService.findTournamentPlayerById(playerId);
+        return ResponseEntity.ok(tournamentPlayerDTO);
+    }
+
 }

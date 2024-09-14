@@ -24,8 +24,8 @@ public class TournamentController {
     }
 
     @PostMapping("/admin/create")
-    public ResponseEntity<TournamentDTO> createTournament(@RequestBody TournamentDTO tournamentDTO, HttpServletRequest request) {
-        return tournamentService.createTournament(tournamentDTO, request);
+    public ResponseEntity<TournamentDTO> createTournament(@RequestBody TournamentDTO tournamentDTO) {
+        return tournamentService.createTournament(tournamentDTO);
     }
 
     @GetMapping("/public/get/{tournamentName}")
