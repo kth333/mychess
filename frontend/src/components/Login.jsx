@@ -37,6 +37,7 @@ class Login extends Component {
                 const role = decodedToken.role[0].authority
                 localStorage.setItem("role", role);
             }
+            this.props.navigate('/home');
             
           }});
         
@@ -56,7 +57,7 @@ class Login extends Component {
 
     return (
       <div className="flex justify-center items-center min-h-screen">
-        <form className="p-8 rounded-lg shadow-lg w-96" onSubmit={this.handleSubmit}>
+        <form className="p-8 rounded-lg border border-accent shadow-lg w-96 bg-secondary" onSubmit={this.handleSubmit}>
           <h2 className="text-2xl font-bold text-center mb-6">Login</h2>
           <div className="mb-4">
             <label className="block text-primary text-sm font-bold mb-2">Username</label>
@@ -66,7 +67,7 @@ class Login extends Component {
               value={username}
               onChange={this.handleInputChange}
               required
-              className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-3 py-2 border border-accent rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
           <div className="mb-6">
@@ -77,7 +78,7 @@ class Login extends Component {
               value={password}
               onChange={this.handleInputChange}
               required
-              className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-3 py-2 border border-accent rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
           <div className="flex flex-col space-y-4">

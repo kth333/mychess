@@ -9,6 +9,7 @@ import org.springframework.http.ResponseEntity;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.stereotype.Service;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import com.g1.mychess.tournament.dto.TournamentDTO;
 import com.g1.mychess.tournament.dto.TournamentPlayerDTO;
@@ -58,76 +59,69 @@ public class TournamentService {
         tournament.setRegion(tournamentDTO.getRegion());
         tournament.setCity(tournamentDTO.getCity());
         tournament.setAddress(tournamentDTO.getAddress());
+        tournament.setParticipants(new HashSet<>());
 
         // Save the tournament to the repository
         Tournament savedTournament = tournamentRepository.save(tournament);
-
+       
         // Map the saved Tournament entity back to a TournamentDTO
-        TournamentDTO savedTournamentDTO = new TournamentDTO(
-                savedTournament.getId(),
-                savedTournament.getAdminId(),
-                savedTournament.getName(),
-                savedTournament.getDescription(),
-                savedTournament.getStartDateTime(),
-                savedTournament.getEndDateTime(),
-                savedTournament.getRegistrationStartDate(),
-                savedTournament.getRegistrationEndDate(),
-                savedTournament.getFormat().name(),
-                savedTournament.getStatus().name(),
-                savedTournament.getMinRating(),
-                savedTournament.getMaxRating(),
-                savedTournament.isAffectsRating(),
-                savedTournament.getMinAge(),
-                savedTournament.getMaxAge(),
-                savedTournament.getRequiredGender(),
-                savedTournament.getCountry(),
-                savedTournament.getRegion(),
-                savedTournament.getCity(),
-                savedTournament.getAddress(),
-                new HashSet<>()
-        );
+        TournamentDTO savedTournamentDTO = convertToDTO(savedTournament);
 
         // Return the saved tournament details
         return ResponseEntity.status(HttpStatus.CREATED).body(savedTournamentDTO);
     }
 
-    public TournamentDTO findTournamentByName(String name) {
+    public ResponseEntity<TournamentDTO> findTournamentByName(String name) {
         Tournament tournament = tournamentRepository.findByName(name)
                 .orElseThrow(() -> new IllegalArgumentException("Tournament not found with name: " + name));
     
         // Convert Tournament to TournamentDTO
-        return new TournamentDTO(
-                tournament.getId(),
-                tournament.getAdminId(),  // Assuming there is an admin relation in Tournament entity
-                tournament.getName(),
-                tournament.getDescription(),
-                tournament.getStartDateTime(),
-                tournament.getEndDateTime(),
-                tournament.getRegistrationStartDate(),
-                tournament.getRegistrationEndDate(),
-                tournament.getFormat().name(),
-                tournament.getStatus().name(),
-                tournament.getMinRating(),
-                tournament.getMaxRating(),
-                tournament.isAffectsRating(),
-                tournament.getMinAge(),
-                tournament.getMaxAge(),
-                tournament.getRequiredGender(),
-                tournament.getCountry(),
-                tournament.getRegion(),
-                tournament.getCity(),
-                tournament.getAddress(),
-                tournament.getParticipants().stream()
-                    .map(participant -> new TournamentPlayerDTO(
-                        participant.getId(),
-                        participant.getTournament().getId(),  
-                        participant.getPlayerId(),      
-                        participant.getSignUpDateTime(),
-                        participant.getPoints(),
-                        participant.getRoundsPlayed(),
-                        participant.getStatus().name()))
-                    .collect(Collectors.toSet())
-        );
+        return ResponseEntity.status(HttpStatus.OK).body(convertToDTO(tournament));
+    }
+
+    public ResponseEntity<List<TournamentDTO>> getAllTournaments() {
+        List<Tournament> tournaments = tournamentRepository.findAll();
+        List<TournamentDTO> tournamentDTOs = tournaments.stream()
+            .map(this::convertToDTO)
+            .collect(Collectors.toList());
+        
+        return ResponseEntity.status(HttpStatus.OK).body(tournamentDTOs);
+    }
+
+    public ResponseEntity<TournamentDTO> updateTournament(TournamentDTO tournamentDTO) {
+        // Find the tournament by its ID
+        Tournament tournament = tournamentRepository.findById(tournamentDTO.getId())
+                .orElseThrow(() -> new IllegalArgumentException("Tournament not found with ID: " + tournamentDTO.getId()));
+
+        // Update the tournament fields
+        tournament.setAdminId(tournamentDTO.getAdminId());
+        tournament.setName(tournamentDTO.getName());
+        tournament.setDescription(tournamentDTO.getDescription());
+        tournament.setStartDateTime(tournamentDTO.getStartDateTime());
+        tournament.setEndDateTime(tournamentDTO.getEndDateTime());
+        tournament.setRegistrationStartDate(tournamentDTO.getRegistrationStartDate());
+        tournament.setRegistrationEndDate(tournamentDTO.getRegistrationEndDate());
+        tournament.setFormat(Tournament.TournamentFormat.valueOf(tournamentDTO.getFormat()));
+        tournament.setStatus(Tournament.TournamentStatus.valueOf(tournamentDTO.getStatus()));
+        tournament.setMinRating(tournamentDTO.getMinRating());
+        tournament.setMaxRating(tournamentDTO.getMaxRating());
+        tournament.setAffectsRating(tournamentDTO.isAffectsRating());
+        tournament.setMinAge(tournamentDTO.getMinAge());
+        tournament.setMaxAge(tournamentDTO.getMaxAge());
+        tournament.setRequiredGender(tournamentDTO.getRequiredGender());
+        tournament.setCountry(tournamentDTO.getCountry());
+        tournament.setRegion(tournamentDTO.getRegion());
+        tournament.setCity(tournamentDTO.getCity());
+        tournament.setAddress(tournamentDTO.getAddress());
+
+        // Save the updated tournament to the repository
+        Tournament updatedTournament = tournamentRepository.save(tournament);
+
+        // Convert the updated Tournament entity back to a TournamentDTO
+        TournamentDTO updatedTournamentDTO = convertToDTO(updatedTournament);
+
+        // Return the updated tournament details
+        return ResponseEntity.status(HttpStatus.OK).body(updatedTournamentDTO);
     }
     
     
