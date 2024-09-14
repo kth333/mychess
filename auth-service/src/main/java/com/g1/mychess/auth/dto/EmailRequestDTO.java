@@ -2,7 +2,6 @@ package com.g1.mychess.auth.dto;
 
 public class EmailRequestDTO {
     private String to;
-
     private String username;
     private String userToken;
 

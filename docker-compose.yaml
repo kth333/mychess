@@ -10,11 +10,11 @@ services:
     env_file:
       ./.env
 
-  user-service:
+  player-service:
     build:
-      context: ./user-service
+      context: ./player-service
       dockerfile: Dockerfile
-    image: "${DOCKER_USERNAME}/user-service:latest"
+    image: "${DOCKER_USERNAME}/player-service:latest"
     ports:
       - "8081:8081"
     env_file:
@@ -57,6 +57,16 @@ services:
     image: "${DOCKER_USERNAME}/email-service:latest"
     ports:
       - "8085:8085"
+    env_file:
+      ./.env
+
+  admin-service:
+    build:
+      context: ./admin-service
+      dockerfile: Dockerfile
+    image: "${DOCKER_USERNAME}/admin-service:latest"
+    ports:
+      - "8086:8086"
     env_file:
       ./.env
 

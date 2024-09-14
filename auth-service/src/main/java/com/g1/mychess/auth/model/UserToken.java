@@ -21,6 +21,9 @@ public class UserToken {
     @Column(name = "user_id", nullable = false)
     private Long userId;
 
+    @Column(name = "user_type", nullable = false)
+    private String userType;
+
     @Column(name = "used", nullable = false)
     private boolean used;
 
@@ -31,11 +34,12 @@ public class UserToken {
 
     public UserToken() {}
 
-    public UserToken(String token, LocalDateTime expirationTime, TokenType tokenType, Long userId) {
+    public UserToken(String token, LocalDateTime expirationTime, TokenType tokenType, Long userId, String userType) {
         this.token = token;
         this.expirationTime = expirationTime;
         this.tokenType = tokenType;
         this.userId = userId;
+        this.userType = userType;
         this.used = false;
     }
 
@@ -68,6 +72,10 @@ public class UserToken {
     public Long getUserId() { return userId; }
 
     public void setUserId(Long userId) { this.userId = userId; }
+
+    public String getUserType() { return userType; }
+
+    public void setUserType(String userType) { this.userType = userType; }
 
     public boolean isUsed() {
         return used;

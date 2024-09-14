@@ -1,21 +1,23 @@
-package com.g1.mychess.auth.dto;
+package com.g1.mychess.player.dto;
 
-public class UserDTO {
-    private Long userId;
+public class RegisterRequestDTO {
+
     private String username;
     private String password;
     private String email;
-    private String role;
 
-    // Getters and setters
-    public Long getUserId() {
-        return userId;
+    // Default constructor
+    public RegisterRequestDTO() {
     }
 
-    public void setUserId(Long userId) {
-        this.userId = userId;
+    // Parameterized constructor
+    public RegisterRequestDTO(String username, String password, String email) {
+        this.username = username;
+        this.password = password;
+        this.email = email;
     }
 
+    // Getters and Setters
     public String getUsername() {
         return username;
     }
@@ -38,13 +40,5 @@ public class UserDTO {
 
     public void setEmail(String email) {
         this.email = email;
-    }
-
-    public String getRole() {
-        return role;
-    }
-
-    public void getRole(String role) {
-        this.role = role;
     }
 }

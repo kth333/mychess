@@ -44,15 +44,21 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(ex.getMessage(), HttpStatus.BAD_REQUEST);
     }
 
+    // Handle InvalidRoleException
+    @ExceptionHandler(InvalidRoleException.class)
+    public ResponseEntity<String> handleInvalidRoleException(InvalidRoleException ex) {
+        return new ResponseEntity<>(ex.getMessage(), HttpStatus.BAD_REQUEST);
+    }
+
     // Handle UserAlreadyExistsException
     @ExceptionHandler(UserAlreadyExistsException.class)
     public ResponseEntity<String> handleUserAlreadyExistsException(UserAlreadyExistsException ex) {
         return new ResponseEntity<>(ex.getMessage(), HttpStatus.CONFLICT);
     }
 
-    // Handle UserServiceException
-    @ExceptionHandler(UserServiceException.class)
-    public ResponseEntity<String> handleUserServiceException(UserServiceException ex) {
+    // Handle PlayerServiceException
+    @ExceptionHandler(PlayerServiceException.class)
+    public ResponseEntity<String> handlePlayerServiceException(PlayerServiceException ex) {
         return new ResponseEntity<>(ex.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
     }
 

@@ -40,36 +40,36 @@ public class AuthService {
 
         String password = registerRequestDTO.getPassword();
 
-        if (!isValidPassword(password)) {
+        if (isValidPassword(password)) {
             throw new InvalidPasswordException("Password must be at least 8 characters long and contain at least one number.");
         }
 
         String hashedPassword = passwordEncoder.encode(registerRequestDTO.getPassword());
 
-        RegisterRequestDTO userDTO = new RegisterRequestDTO(
+        RegisterRequestDTO playerDTO = new RegisterRequestDTO(
                 registerRequestDTO.getUsername(),
                 hashedPassword,
                 registerRequestDTO.getEmail()
         );
 
-        ResponseEntity<UserCreationResponseDTO> userServiceResponse = webClientBuilder.build()
+        ResponseEntity<PlayerCreationResponseDTO> playerServiceResponse = webClientBuilder.build()
                 .post()
-                .uri("http://user-service:8081/api/v1/users")
-                .bodyValue(userDTO)
+                .uri("http://player-service:8081/api/v1/player")
+                .bodyValue(playerDTO)
                 .retrieve()
-                .toEntity(UserCreationResponseDTO.class)
+                .toEntity(PlayerCreationResponseDTO.class)
                 .block();
 
-        if (userServiceResponse == null) {
-            throw new UserServiceException("No response from user service.");
+        if (playerServiceResponse == null) {
+            throw new PlayerServiceException("No response from player service.");
         }
 
-        if (userServiceResponse.getStatusCode().is2xxSuccessful()) {
-            UserCreationResponseDTO responseBody = userServiceResponse.getBody();
+        if (playerServiceResponse.getStatusCode().is2xxSuccessful()) {
+            PlayerCreationResponseDTO responseBody = playerServiceResponse.getBody();
 
-            if (responseBody != null && responseBody.getId() != null) {
+            if (responseBody != null && responseBody.getPlayerId() != null) {
                 // Generate verification token and send the email
-                String verificationToken = generateToken(responseBody.getId(), UserToken.TokenType.EMAIL_VERIFICATION, LocalDateTime.now().plusDays(1));
+                String verificationToken = generateToken(responseBody.getPlayerId(), "ROLE_PLAYER", UserToken.TokenType.EMAIL_VERIFICATION, LocalDateTime.now().plusDays(1));
                 try {
                     sendVerificationEmail(registerRequestDTO.getEmail(), registerRequestDTO.getUsername(), verificationToken);
                 } catch (Exception e) {
@@ -77,39 +77,50 @@ public class AuthService {
                 }
                 return ResponseEntity.ok("Registration successful! Check your email to verify your account.");
             } else {
-                throw new UserServiceException("userId is missing in the response from the user service.");
+                throw new PlayerServiceException("userId is missing in the response from the player service.");
             }
         }
 
-        if (userServiceResponse.getStatusCode() == HttpStatus.CONFLICT) {
-            UserCreationResponseDTO responseBody = userServiceResponse.getBody();
+        if (playerServiceResponse.getStatusCode() == HttpStatus.CONFLICT) {
+            PlayerCreationResponseDTO responseBody = playerServiceResponse.getBody();
             if (responseBody != null) {
                 throw new UserAlreadyExistsException(responseBody.getMessage());
             }
         }
 
-        throw new UserServiceException("User service failed to register the user. Status code: " + userServiceResponse.getStatusCode());
+        throw new PlayerServiceException("Player service failed to register the user. Status code: " + playerServiceResponse.getStatusCode());
     }
 
-    private boolean isValidPassword(String password) {
-        return password.length() >= 8 && password.matches(".*\\d.*");
+    private static boolean isValidPassword(String password) {
+        return password.length() < 8 || !password.matches(".*\\d.*");
     }
 
-    public String login(String username, String password) {
-        // Fetch user details from User microservice
-        UserDTO userDTO = fetchUserFromUserService(username);
+    public String login(String username, String password, String role) {
+        UserDTO userDTO;
+
+        if (role.equals("ROLE_PLAYER")) {
+            // Fetch player details from player service
+            userDTO = fetchPlayerFromPlayerService(username);
+        } else if (role.equals("ROLE_ADMIN")) {
+            // Fetch admin details from admin service
+            userDTO = fetchAdminFromAdminService(username);
+        } else {
+            throw new InvalidRoleException("Invalid role provided.");
+        }
 
         if (userDTO == null) {
             throw new UserNotFoundException("User not found.");
         }
 
+        // Check if the provided password matches the user's password
         if (!passwordEncoder.matches(password, userDTO.getPassword())) {
             throw new InvalidCredentialsException("Invalid username or password.");
         }
 
-        Long userId = userDTO.getId();
+        Long userId = userDTO.getUserId();
 
-        if (!isEmailVerified(userId)) {
+        // Check if email is verified for both player and admin users
+        if (!isEmailVerified(userId, role)) {
             throw new EmailNotVerifiedException("Please verify your email before logging in.");
         }
 
@@ -117,41 +128,35 @@ public class AuthService {
         UserDetails userDetails = new org.springframework.security.core.userdetails.User(
                 userDTO.getUsername(),
                 userDTO.getPassword(),
-                Collections.singleton(new org.springframework.security.core.authority.SimpleGrantedAuthority(userDTO.getRole()))
+                Collections.singleton(new org.springframework.security.core.authority.SimpleGrantedAuthority(role))
         );
 
-        return jwtUtil.generateToken(userDetails, userDTO.getId());
+        return jwtUtil.generateToken(userDetails, userDTO.getUserId());
     }
 
-    private String generateToken(Long userId, UserToken.TokenType tokenType, LocalDateTime expirationTime) {
+    private String generateToken(Long userId, String userType, UserToken.TokenType tokenType, LocalDateTime expirationTime) {
         try {
-            // Check if there's already a token for this userId and tokenType
-            Optional<UserToken> existingToken = userTokenRepository.findByUserIdAndTokenType(userId, tokenType);
+            Optional<UserToken> existingToken = userTokenRepository.findByUserIdAndUserTypeAndTokenType(userId, userType, tokenType);
 
-            // If a token exists, delete it
             existingToken.ifPresent(userTokenRepository::delete);
 
-            // Generate a new token
             String token = UUID.randomUUID().toString();
 
-            // Create a new UserToken object
             UserToken userToken = new UserToken(
                     token,
                     expirationTime,
                     tokenType,
-                    userId
+                    userId,
+                    userType
             );
 
-            // Save the new token to the database
             userTokenRepository.save(userToken);
 
-            // Return the newly generated token
             return token;
         } catch (Exception e) {
             throw new UserTokenException("Failed to generate or store verification token.");
         }
     }
-
 
     public void sendVerificationEmail(String email, String username, String verificationToken) {
         EmailRequestDTO emailRequestDTO = new EmailRequestDTO();
@@ -173,21 +178,21 @@ public class AuthService {
     }
 
     public ResponseEntity<String> resendVerificationEmail(String email) {
-        UserDTO userDTO = fetchUserFromUserServiceByEmail(email);
+        UserDTO userDTO = fetchPlayerFromPlayerServiceByEmail(email);
 
         if (userDTO == null) {
             throw new UserNotFoundException("User with this email not found.");
         }
 
-        Long userId = userDTO.getId();
+        Long userId = userDTO.getUserId();
 
         // Check if the email is already verified
-        if (isEmailVerified(userId)) {
+        if (isEmailVerified(userId, userDTO.getRole())) {
             throw new EmailAlreadyVerifiedException("Your email is already verified. Proceed to login!");
         }
 
         // Generate a new verification token and send the verification email
-        String verificationToken = generateToken(userId, UserToken.TokenType.EMAIL_VERIFICATION, LocalDateTime.now().plusDays(1));
+        String verificationToken = generateToken(userId, userDTO.getRole(), UserToken.TokenType.EMAIL_VERIFICATION, LocalDateTime.now().plusDays(1));
         try {
             sendVerificationEmail(userDTO.getEmail(), userDTO.getUsername(), verificationToken);
         } catch (Exception e) {
@@ -198,14 +203,14 @@ public class AuthService {
     }
 
     public ResponseEntity<String> requestPasswordReset(String email) {
-        UserDTO userDTO = fetchUserFromUserServiceByEmail(email);
+        UserDTO userDTO = fetchPlayerFromPlayerServiceByEmail(email);
 
         if (userDTO == null) {
             throw new UserNotFoundException("User not found.");
         }
 
-        Long userId = userDTO.getId();
-        String resetToken = generateToken(userId, UserToken.TokenType.PASSWORD_RESET, LocalDateTime.now().plusHours(1));
+        Long userId = userDTO.getUserId();
+        String resetToken = generateToken(userId, userDTO.getRole(), UserToken.TokenType.PASSWORD_RESET, LocalDateTime.now().plusHours(1));
 
         try {
             sendVerificationEmail(userDTO.getEmail(), userDTO.getUsername(), resetToken);
@@ -217,7 +222,7 @@ public class AuthService {
     }
 
     public ResponseEntity<String> resetPassword(String resetToken, String newPassword) {
-        if (!isValidPassword(newPassword)) {
+        if (isValidPassword(newPassword)) {
             throw new InvalidPasswordException("Password does not meet the requirements.");
         }
 
@@ -233,7 +238,7 @@ public class AuthService {
         }
 
         // Fetch user by ID and update password
-        UserDTO userDTO = fetchUserFromUserServiceById(token.getUserId());
+        UserDTO userDTO = fetchPlayerFromPlayerServiceById(token.getUserId());
 
         if (userDTO == null) {
             throw new UserNotFoundException("User not found.");
@@ -241,58 +246,63 @@ public class AuthService {
 
         String hashedPassword = passwordEncoder.encode(newPassword);
 
-        // Send the new password to the user service to update the user's password
-            updatePasswordInUserService(userDTO.getId(), hashedPassword);
+        updatePasswordInPlayerService(userDTO.getUserId(), hashedPassword);
 
-        // Mark token as used
         token.setUsed(true);
         userTokenRepository.save(token);
 
         return ResponseEntity.ok("Password has been reset successfully.");
     }
 
-    public UserDTO fetchUserFromUserService(String username) {
+    public UserDTO fetchPlayerFromPlayerService(String username) {
         return webClientBuilder.build()
                 .get()
-                .uri("http://user-service:8081/api/v1/users/username/" + username)
+                .uri("http://player-service:8081/api/v1/player/username/" + username)
                 .retrieve()
                 .bodyToMono(UserDTO.class)
-                .block(); // Blocking call for simplicity
+                .block();
     }
 
-    public UserDTO fetchUserFromUserServiceByEmail(String email) {
+    public UserDTO fetchAdminFromAdminService(String username) {
         return webClientBuilder.build()
                 .get()
-                .uri("http://user-service:8081/api/v1/users/email/" + email)
+                .uri("http://admin-service:8086/api/v1/admin/username/" + username)
                 .retrieve()
                 .bodyToMono(UserDTO.class)
-                .block(); // Blocking call for simplicity
+                .block();
     }
 
-    public UserDTO fetchUserFromUserServiceById(Long userId) {
+    public UserDTO fetchPlayerFromPlayerServiceByEmail(String email) {
         return webClientBuilder.build()
                 .get()
-                .uri("http://user-service:8081/api/v1/users/userId/" + userId)
+                .uri("http://player-service:8081/api/v1/player/email/" + email)
                 .retrieve()
                 .bodyToMono(UserDTO.class)
-                .block(); // Blocking call for simplicity
+                .block();
     }
 
-    private void updatePasswordInUserService(Long userId, String hashedPassword) {
-        // Create a DTO or request body to send the updated password
-        UpdatePasswordRequestDTO updatePasswordRequest = new UpdatePasswordRequestDTO(userId, hashedPassword);
+    public UserDTO fetchPlayerFromPlayerServiceById(Long playerId) {
+        return webClientBuilder.build()
+                .get()
+                .uri("http://player-service:8081/api/v1/player/playerId/" + playerId)
+                .retrieve()
+                .bodyToMono(UserDTO.class)
+                .block();
+    }
 
-        // Make the PUT request to the user service to update the user's password
+    private void updatePasswordInPlayerService(Long playerId, String hashedPassword) {
+        UpdatePasswordRequestDTO updatePasswordRequest = new UpdatePasswordRequestDTO(playerId, hashedPassword);
+
         try {
             webClientBuilder.build()
                     .put()
-                    .uri("http://user-service:8081/api/v1/users/update-password") // Adjust the URI based on your actual user service endpoint
+                    .uri("http://player-service:8081/api/v1/player/update-password")
                     .bodyValue(updatePasswordRequest)
                     .retrieve()
                     .bodyToMono(Void.class)
-                    .block();  // Blocking call for simplicity; you could use async if needed
+                    .block();
         } catch (Exception e) {
-            throw new UserServiceException("Failed to update the user's password.");
+            throw new PlayerServiceException("Failed to update the user's password.");
         }
     }
 
@@ -312,12 +322,15 @@ public class AuthService {
         userTokenRepository.save(userToken);
     }
 
-    public boolean isEmailVerified(Long userId) {
-        // Check if the user has a valid, used verification token
-        UserToken userToken = userTokenRepository.findByUserIdAndTokenTypeAndUsed(userId, UserToken.TokenType.EMAIL_VERIFICATION, true)
-                .orElse(null);
+    public boolean isEmailVerified(Long userId, String userType) {
+        UserToken userToken = userTokenRepository.findByUserIdAndUserTypeAndTokenTypeAndUsed(
+                userId,
+                userType,
+                UserToken.TokenType.EMAIL_VERIFICATION,
+                true
+        ).orElse(null);
 
-        return userToken != null; // If the used token exists, the email is verified
+        return userToken != null;
     }
 }
 
