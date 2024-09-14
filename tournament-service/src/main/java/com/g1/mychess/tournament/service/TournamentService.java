@@ -2,9 +2,11 @@ package com.g1.mychess.tournament.service;
 
 import java.util.stream.Collectors;
 
+import com.g1.mychess.tournament.util.JwtUtil;
 import jakarta.transaction.Transactional;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.stereotype.Service;
 import java.util.HashSet;
 import java.util.Set;
@@ -19,20 +21,25 @@ public class TournamentService {
     
     private final TournamentRepository tournamentRepository;
 
-    public TournamentService(TournamentRepository tournamentRepository) {
+    private final JwtUtil jwtUtil;
+
+    public TournamentService(TournamentRepository tournamentRepository, JwtUtil jwtUtil) {
         this.tournamentRepository = tournamentRepository;
+        this.jwtUtil = jwtUtil;
     }
 
     @Transactional
-    public ResponseEntity<TournamentDTO> createTournament(TournamentDTO tournamentDTO) {
+    public ResponseEntity<TournamentDTO> createTournament(TournamentDTO tournamentDTO, HttpServletRequest request) {
         // Check if a tournament with the same name already exists
         if (tournamentRepository.findByName(tournamentDTO.getName()).isPresent()) {
             throw new TournamentAlreadyExistsException("Tournament with the name " + tournamentDTO.getName() + " already exists.");
         }
+        String jwtToken = request.getHeader("Authorization").substring(7);
+        Long userId = jwtUtil.extractUserId(jwtToken);
 
         // Map TournamentDTO to Tournament entity
         Tournament tournament = new Tournament();
-        tournament.setAdminId(tournamentDTO.getAdminId());
+        tournament.setAdminId(userId);
         tournament.setName(tournamentDTO.getName());
         tournament.setDescription(tournamentDTO.getDescription());
         tournament.setStartDateTime(tournamentDTO.getStartDateTime());

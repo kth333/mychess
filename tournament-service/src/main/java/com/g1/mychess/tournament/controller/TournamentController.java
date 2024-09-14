@@ -1,5 +1,6 @@
 package com.g1.mychess.tournament.controller;
 
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -18,7 +19,7 @@ public class TournamentController {
     }
 
     @PostMapping("/admin/create-tournament")
-    public ResponseEntity<TournamentDTO> createTournament(@RequestBody TournamentDTO tournamentDTO) {
-        return tournamentService.createTournament(tournamentDTO);
+    public ResponseEntity<TournamentDTO> createTournament(@RequestBody TournamentDTO tournamentDTO, HttpServletRequest request) {
+        return tournamentService.createTournament(tournamentDTO, request);
     }
 }

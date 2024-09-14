@@ -6,7 +6,6 @@ import java.util.Set;
 public class TournamentDTO {
 
     private Long id;
-    private Long adminId;
     private String name;
     private String description;
     private LocalDateTime startDateTime;
@@ -30,13 +29,12 @@ public class TournamentDTO {
     // Constructors
     public TournamentDTO() {}
 
-    public TournamentDTO(Long id, Long adminId, String name, String description, LocalDateTime startDateTime,
+    public TournamentDTO(Long id, String name, String description, LocalDateTime startDateTime,
                          LocalDateTime endDateTime, LocalDateTime registrationStartDate,
                          LocalDateTime registrationEndDate, String format, String status, Integer minRating,
                          Integer maxRating, boolean affectsRating, Integer minAge, Integer maxAge, String requiredGender,
                          String country, String region, String city, String address, Set<TournamentPlayerDTO> participants) {
         this.id = id;
-        this.adminId = adminId;
         this.name = name;
         this.description = description;
         this.startDateTime = startDateTime;
@@ -62,11 +60,7 @@ public class TournamentDTO {
     public Long getId() { return id; }
 
     public void setId(Long id) { this.id = id; }
-
-    public Long getAdminId() { return adminId; }
-
-    public void setAdminId(Long adminId) { this.adminId = adminId; }
-
+    
     public String getName() { return name; }
 
     public void setName(String name) { this.name = name; }

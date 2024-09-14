@@ -51,13 +51,13 @@ public class JwtUtil {
         return extractExpiration(token).before(new Date());
     }
 
-    public String generateToken(UserDetails userDetails) {
+    public String generateToken(UserDetails userDetails, Long userId) {
         Map<String, Object> claims = new HashMap<>();
-        // Convert authorities to a list of role names (strings)
+        claims.put("userId", userId);
         List<String> roles = userDetails.getAuthorities().stream()
                 .map(GrantedAuthority::getAuthority)
-                .toList(); // or toList() in Java 16+
-        claims.put("role", roles); // Store roles as a list of strings
+                .toList();
+        claims.put("role", roles);
         return createToken(claims, userDetails.getUsername(), jwtExpirationInMs);
     }
 
@@ -86,11 +86,14 @@ public class JwtUtil {
 
     public List<GrantedAuthority> extractRoles(String token) {
         Claims claims = extractAllClaims(token);
-        // Assuming the role is stored as a list of strings in the token
-        List<String> roles = claims.get("role", List.class);  // Extract roles as a list of strings
-        // Convert each role into a GrantedAuthority (SimpleGrantedAuthority is an implementation of GrantedAuthority)
+        List<String> roles = claims.get("role", List.class);
         return roles.stream()
-                .map(SimpleGrantedAuthority::new)  // Convert each role to SimpleGrantedAuthority
-                .collect(Collectors.toList());  // Return a list of GrantedAuthority
+                .map(SimpleGrantedAuthority::new)
+                .collect(Collectors.toList());
+    }
+
+    public Long extractUserId(String token) {
+        Claims claims = extractAllClaims(token);
+        return claims.get("userId", Long.class);
     }
 }

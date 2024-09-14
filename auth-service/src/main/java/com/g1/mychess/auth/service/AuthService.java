@@ -120,7 +120,7 @@ public class AuthService {
                 Collections.singleton(new org.springframework.security.core.authority.SimpleGrantedAuthority(userDTO.getRole()))
         );
 
-        return jwtUtil.generateToken(userDetails);
+        return jwtUtil.generateToken(userDetails, userDTO.getId());
     }
 
     private String generateToken(Long userId, UserToken.TokenType tokenType, LocalDateTime expirationTime) {
