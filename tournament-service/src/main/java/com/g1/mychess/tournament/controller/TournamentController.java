@@ -39,8 +39,8 @@ public class TournamentController {
     }
 
     @PutMapping("/admin/update")
-    public ResponseEntity<TournamentDTO> updateTournament(@RequestBody TournamentDTO tournamentDTO) {
-        return tournamentService.updateTournament(tournamentDTO);
+    public ResponseEntity<TournamentDTO> updateTournament(@RequestBody TournamentDTO tournamentDTO, HttpServletRequest request) {
+        return tournamentService.updateTournament(tournamentDTO, request);
     }
 
 }

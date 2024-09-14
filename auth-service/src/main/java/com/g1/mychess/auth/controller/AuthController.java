@@ -1,19 +1,16 @@
 package com.g1.mychess.auth.controller;
 
-import com.g1.mychess.auth.model.*;
 import com.g1.mychess.auth.service.*;
 import com.g1.mychess.auth.dto.*;
 import com.g1.mychess.auth.util.JwtUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.GrantedAuthority;
 import org.springframework.web.bind.annotation.*;
 import jakarta.validation.Valid;
 
 import org.springframework.web.reactive.function.client.WebClient;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -33,7 +30,6 @@ public class AuthController {
         this.jwtUtil = jwtUtil;
     }
 
-    // POST /auth/register: User registration (including email/phone verification)
     @PostMapping("/register")
     public ResponseEntity<String> register(@RequestBody @Valid RegisterRequestDTO registerRequestDTO) {
         return authService.registerUser(registerRequestDTO);
@@ -47,7 +43,7 @@ public class AuthController {
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody LoginRequestDTO loginRequestDTO) {
-        String token = authService.login(loginRequestDTO.getUsername(), loginRequestDTO.getPassword());
+        String token = authService.login(loginRequestDTO.getUsername(), loginRequestDTO.getPassword(), loginRequestDTO.getRole());
 
         Map<String, String> response = new HashMap<>();
         response.put("token", token);

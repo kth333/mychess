@@ -19,7 +19,7 @@ import com.g1.mychess.tournament.repository.TournamentRepository;
 
 @Service
 public class TournamentService {
-    
+
     private final TournamentRepository tournamentRepository;
 
     private final JwtUtil jwtUtil;
@@ -63,7 +63,7 @@ public class TournamentService {
 
         // Save the tournament to the repository
         Tournament savedTournament = tournamentRepository.save(tournament);
-       
+
         // Map the saved Tournament entity back to a TournamentDTO
         TournamentDTO savedTournamentDTO = convertToDTO(savedTournament);
 
@@ -74,7 +74,7 @@ public class TournamentService {
     public ResponseEntity<TournamentDTO> findTournamentByName(String name) {
         Tournament tournament = tournamentRepository.findByName(name)
                 .orElseThrow(() -> new IllegalArgumentException("Tournament not found with name: " + name));
-    
+
         // Convert Tournament to TournamentDTO
         return ResponseEntity.status(HttpStatus.OK).body(convertToDTO(tournament));
     }
@@ -82,19 +82,22 @@ public class TournamentService {
     public ResponseEntity<List<TournamentDTO>> getAllTournaments() {
         List<Tournament> tournaments = tournamentRepository.findAll();
         List<TournamentDTO> tournamentDTOs = tournaments.stream()
-            .map(this::convertToDTO)
-            .collect(Collectors.toList());
-        
+                .map(this::convertToDTO)
+                .collect(Collectors.toList());
+
         return ResponseEntity.status(HttpStatus.OK).body(tournamentDTOs);
     }
 
-    public ResponseEntity<TournamentDTO> updateTournament(TournamentDTO tournamentDTO) {
+    public ResponseEntity<TournamentDTO> updateTournament(TournamentDTO tournamentDTO, HttpServletRequest request) {
         // Find the tournament by its ID
         Tournament tournament = tournamentRepository.findById(tournamentDTO.getId())
                 .orElseThrow(() -> new IllegalArgumentException("Tournament not found with ID: " + tournamentDTO.getId()));
 
+        String jwtToken = request.getHeader("Authorization").substring(7);
+        Long userId = jwtUtil.extractUserId(jwtToken);
+
         // Update the tournament fields
-        tournament.setAdminId(tournamentDTO.getAdminId());
+        tournament.setAdminId(userId);
         tournament.setName(tournamentDTO.getName());
         tournament.setDescription(tournamentDTO.getDescription());
         tournament.setStartDateTime(tournamentDTO.getStartDateTime());
@@ -123,49 +126,49 @@ public class TournamentService {
         // Return the updated tournament details
         return ResponseEntity.status(HttpStatus.OK).body(updatedTournamentDTO);
     }
-    
-    
+
+
 
     public TournamentDTO convertToDTO(Tournament tournament) {
         // Convert each TournamentPlayer to TournamentPlayerDTO using the correct fields
         Set<TournamentPlayerDTO> participantDTOs = tournament.getParticipants().stream()
-            .map(player -> new TournamentPlayerDTO(
-                player.getId(),
-                player.getTournament().getId(), // Assuming you want to include the tournament ID
-                player.getPlayerId(), 
-                player.getSignUpDateTime(),
-                player.getPoints(),
-                player.getRoundsPlayed(),
-                player.getStatus().name() // Convert enum to string
-            ))
-            .collect(Collectors.toSet());
-    
+                .map(player -> new TournamentPlayerDTO(
+                        player.getId(),
+                        player.getTournament().getId(), // Assuming you want to include the tournament ID
+                        player.getPlayerId(),
+                        player.getSignUpDateTime(),
+                        player.getPoints(),
+                        player.getRoundsPlayed(),
+                        player.getStatus().name() // Convert enum to string
+                ))
+                .collect(Collectors.toSet());
+
         // Map the Tournament fields to TournamentDTO fields
         return new TournamentDTO(
-            tournament.getId(),
-            tournament.getAdminId(),
-            tournament.getName(),
-            tournament.getDescription(),
-            tournament.getStartDateTime(),
-            tournament.getEndDateTime(),
-            tournament.getRegistrationStartDate(),
-            tournament.getRegistrationEndDate(),
-            tournament.getFormat().name(), // Convert enum to string
-            tournament.getStatus().name(), // Convert enum to string
-            tournament.getMinRating(),
-            tournament.getMaxRating(),
-            tournament.isAffectsRating(),
-            tournament.getMinAge(),
-            tournament.getMaxAge(),
-            tournament.getRequiredGender(),
-            tournament.getCountry(),
-            tournament.getRegion(),
-            tournament.getCity(),
-            tournament.getAddress(),
-            participantDTOs // Pass the converted set of participant DTOs
+                tournament.getId(),
+                tournament.getAdminId(),
+                tournament.getName(),
+                tournament.getDescription(),
+                tournament.getStartDateTime(),
+                tournament.getEndDateTime(),
+                tournament.getRegistrationStartDate(),
+                tournament.getRegistrationEndDate(),
+                tournament.getFormat().name(), // Convert enum to string
+                tournament.getStatus().name(), // Convert enum to string
+                tournament.getMinRating(),
+                tournament.getMaxRating(),
+                tournament.isAffectsRating(),
+                tournament.getMinAge(),
+                tournament.getMaxAge(),
+                tournament.getRequiredGender(),
+                tournament.getCountry(),
+                tournament.getRegion(),
+                tournament.getCity(),
+                tournament.getAddress(),
+                participantDTOs // Pass the converted set of participant DTOs
         );
     }
-    
-    
+
+
 
 }
