@@ -8,7 +8,7 @@ WORKDIR /app
 COPY target/admin-service-0.0.1-SNAPSHOT.jar app.jar
 
 # Expose the port on which your Spring Boot app will run
-EXPOSE 8086
+EXPOSE 8084
 
 # Run the JAR file
 ENTRYPOINT ["java","-jar","/app/app.jar"]

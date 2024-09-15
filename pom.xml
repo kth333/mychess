@@ -17,9 +17,8 @@
         <module>player-service</module>
         <module>match-service</module>
         <module>tournament-service</module>
-        <module>matchmaking-service</module>
-        <module>email-service</module>
         <module>admin-service</module>
+        <module>email-service</module>
     </modules>
 
     <properties>
