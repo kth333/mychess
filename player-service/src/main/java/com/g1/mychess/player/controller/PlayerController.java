@@ -1,9 +1,6 @@
 package com.g1.mychess.player.controller;
 
-import com.g1.mychess.player.dto.RegisterRequestDTO;
-import com.g1.mychess.player.dto.UpdatePasswordRequestDTO;
-import com.g1.mychess.player.dto.PlayerCreationResponseDTO;
-import com.g1.mychess.player.dto.UserDTO;
+import com.g1.mychess.player.dto.*;
 import com.g1.mychess.player.service.PlayerService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -45,5 +42,11 @@ public class PlayerController {
     public ResponseEntity<String> updatePassword(@RequestBody UpdatePasswordRequestDTO updatePasswordRequest) {
         playerService.updatePlayerPassword(updatePasswordRequest.getPlayerId(), updatePasswordRequest.getNewPassword());
         return ResponseEntity.ok("Password updated successfully.");
+    }
+
+    @GetMapping("/{playerId}/details")
+    public ResponseEntity<PlayerDTO> getPlayerWithRatingDetails(@PathVariable Long playerId) {
+        PlayerDTO playerDTO = playerService.getPlayerWithRatingDetails(playerId);
+        return ResponseEntity.ok(playerDTO);
     }
 }

@@ -1,9 +1,13 @@
 package com.g1.mychess.player.service;
 
+import com.g1.mychess.player.dto.PlayerDTO;
 import com.g1.mychess.player.dto.RegisterRequestDTO;
 import com.g1.mychess.player.dto.PlayerCreationResponseDTO;
 import com.g1.mychess.player.dto.UserDTO;
+import com.g1.mychess.player.exception.RatingNotFoundException;
 import com.g1.mychess.player.model.Player;
+import com.g1.mychess.player.model.PlayerRatingHistory;
+import com.g1.mychess.player.repository.PlayerRatingHistoryRepository;
 import com.g1.mychess.player.repository.PlayerRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -14,9 +18,11 @@ import com.g1.mychess.player.exception.PlayerNotFoundException;
 public class PlayerService {
 
     private final PlayerRepository playerRepository;
+    private final PlayerRatingHistoryRepository playerRatingHistoryRepository;
 
-    public PlayerService(PlayerRepository playerRepository) {
+    public PlayerService(PlayerRepository playerRepository, PlayerRatingHistoryRepository playerRatingHistoryRepository) {
         this.playerRepository = playerRepository;
+        this.playerRatingHistoryRepository = playerRatingHistoryRepository;
     }
 
     public ResponseEntity<PlayerCreationResponseDTO> createPlayer(RegisterRequestDTO registerRequestDTO) {
@@ -67,5 +73,23 @@ public class PlayerService {
                 .orElseThrow(() -> new IllegalArgumentException("Player not found with email: " + email));
 
         return new UserDTO(player.getPlayerId(), player.getUsername(), player.getPassword(), player.getEmail(), player.getRole());
+    }
+
+    public PlayerDTO getPlayerWithRatingDetails(Long playerId) {
+        Player player = playerRepository.findById(playerId)
+                .orElseThrow(() -> new PlayerNotFoundException("Player not found with id: " + playerId));
+
+        PlayerRatingHistory latestRating = playerRatingHistoryRepository.findLatestRatingByPlayerId(playerId)
+                .orElseThrow(() -> new RatingNotFoundException("Rating history not found for player with id: " + playerId));
+
+        return new PlayerDTO(
+                player.getPlayerId(),
+                player.getUsername(),
+                player.getProfile().getAge(),
+                player.getProfile().getGender(),
+                latestRating.getGlickoRating(),
+                latestRating.getRatingDeviation(),
+                latestRating.getVolatility()
+        );
     }
 }

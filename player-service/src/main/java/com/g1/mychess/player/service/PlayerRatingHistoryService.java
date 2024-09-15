@@ -15,10 +15,8 @@ public class PlayerRatingHistoryService {
         this.playerRatingHistoryRepository = playerRatingHistoryRepository;
     }
 
-    // Schedule the task to run daily to delete ratings older than 7 days
-    @Scheduled(cron = "0 0 0 * * ?") // Runs every day at midnight
-    public void deleteOldRatingHistories() {
-        LocalDateTime sevenDaysAgo = LocalDateTime.now().minusDays(7);
-        playerRatingHistoryRepository.deleteRatingsOlderThan(sevenDaysAgo);
+    @Scheduled(cron = "0 0 0 * * ?")  // every day at midnight
+    public void cleanupOldRatingHistories() {
+        playerRatingHistoryRepository.deleteOldRatingHistories();
     }
 }

@@ -1,11 +1,13 @@
 package com.g1.mychess.tournament.service;
 
+import java.time.LocalDateTime;
 import java.util.stream.Collectors;
 
+import com.g1.mychess.tournament.dto.PlayerDTO;
+import com.g1.mychess.tournament.exception.*;
 import com.g1.mychess.tournament.util.JwtUtil;
 import jakarta.transaction.Transactional;
 
-import org.apache.el.stream.Optional;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import jakarta.servlet.http.HttpServletRequest;
@@ -16,19 +18,21 @@ import java.util.Set;
 import com.g1.mychess.tournament.dto.TournamentDTO;
 import com.g1.mychess.tournament.dto.TournamentPlayerDTO;
 import com.g1.mychess.tournament.model.Tournament;
-import com.g1.mychess.tournament.exception.TournamentAlreadyExistsException;
+import com.g1.mychess.tournament.model.TournamentPlayer;
 import com.g1.mychess.tournament.repository.TournamentRepository;
+import org.springframework.web.reactive.function.client.WebClient;
 
 @Service
 public class TournamentService {
 
     private final TournamentRepository tournamentRepository;
-
+    private final WebClient.Builder webClientBuilder;
     private final JwtUtil jwtUtil;
 
-    public TournamentService(TournamentRepository tournamentRepository, JwtUtil jwtUtil) {
+    public TournamentService(TournamentRepository tournamentRepository, JwtUtil jwtUtil, WebClient.Builder webClientBuilder) {
         this.tournamentRepository = tournamentRepository;
         this.jwtUtil = jwtUtil;
+        this.webClientBuilder = webClientBuilder;
     }
 
     @Transactional
@@ -128,45 +132,53 @@ public class TournamentService {
         // Return the updated tournament details
         return ResponseEntity.status(HttpStatus.OK).body(updatedTournamentDTO);
     }
-    
-    public ResponseEntity<String> signUpToTournament(Long tournamentId, Long userId) {
+
+    public ResponseEntity<String> signUpToTournament(Long tournamentId, Long playerId) {
         // Fetch the tournament from the repository
-        Optional<Tournament> optionalTournament = tournamentRepository.findById(tournamentId);
-        if (!optionalTournament.isPresent()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Tournament not found");
+        Tournament tournament = tournamentRepository.findById(tournamentId)
+                .orElseThrow(() -> new TournamentNotFoundException("Tournament not found with id: " + tournamentId));
+
+        PlayerDTO playerDTO;
+        try {
+            playerDTO = getPlayerDetails(playerId);
+        } catch (PlayerNotFoundException ex) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Player not found");
         }
-        Tournament tournament = optionalTournament.get();
-    
-        // Fetch the user from the repository
-        Optional<User> optionalUser = userRepository.findById(userId);
-        if (!optionalUser.isPresent()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
+
+        // Check rating requirements
+        if (playerDTO.getGlickoRating() < tournament.getMinRating() || playerDTO.getGlickoRating() > tournament.getMaxRating()) {
+            throw new RequirementNotMetException("Player does not meet the rating requirements");
         }
-        User user = optionalUser.get();
-    
-        // Check if the user meets the tournament's requirements
-        if (user.getRating() < tournament.getMinRating() || user.getRating() > tournament.getMaxRating()) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("User does not meet the rating requirements");
+
+        // Check age requirements
+        if (tournament.getMinAge() != null && playerDTO.getAge() < tournament.getMinAge()) {
+            throw new RequirementNotMetException("Player does not meet the minimum age requirement");
         }
-        if (user.getAge() < tournament.getMinAge() || user.getAge() > tournament.getMaxAge()) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("User does not meet the age requirements");
+        if (tournament.getMaxAge() != null && playerDTO.getAge() > tournament.getMaxAge()) {
+            throw new RequirementNotMetException("Player does not meet the maximum age requirement");
         }
-        if (tournament.getRequiredGender() != null && !tournament.getRequiredGender().equals(user.getGender())) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("User does not meet the gender requirements");
+
+        // Check gender requirements
+        if (tournament.getRequiredGender() != null && !tournament.getRequiredGender().equals(playerDTO.getGender())) {
+            throw new RequirementNotMetException("Player does not meet the gender requirement");
         }
-    
-        // Add the user to the tournament's list of participants
-        tournament.getParticipants().add(user);
-    
-        // Save the updated tournament to the repository
+
+        // Create TournamentPlayer entity
+        TournamentPlayer tournamentPlayer = new TournamentPlayer();
+        tournamentPlayer.setTournament(tournament);
+        tournamentPlayer.setPlayerId(playerId);
+        tournamentPlayer.setSignUpDateTime(LocalDateTime.now());
+        tournamentPlayer.setStatus(TournamentPlayer.TournamentPlayerStatus.ACTIVE);
+
+        tournament.getParticipants().add(tournamentPlayer);
+
         tournamentRepository.save(tournament);
-    
-        // Return a success response
-        return ResponseEntity.status(HttpStatus.OK).body("User successfully signed up to the tournament");
+
+        return ResponseEntity.status(HttpStatus.OK).body("Player successfully signed up to the tournament");
     }
 
     public TournamentDTO convertToDTO(Tournament tournament) {
-        // Convert each TournamentPlayer to TournamentPlayerDTO using the correct fields
+        // Convert each TournamentPlayer to PlayerDTO using the correct fields
         Set<TournamentPlayerDTO> participantDTOs = tournament.getParticipants().stream()
                 .map(player -> new TournamentPlayerDTO(
                         player.getId(),
@@ -205,6 +217,12 @@ public class TournamentService {
         );
     }
 
-
-
+    public PlayerDTO getPlayerDetails(Long playerId) {
+        return webClientBuilder.build()
+                .get()
+                .uri("http://player-service:8081/api/v1/" + playerId + "/details")
+                .retrieve()
+                .bodyToMono(PlayerDTO.class)
+                .block();
+    }
 }

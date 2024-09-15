@@ -24,8 +24,8 @@ public class TournamentController {
     }
 
     @PostMapping("/admin/create")
-    public ResponseEntity<TournamentDTO> createTournament(@RequestBody TournamentDTO tournamentDTO) {
-        return tournamentService.createTournament(tournamentDTO);
+    public ResponseEntity<TournamentDTO> createTournament(@RequestBody TournamentDTO tournamentDTO, HttpServletRequest request) {
+        return tournamentService.createTournament(tournamentDTO, request);
     }
 
     @GetMapping("/public/get/{tournamentName}")
@@ -43,4 +43,8 @@ public class TournamentController {
         return tournamentService.updateTournament(tournamentDTO, request);
     }
 
+    @PostMapping("/player/signup/{tournamentId}/{playerId}")
+    public ResponseEntity<String> signUpToTournament(@PathVariable Long tournamentId, @PathVariable Long playerId) {
+        return tournamentService.signUpToTournament(tournamentId, playerId);
+    }
 }
