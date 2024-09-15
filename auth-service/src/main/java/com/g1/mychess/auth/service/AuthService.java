@@ -266,7 +266,7 @@ public class AuthService {
     public UserDTO fetchAdminFromAdminService(String username) {
         return webClientBuilder.build()
                 .get()
-                .uri("http://admin-service:8086/api/v1/admin/username/" + username)
+                .uri("http://admin-service:8084/api/v1/admin/username/" + username)
                 .retrieve()
                 .bodyToMono(UserDTO.class)
                 .block();
