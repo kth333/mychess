@@ -220,7 +220,7 @@ public class TournamentService {
     public PlayerDTO getPlayerDetails(Long playerId) {
         return webClientBuilder.build()
                 .get()
-                .uri("http://player-service:8081/api/v1/" + playerId + "/details")
+                .uri("http://player-service:8081/api/v1/player/" + playerId + "/details")
                 .retrieve()
                 .bodyToMono(PlayerDTO.class)
                 .block();

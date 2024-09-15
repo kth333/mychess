@@ -27,7 +27,16 @@ public class PlayerRatingHistory {
     @Column(name = "date", nullable = false)
     private LocalDateTime date;  // Date when this rating was recorded
 
-    public PlayerRatingHistory() {}
+    public PlayerRatingHistory(){
+    }
+
+    public PlayerRatingHistory(Player player, int glickoRating, double ratingDeviation, double volatility, LocalDateTime now) {
+        this.player = player;
+        this.glickoRating = glickoRating;
+        this.ratingDeviation = ratingDeviation;
+        this.volatility = volatility;
+        this.date = now;
+    }
 
     // Getters and Setters
 

@@ -15,7 +15,7 @@ public class PlayerController {
         this.playerService = playerService;
     }
 
-    @PostMapping
+    @PostMapping("/create")
     public ResponseEntity<PlayerCreationResponseDTO> createPlayer(@RequestBody RegisterRequestDTO registerRequestDTO) {
         return playerService.createPlayer(registerRequestDTO);
     }

@@ -44,6 +44,15 @@ public class Profile {
     @Column(name = "chess_rank")
     private CustomChessRank rank;
 
+    @Column(name = "glicko_rating", nullable = false)
+    private int glickoRating = 1500;
+
+    @Column(name = "rating_deviation", nullable = false)
+    private double ratingDeviation = 350.0;
+
+    @Column(name = "volatility", nullable = false)
+    private double volatility = 0.06;
+
     @Column(name = "total_wins")
     private int totalWins;
 
@@ -130,6 +139,30 @@ public class Profile {
 
     public void setRank(CustomChessRank rank) {
         this.rank = rank;
+    }
+
+    public int getGlickoRating() {
+        return glickoRating;
+    }
+
+    public void setGlickoRating(int glickoRating) {
+        this.glickoRating = glickoRating;
+    }
+
+    public double getRatingDeviation() {
+        return ratingDeviation;
+    }
+
+    public void setRatingDeviation(double ratingDeviation) {
+        this.ratingDeviation = ratingDeviation;
+    }
+
+    public double getVolatility() {
+        return volatility;
+    }
+
+    public void setVolatility(double volatility) {
+        this.volatility = volatility;
     }
 
     public int getTotalWins() {
