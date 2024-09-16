@@ -172,7 +172,7 @@ public class TournamentService {
         }
 
         // Check gender requirements
-        if (tournament.getRequiredGender() != null && !tournament.getRequiredGender().equals(playerDTO.getGender())) {
+        if (tournament.getRequiredGender() != null && !tournament.getRequiredGender().equals(playerDTO.getGender()) && !tournament.getRequiredGender().equals("ANY")) {
             throw new RequirementNotMetException("Player does not meet the gender requirement");
         }
 
