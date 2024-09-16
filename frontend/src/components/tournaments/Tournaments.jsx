@@ -1,8 +1,9 @@
 import React, { Component } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./ui/card";
-import { CalendarIcon, TrophyIcon, UsersIcon, StarIcon } from "lucide-react";
-import withNavigateandLocation from './withNavigateandLocation';
-import Pagination from './Pagination';  // Import the Pagination component
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../ui/card";
+import { CalendarIcon, TrophyIcon, UsersIcon } from "lucide-react";
+import withNavigateandLocation from '../withNavigateandLocation';
+import Pagination from '../Pagination';  // Import the Pagination component
+import TournamentService from '../../services/TournamentService';
 
 class Tournaments extends Component {
   constructor(props) {
@@ -11,8 +12,22 @@ class Tournaments extends Component {
       searchQuery: '',
       currentPage: 1,
       tournamentsPerPage: 9,
+      tournaments: [],
     };
   }
+
+  componentDidMount() {
+    this.fetchData();
+  }
+
+  fetchData = async () => {
+    try {
+      const response = await TournamentService.getAllTournaments();
+      this.setState({ tournaments: response.data });
+    } catch (error) {
+      console.error('Error fetching tournaments:', error.response ? error.response.data : error.message);
+    }
+  };
 
   handleSearchChange = (event) => {
     this.setState({ searchQuery: event.target.value, currentPage: 1 });
@@ -22,7 +37,7 @@ class Tournaments extends Component {
     const { searchQuery } = this.state;
     if (!searchQuery) return tournaments;
     return tournaments.filter(tournament =>
-      tournament.title.toLowerCase().includes(searchQuery.toLowerCase())
+      tournament.name.toLowerCase().includes(searchQuery.toLowerCase())
     );
   };
 
@@ -38,22 +53,7 @@ class Tournaments extends Component {
   };
 
   render() {
-    // Sample data for tournaments
-    const tournaments = [
-      { title: "Summer Blitz (Test)", date: "July 15-16, 2023", players: 64, rating: 4.5 },
-      { title: "Grandmaster Open (Test)", date: "August 5-7, 2023", players: 128, rating: 4.8 },
-      { title: "Junior Championship (Test)", date: "September 1-3, 2023", players: 32, rating: 4.2 },
-      // Add more sample tournaments if needed
-      { title: "Junior Championship (Test)", date: "September 1-3, 2023", players: 32, rating: 4.2 },
-      { title: "Junior Championship (Test)", date: "September 1-3, 2023", players: 32, rating: 4.2 },
-      { title: "Junior Championship (Test)", date: "September 1-3, 2023", players: 32, rating: 4.2 },
-      { title: "Junior Championship (Test)", date: "September 1-3, 2023", players: 32, rating: 4.2 },
-      { title: "Junior Championship (Test)", date: "September 1-3, 2023", players: 32, rating: 4.2 },
-      { title: "Junior Championship (Test)", date: "September 1-3, 2023", players: 32, rating: 4.2 },
-      { title: "Junior Championship (Test)", date: "September 1-3, 2023", players: 32, rating: 4.2 },
-      { title: "Junior Championship (Test)", date: "September 1-3, 2023", players: 32, rating: 4.2 },
-
-    ];
+    const { tournaments, searchQuery, currentPage, tournamentsPerPage } = this.state;
 
     const filteredTournaments = this.filterTournaments(tournaments);
     const paginatedTournaments = this.paginateTournaments(filteredTournaments);
@@ -69,7 +69,7 @@ class Tournaments extends Component {
                 type="text"
                 placeholder="Search tournaments..."
                 className="p-2 border rounded-md w-full max-w-md mx-auto"
-                value={this.state.searchQuery}
+                value={searchQuery}
                 onChange={this.handleSearchChange}
               />
             </div>
@@ -77,35 +77,35 @@ class Tournaments extends Component {
 
           <section className="py-16 px-6">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {paginatedTournaments.map((tournament, index) => (
-                <Card key={index}>
+              {paginatedTournaments.map((tournament) => (
+                <Card key={tournament.id}>
                   <CardHeader>
-                    <CardTitle>{tournament.title}</CardTitle>
+                    <CardTitle>{tournament.name}</CardTitle>
                     <CardDescription>
                       <CalendarIcon className="inline-block mr-2 h-4 w-4" />
-                      {tournament.date}
+                      {new Date(tournament.startDateTime).toLocaleDateString()} - {new Date(tournament.endDateTime).toLocaleDateString()}
                     </CardDescription>
                   </CardHeader>
                   <CardContent>
                     <p className="flex items-center">
                       <UsersIcon className="mr-2 h-4 w-4" />
-                      {tournament.players} players
+                      {tournament.participants.length} participants
                     </p>
                     <p className="flex items-center mt-2">
-                      <StarIcon className="mr-2 h-4 w-4 text-yellow-500" />
-                      Rating: {tournament.rating} / 5
+                      <TrophyIcon className="mr-2 h-4 w-4 text-yellow-500" />
+                      Rating Range: {tournament.minRating} - {tournament.maxRating}
                     </p>
                     <button className="mt-4 btn btn-primary w-auto font-bold" variant="outline" asChild>
-                      <a href={`/tournaments/${index + 1}`}>View Details</a>
+                      <a href={`/tournaments/${tournament.id}`}>View Details</a>
                     </button>
                   </CardContent>
                 </Card>
               ))}
             </div>
             <Pagination
-              currentPage={this.state.currentPage}
+              currentPage={currentPage}
               totalItems={filteredTournaments.length}
-              itemsPerPage={this.state.tournamentsPerPage}
+              itemsPerPage={tournamentsPerPage}
               onPageChange={this.handlePageChange}
             />
           </section>

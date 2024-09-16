@@ -5,7 +5,8 @@ import Login from "./components/Login";
 import Register from './components/Register';
 import Home from './components/Home';
 import Layout from './components/Layout';
-import Tournaments from './components/Tournaments';
+import Tournaments from './components/tournaments/Tournaments';
+import CreateTournament from './components/tournaments/CreateTournament';
 
 function App() {
   return (
@@ -17,6 +18,8 @@ function App() {
             <Route exact path="/login" element={<Login />} />
             <Route exact path="/register" element={<Register />} />
             <Route exact path="/tournaments" element={<Tournaments />} />
+            <Route exact path="/create-tournament" element={<CreateTournament />} />
+
 
           </Route>
         </Routes>
