@@ -4,14 +4,12 @@ public class BlacklistEmailDTO {
 
     private String to;
     private String username;
-    private boolean isBlacklisted;
     private String reason;
     private Long banDuration;
 
-    public BlacklistEmailDTO(String to, String username, boolean isBlacklisted, String reason, Long banDuration) {
+    public BlacklistEmailDTO(String to, String username, String reason, Long banDuration) {
         this.to = to;
         this.username = username;
-        this.isBlacklisted = isBlacklisted;
         this.reason = reason;
         this.banDuration = banDuration;
     }
@@ -31,14 +29,6 @@ public class BlacklistEmailDTO {
 
     public void setUsername(String username) {
         this.username = username;
-    }
-
-    public boolean isBlacklisted() {
-        return isBlacklisted;
-    }
-
-    public void setBlacklisted(boolean blacklisted) {
-        isBlacklisted = blacklisted;
     }
 
     public String getReason() {
