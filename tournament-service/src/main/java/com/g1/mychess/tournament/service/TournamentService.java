@@ -5,6 +5,7 @@ import java.util.stream.Collectors;
 
 import com.g1.mychess.tournament.dto.PlayerDTO;
 import com.g1.mychess.tournament.exception.*;
+import com.g1.mychess.tournament.repository.TournamentPlayerRepository;
 import com.g1.mychess.tournament.util.JwtUtil;
 import jakarta.transaction.Transactional;
 
@@ -26,11 +27,13 @@ import org.springframework.web.reactive.function.client.WebClient;
 public class TournamentService {
 
     private final TournamentRepository tournamentRepository;
+    private final TournamentPlayerRepository tournamentPlayerRepository;
     private final WebClient.Builder webClientBuilder;
     private final JwtUtil jwtUtil;
 
-    public TournamentService(TournamentRepository tournamentRepository, JwtUtil jwtUtil, WebClient.Builder webClientBuilder) {
+    public TournamentService(TournamentRepository tournamentRepository, TournamentPlayerRepository tournamentPlayerRepository, JwtUtil jwtUtil, WebClient.Builder webClientBuilder) {
         this.tournamentRepository = tournamentRepository;
+        this.tournamentPlayerRepository = tournamentPlayerRepository;
         this.jwtUtil = jwtUtil;
         this.webClientBuilder = webClientBuilder;
     }
@@ -66,6 +69,7 @@ public class TournamentService {
         tournament.setCity(tournamentDTO.getCity());
         tournament.setAddress(tournamentDTO.getAddress());
         tournament.setParticipants(new HashSet<>());
+        tournament.setTimeControlSetting(tournamentDTO.getTimeControl());
 
         // Save the tournament to the repository
         Tournament savedTournament = tournamentRepository.save(tournament);
@@ -138,11 +142,20 @@ public class TournamentService {
         Tournament tournament = tournamentRepository.findById(tournamentId)
                 .orElseThrow(() -> new TournamentNotFoundException("Tournament not found with id: " + tournamentId));
 
+        boolean isAlreadySignedUp = tournamentPlayerRepository.existsByTournamentIdAndPlayerId(tournamentId, playerId);
+        if (isAlreadySignedUp) {
+            throw new PlayerAlreadySignedUpException("Player is already signed up for this tournament.");
+        }
+
         PlayerDTO playerDTO;
         try {
             playerDTO = getPlayerDetails(playerId);
         } catch (PlayerNotFoundException ex) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Player not found");
+        }
+
+        if (playerDTO.isBlacklisted()) {
+            throw new PlayerBlacklistedException("Player is blacklisted from participating in tournaments.");
         }
 
         // Check rating requirements
@@ -213,7 +226,8 @@ public class TournamentService {
                 tournament.getRegion(),
                 tournament.getCity(),
                 tournament.getAddress(),
-                participantDTOs // Pass the converted set of participant DTOs
+                participantDTOs, // Pass the converted set of participant DTOs
+                tournament.getTimeControlSetting()
         );
     }
 

@@ -27,4 +27,33 @@ public class EmailService {
         message.setText(emailContent);
         mailSender.send(message);
     }
+
+    public void sendBlacklistEmail(String to, String username, String reason, Long banDuration) {
+        SimpleMailMessage message = new SimpleMailMessage();
+        message.setTo(to);
+        message.setSubject("Blacklist Notification - MyChess");
+
+        String emailContent = "Dear " + username + ",\n\n"
+                + "You have been banned from participating in tournaments for the following reason: " + reason + "\n"
+                + "Ban Duration: " + banDuration + " hours.\n\n"
+                + "If you believe this is a mistake, please contact support.\n\n"
+                + "Thank you,\nMyChess Team";
+
+        message.setText(emailContent);
+        mailSender.send(message);
+    }
+
+    public void sendWhitelistEmail(String to, String username, String reason) {
+        SimpleMailMessage message = new SimpleMailMessage();
+        message.setTo(to);
+        message.setSubject("Whitelist Notification - MyChess");
+
+        String emailContent = "Dear " + username + ",\n\n"
+                + "You have been whitelisted and can now participate in tournaments again.\n"
+                + "Reason: " + reason + "\n\n"
+                + "Thank you,\nMyChess Team";
+
+        message.setText(emailContent);
+        mailSender.send(message);
+    }
 }

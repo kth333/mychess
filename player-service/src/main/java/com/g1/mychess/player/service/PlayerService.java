@@ -1,15 +1,13 @@
 package com.g1.mychess.player.service;
 
-import com.g1.mychess.player.dto.PlayerDTO;
-import com.g1.mychess.player.dto.RegisterRequestDTO;
-import com.g1.mychess.player.dto.PlayerCreationResponseDTO;
-import com.g1.mychess.player.dto.UserDTO;
+import com.g1.mychess.player.dto.*;
 import com.g1.mychess.player.model.Player;
 import com.g1.mychess.player.model.PlayerRatingHistory;
 import com.g1.mychess.player.model.Profile;
 import com.g1.mychess.player.repository.PlayerRatingHistoryRepository;
 import com.g1.mychess.player.repository.PlayerRepository;
 import com.g1.mychess.player.repository.ProfileRepository;
+import jakarta.transaction.Transactional;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -107,6 +105,7 @@ public class PlayerService {
 
         return new PlayerDTO(
                 player.getPlayerId(),
+                player.isBlacklisted(),
                 player.getUsername(),
                 profile.getAge(),
                 profile.getGender(),
@@ -114,6 +113,26 @@ public class PlayerService {
                 profile.getRatingDeviation(),
                 profile.getVolatility()
         );
+    }
+
+    @Transactional
+    public void blacklistPlayer(Long playerId) {
+        // Fetch the player and update their blacklisted status
+        Player player = playerRepository.findById(playerId)
+                .orElseThrow(() -> new PlayerNotFoundException("Player not found with id: " + playerId));
+
+        player.setBlacklisted(true);
+        playerRepository.save(player);
+    }
+
+    @Transactional
+    public void whitelistPlayer(Long playerId) {
+        // Fetch the player and update their blacklisted status
+        Player player = playerRepository.findById(playerId)
+                .orElseThrow(() -> new PlayerNotFoundException("Player not found with id: " + playerId));
+
+        player.setBlacklisted(false);
+        playerRepository.save(player);
     }
 
     public void updatePlayerRating(Long playerId, int glickoRating, double ratingDeviation, double volatility) {
@@ -132,5 +151,18 @@ public class PlayerService {
 
         // Save the updated profile
         profileRepository.save(profile);
+    }
+
+    public AdminPlayerDTO getPlayerDetailsForAdmin(Long playerId) {
+        // Fetch player details
+        Player player = playerRepository.findById(playerId)
+                .orElseThrow(() -> new PlayerNotFoundException("Player not found with id: " + playerId));
+
+        return new AdminPlayerDTO(
+                player.getPlayerId(),
+                player.isBlacklisted(),
+                player.getUsername(),
+                player.getEmail()
+        );
     }
 }

@@ -16,6 +16,9 @@ public class Player {
     @Column(name = "role")
     private String role = "ROLE_PLAYER";
 
+    @Column(name = "is_blacklisted", nullable = false)
+    private boolean isBlacklisted = false;
+
     @Column(name = "username", nullable = false, unique = true, length = 16)
     private String username;
 
@@ -56,6 +59,14 @@ public class Player {
 
     public void setRole(String role) {
         this.role = role;
+    }
+
+    public boolean isBlacklisted() {
+        return isBlacklisted;
+    }
+
+    public void setBlacklisted(boolean blacklisted) {
+        isBlacklisted = blacklisted;
     }
 
     public String getUsername() {

@@ -1,5 +1,7 @@
 package com.g1.mychess.tournament.dto;
 
+import com.g1.mychess.tournament.model.TimeControlSetting;
+
 import java.time.LocalDateTime;
 import java.util.Set;
 
@@ -26,6 +28,7 @@ public class TournamentDTO {
     private String city;
     private String address;
     private Set<TournamentPlayerDTO> participants;
+    private TimeControlSetting timeControl;
 
     // Constructors
     public TournamentDTO() {}
@@ -34,7 +37,7 @@ public class TournamentDTO {
                          LocalDateTime endDateTime, LocalDateTime registrationStartDate,
                          LocalDateTime registrationEndDate, String format, String status, Integer minRating,
                          Integer maxRating, boolean affectsRating, Integer minAge, Integer maxAge, String requiredGender,
-                         String country, String region, String city, String address, Set<TournamentPlayerDTO> participants) {
+                         String country, String region, String city, String address, Set<TournamentPlayerDTO> participants, TimeControlSetting timeControlSetting) {
         this.id = id;
         this.adminId = adminId;
         this.name = name;
@@ -56,6 +59,7 @@ public class TournamentDTO {
         this.city = city;
         this.address = address;
         this.participants = participants;
+        this.timeControl = timeControlSetting;
     }
 
     // Getters and Setters
@@ -142,4 +146,8 @@ public class TournamentDTO {
     public Set<TournamentPlayerDTO> getParticipants() { return participants; }
 
     public void setParticipants(Set<TournamentPlayerDTO> participants) { this.participants = participants; }
+
+    public TimeControlSetting getTimeControl() { return timeControl; }
+
+    public void setTimeControl(TimeControlSetting timeControl) { this.timeControl = timeControl; }
 }

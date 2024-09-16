@@ -9,10 +9,21 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
+    // Handle PlayerAlreadySignedUpException
+    @ExceptionHandler(PlayerAlreadySignedUpException.class)
+    public ResponseEntity<String> handlePlayerAlreadySignedUpException(PlayerAlreadySignedUpException ex) {
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(ex.getMessage());
+    }
+
+    // Handle PlayerBlacklistedException
+    @ExceptionHandler(PlayerBlacklistedException.class)
+    public ResponseEntity<String> handlePlayerBlacklistedException(PlayerBlacklistedException ex) {
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(ex.getMessage());
+    }
+
     // Handle PlayerNotFoundException
     @ExceptionHandler(PlayerNotFoundException.class)
     public ResponseEntity<String> handlePlayerNotFoundException(PlayerNotFoundException ex) {
-        // Return a response entity with NOT_FOUND status and the exception message
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());
     }
 

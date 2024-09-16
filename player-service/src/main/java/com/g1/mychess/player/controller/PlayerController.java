@@ -20,6 +20,18 @@ public class PlayerController {
         return playerService.createPlayer(registerRequestDTO);
     }
 
+    @PutMapping("/update-blacklist-status")
+    public ResponseEntity<String> updateBlacklistStatus(@RequestParam Long playerId) {
+        playerService.blacklistPlayer(playerId);  // Use the playerId directly
+        return ResponseEntity.ok("Player has been blacklisted successfully.");
+    }
+
+    @PutMapping("/update-whitelist-status")
+    public ResponseEntity<String> updateWhitelistStatus(@RequestParam Long playerId) {
+        playerService.whitelistPlayer(playerId);  // Use the playerId directly
+        return ResponseEntity.ok("Player has been whitelisted successfully.");
+    }
+
     @GetMapping("/username/{username}")
     public ResponseEntity<UserDTO> getPlayerByUsername(@PathVariable String username) {
         UserDTO userDTO = playerService.findPlayerByUsername(username);
@@ -48,5 +60,11 @@ public class PlayerController {
     public ResponseEntity<PlayerDTO> getPlayerWithRatingDetails(@PathVariable Long playerId) {
         PlayerDTO playerDTO = playerService.getPlayerWithRatingDetails(playerId);
         return ResponseEntity.ok(playerDTO);
+    }
+
+    @GetMapping("/{playerId}/admin-details")
+    public ResponseEntity<AdminPlayerDTO> getPlayerDetailsForAdmin(@PathVariable Long playerId) {
+        AdminPlayerDTO adminPlayerDTO = playerService.getPlayerDetailsForAdmin(playerId);
+        return ResponseEntity.ok(adminPlayerDTO);
     }
 }
