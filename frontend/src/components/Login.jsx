@@ -40,7 +40,6 @@ class Login extends Component {
             const role = decodedToken.role[0];
             localStorage.setItem("role", role);
           }
-          // localStorage.setItem("role", this.state.role);
 
           // Navigate after login success
           this.props.navigate('/');

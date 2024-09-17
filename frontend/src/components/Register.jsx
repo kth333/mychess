@@ -1,6 +1,9 @@
 import React, { Component } from 'react';
 import AuthService from "../services/AuthService";
-import countryList from 'react-select-country-list'; // Use this package for country list
+import countryList from 'react-select-country-list';
+import { Terminal } from "lucide-react";
+import { Alert, AlertDescription, AlertTitle } from "./ui/alert";
+import withNavigateandLocation from './withNavigateandLocation';
 
 class Register extends Component {
   constructor(props) {
@@ -9,16 +12,18 @@ class Register extends Component {
       username: '',
       password: '',
       email: '',
-      gender: '', // Default to empty, so "Select Gender" is the initial option
+      gender: '',
       country: '',
       region: '',
       city: '',
       birthDate: '',
-      countries: countryList().getData(), // Generate country list
+      countries: countryList().getData(),
+      showAlert: false,
+      alertType: '', // 'success' or 'error'
+      alertMessage: '', // Custom alert message
     };
   }
 
-  // Handle form submission
   handleSubmit = async (e) => {
     e.preventDefault();
     const user = {
@@ -32,32 +37,59 @@ class Register extends Component {
       birthDate: this.state.birthDate,
     };
 
-    console.log("user  => " + JSON.stringify(user));
+    console.log("user => " + JSON.stringify(user));
 
     try {
-      await AuthService.registerUser(user).then((res) => {
-        if (res.data) {
-          console.log("success");
-          console.log(res.data);
-        }
-      });
+      const res = await AuthService.registerUser(user);
+      if (res.data) {
+        this.setState({
+          showAlert: true,
+          alertType: 'success',
+          alertMessage: 'Registration successful! Redirecting to login...',
+        });
+        setTimeout(() => {
+          this.setState({ showAlert: false });
+          this.props.navigate('/login');
+        }, 3000);
+      }
     } catch (error) {
-      console.error('Registration error:', error.response ? error.response.data : error.message);
+      const errorMessage = error.response ? error.response.data : error.message;
+      console.error('Registration error:', errorMessage);
+      this.setState({
+        showAlert: true,
+        alertType: 'error',
+        alertMessage: `Registration failed: ${errorMessage}`,
+      });
+      setTimeout(() => {
+        this.setState({ showAlert: false });
+      }, 5000);
     }
   };
 
-  // Handle input change
   handleInputChange = (e) => {
     const { name, value } = e.target;
     this.setState({ [name]: value });
   };
 
   render() {
-    const { username, password, email, gender, country, region, city, birthDate, countries } = this.state;
+    const { username, password, email, gender, country, region, city, birthDate, countries, showAlert, alertType, alertMessage } = this.state;
 
     return (
       <div className="flex justify-center items-center min-h-screen">
         <div className="relative w-full max-w-md">
+
+          {/* Alert as overlay */}
+          {showAlert && (
+            <Alert variant="destructive"
+              className={`fixed top-4 left-1/2 transform -translate-x-1/2 z-50 p-4 max-w-lg w-full shadow-lg}`}
+            >
+              <Terminal className="h-4 w-4" />
+              <AlertTitle>{alertType === 'success' ? 'Success!' : 'Error!'}</AlertTitle>
+              <AlertDescription>
+                {alertMessage}
+              </AlertDescription>
+            </Alert>
+          )}
 
           {/* Register Form */}
           <form className="p-8 rounded-lg border border-accent shadow-lg bg-secondary" onSubmit={this.handleSubmit}>
@@ -170,7 +202,7 @@ class Register extends Component {
                 className="w-full px-3 py-2 border border-accent rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
-
+            
             <button
               type="submit"
               className="btn btn-primary w-full font-bold"
@@ -184,4 +216,4 @@ class Register extends Component {
   }
 }
 
-export default Register;
+export default withNavigateandLocation(Register);

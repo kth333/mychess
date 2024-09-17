@@ -1,6 +1,6 @@
 // src/components/Pagination.js
 import React from 'react';
-import { Button } from "./ui/button";
+import { Button } from "./button";
 
 const Pagination = ({ currentPage, totalItems, itemsPerPage, onPageChange }) => {
   const totalPages = Math.ceil(totalItems / itemsPerPage);

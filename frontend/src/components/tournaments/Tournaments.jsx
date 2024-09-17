@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../ui/card";
 import { CalendarIcon, TrophyIcon, UsersIcon } from "lucide-react";
 import withNavigateandLocation from '../withNavigateandLocation';
-import Pagination from '../Pagination';  // Import the Pagination component
+import Pagination from "../ui/Pagination"  // Import the Pagination component
 import TournamentService from '../../services/TournamentService';
 
 class Tournaments extends Component {
