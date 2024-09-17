@@ -34,13 +34,13 @@ class Login extends Component {
           const token = localStorage.getItem('token');
           
           // Decoding token to get role
-          // if (token) {
-          //   const decodedToken = jwtDecode(token);
-          //   console.log(decodedToken.role[0].authority);
-          //   const role = decodedToken.role[0].authority;
-          //   localStorage.setItem("role", role);
-          // }
-          localStorage.setItem("role", this.state.role);
+          if (token) {
+            const decodedToken = jwtDecode(token);
+            console.log(decodedToken.role[0]);
+            const role = decodedToken.role[0];
+            localStorage.setItem("role", role);
+          }
+          // localStorage.setItem("role", this.state.role);
 
           // Navigate after login success
           this.props.navigate('/');
