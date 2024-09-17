@@ -17,7 +17,6 @@ import com.g1.mychess.tournament.dto.*;
 
 @RestController
 @RequestMapping("/api/v1/tournaments")
-@CrossOrigin(origins = "http://localhost:3000")
 public class TournamentController {
     private final TournamentService tournamentService;
 
