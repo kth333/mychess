@@ -78,6 +78,7 @@ public class PlayerController {
 
     @GetMapping("/profile")
     @PreAuthorize("hasRole('PLAYER')")
+    @CrossOrigin(origins = "http://localhost:3000")
     public ResponseEntity<PlayerProfileDTO> getPlayerProfile(@RequestHeader(value = "Authorization", required = true) String authorizationHeader) {
         String token = null;
         if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {

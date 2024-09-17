@@ -7,6 +7,7 @@ import Home from './components/Home';
 import Layout from './components/Layout';
 import Tournaments from './components/tournaments/Tournaments';
 import CreateTournament from './components/tournaments/CreateTournament';
+import Profile from './components/Profile';
 
 function App() {
   return (
@@ -19,6 +20,7 @@ function App() {
             <Route exact path="/register" element={<Register />} />
             <Route exact path="/tournaments" element={<Tournaments />} />
             <Route exact path="/create-tournament" element={<CreateTournament />} />
+            <Route exact path="/profile" element={<Profile/>} />
 
 
           </Route>

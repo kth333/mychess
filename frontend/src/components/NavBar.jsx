@@ -77,7 +77,11 @@ class NavBar extends Component {
                       <NavigationMenuLink asChild>
                         <Link className="text-primary hover:bg-accent hover:text-accent-foreground rounded-md px-4 py-2" to="/tournaments">View All Tournaments</Link>
                       </NavigationMenuLink>
+                      <NavigationMenuLink asChild>
+                        <Link className="text-primary hover:bg-accent hover:text-accent-foreground rounded-md px-4 py-2" to="/profile">Profile</Link>
+                      </NavigationMenuLink>
                     </NavigationMenuItem>
+                    
                   )}
                   <NavigationMenuItem>
                     <NavigationMenuLink asChild>
