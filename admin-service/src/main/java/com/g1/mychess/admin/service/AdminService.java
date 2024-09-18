@@ -141,7 +141,7 @@ public class AdminService {
         // Make an API call to Player Service to get player details
         return webClientBuilder.build()
                 .get()
-                .uri("http://player-service:8081/api/v1/player/" + playerId + "/admin-details")
+                .uri("http://localhost:8081/api/v1/player/" + playerId + "/admin-details")
                 .retrieve()
                 .bodyToMono(AdminPlayerDTO.class)
                 .block();
@@ -150,7 +150,7 @@ public class AdminService {
     private void updatePlayerBlacklistStatus(Long playerId) {
         webClientBuilder.build()
                 .put()
-                .uri("http://player-service:8081/api/v1/player/update-blacklist-status?playerId=" + playerId)
+                .uri("http://localhost:8081/api/v1/player/update-blacklist-status?playerId=" + playerId)
                 .retrieve()
                 .toBodilessEntity()
                 .block();
@@ -159,7 +159,7 @@ public class AdminService {
     private void updatePlayerWhitelistStatus(Long playerId) {
         webClientBuilder.build()
                 .put()
-                .uri("http://player-service:8081/api/v1/player/update-whitelist-status?playerId=" + playerId)
+                .uri("http://localhost:8081/api/v1/player/update-whitelist-status?playerId=" + playerId)
                 .retrieve()
                 .toBodilessEntity()
                 .block();
@@ -174,7 +174,7 @@ public class AdminService {
 
         webClientBuilder.build()
                 .post()
-                .uri("http://email-service:8085/api/v1/email/send-blacklist")
+                .uri("http://localhost:8085/api/v1/email/send-blacklist")
                 .bodyValue(emailDTO)
                 .retrieve()
                 .toBodilessEntity()
@@ -189,7 +189,7 @@ public class AdminService {
 
         webClientBuilder.build()
                 .post()
-                .uri("http://email-service:8085/api/v1/email/send-whitelist")
+                .uri("http://localhost:8085/api/v1/email/send-whitelist")
                 .bodyValue(emailDTO)
                 .retrieve()
                 .toBodilessEntity()
