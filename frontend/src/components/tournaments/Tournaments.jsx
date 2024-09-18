@@ -96,7 +96,7 @@ class Tournaments extends Component {
                       Rating Range: {tournament.minRating} - {tournament.maxRating}
                     </p>
                     <button className="mt-4 btn btn-primary w-auto font-bold" variant="outline" asChild>
-                      <a href={`/tournaments/${tournament.id}`}>View Details</a>
+                      <a href={`/tournaments/${tournament.name}`}>View Details</a>
                     </button>
                   </CardContent>
                 </Card>
