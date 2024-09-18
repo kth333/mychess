@@ -1,5 +1,6 @@
 package com.g1.mychess.email.service;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
@@ -8,6 +9,9 @@ import org.springframework.stereotype.Service;
 public class EmailService {
 
     private final JavaMailSender mailSender;
+
+    @Value("${auth.service.url}")
+    private String authServiceUrl;
 
     public EmailService(JavaMailSender mailSender) {
         this.mailSender = mailSender;
@@ -18,7 +22,7 @@ public class EmailService {
         message.setTo(to);
         message.setSubject("Email Verification - MyChess");
 
-        String verificationUrl = "http://localhost:8080/api/v1/auth/verify-email?token=";
+        String verificationUrl = authServiceUrl + "/api/v1/auth/verify-email?token=";
         String emailContent = "Dear " + username + ",\n\n"
                 + "Please verify your email address by clicking on the link below:\n"
                 + verificationUrl + verificationToken + "\n\n"

@@ -9,6 +9,7 @@ import com.g1.mychess.admin.repository.BlacklistRepository;
 import com.g1.mychess.admin.util.JwtUtil;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.transaction.Transactional;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -23,6 +24,12 @@ public class AdminService {
     private final BlacklistRepository blacklistRepository;
     private final WebClient.Builder webClientBuilder;
     private final JwtUtil jwtUtil;
+
+    @Value("${email.service.url}")
+    private String emailServiceUrl;
+
+    @Value("${player.service.url}")
+    private String playerServiceUrl;
 
     public AdminService(AdminRepository adminRepository, BlacklistRepository blacklistRepository, WebClient.Builder webClientBuilder, JwtUtil jwtUtil) {
         this.adminRepository = adminRepository;
@@ -141,7 +148,7 @@ public class AdminService {
         // Make an API call to Player Service to get player details
         return webClientBuilder.build()
                 .get()
-                .uri("http://localhost:8081/api/v1/player/" + playerId + "/admin-details")
+                .uri(playerServiceUrl + "/api/v1/player/" + playerId + "/admin-details")
                 .retrieve()
                 .bodyToMono(AdminPlayerDTO.class)
                 .block();
@@ -150,7 +157,7 @@ public class AdminService {
     private void updatePlayerBlacklistStatus(Long playerId) {
         webClientBuilder.build()
                 .put()
-                .uri("http://localhost:8081/api/v1/player/update-blacklist-status?playerId=" + playerId)
+                .uri(playerServiceUrl + "/api/v1/player/update-blacklist-status?playerId=" + playerId)
                 .retrieve()
                 .toBodilessEntity()
                 .block();
@@ -159,7 +166,7 @@ public class AdminService {
     private void updatePlayerWhitelistStatus(Long playerId) {
         webClientBuilder.build()
                 .put()
-                .uri("http://localhost:8081/api/v1/player/update-whitelist-status?playerId=" + playerId)
+                .uri(playerServiceUrl + "/api/v1/player/update-whitelist-status?playerId=" + playerId)
                 .retrieve()
                 .toBodilessEntity()
                 .block();
@@ -174,7 +181,7 @@ public class AdminService {
 
         webClientBuilder.build()
                 .post()
-                .uri("http://localhost:8085/api/v1/email/send-blacklist")
+                .uri(emailServiceUrl + "/api/v1/email/send-blacklist")
                 .bodyValue(emailDTO)
                 .retrieve()
                 .toBodilessEntity()
@@ -189,7 +196,7 @@ public class AdminService {
 
         webClientBuilder.build()
                 .post()
-                .uri("http://localhost:8085/api/v1/email/send-whitelist")
+                .uri(emailServiceUrl + "/api/v1/email/send-whitelist")
                 .bodyValue(emailDTO)
                 .retrieve()
                 .toBodilessEntity()

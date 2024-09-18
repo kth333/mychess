@@ -9,6 +9,7 @@ import com.g1.mychess.tournament.repository.TournamentPlayerRepository;
 import com.g1.mychess.tournament.util.JwtUtil;
 import jakarta.transaction.Transactional;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import jakarta.servlet.http.HttpServletRequest;
@@ -30,6 +31,9 @@ public class TournamentService {
     private final TournamentPlayerRepository tournamentPlayerRepository;
     private final WebClient.Builder webClientBuilder;
     private final JwtUtil jwtUtil;
+
+    @Value("${player.service.url}")
+    private String playerServiceUrl;
 
     public TournamentService(TournamentRepository tournamentRepository, TournamentPlayerRepository tournamentPlayerRepository, JwtUtil jwtUtil, WebClient.Builder webClientBuilder) {
         this.tournamentRepository = tournamentRepository;
@@ -234,7 +238,7 @@ public class TournamentService {
     public PlayerDTO getPlayerDetails(Long playerId) {
         return webClientBuilder.build()
                 .get()
-                .uri("http://localhost:8081/api/v1/player/" + playerId + "/details")
+                .uri(playerServiceUrl + "/api/v1/player/" + playerId + "/details")
                 .retrieve()
                 .bodyToMono(PlayerDTO.class)
                 .block();

@@ -6,6 +6,7 @@ import com.g1.mychess.auth.model.UserToken;
 import com.g1.mychess.auth.repository.UserTokenRepository;
 import com.g1.mychess.auth.util.JwtUtil;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -23,10 +24,17 @@ public class AuthService {
 
     private final WebClient.Builder webClientBuilder;
     private final PasswordEncoder passwordEncoder;
-
     private final UserTokenRepository userTokenRepository;
-
     private final JwtUtil jwtUtil;
+
+    @Value("${player.service.url}")
+    private String playerServiceUrl;
+
+    @Value("${admin.service.url}")
+    private String adminServiceUrl;
+
+    @Value("${email.service.url}")
+    private String emailServiceUrl;
 
     @Autowired
     public AuthService(WebClient.Builder webClientBuilder, PasswordEncoder passwordEncoder, UserTokenRepository userTokenRepository, JwtUtil jwtUtil) {
@@ -166,7 +174,7 @@ public class AuthService {
         try {
             webClientBuilder.build()
                     .post()
-                    .uri("http://localhost:8085/api/v1/email/send-verification")
+                    .uri(emailServiceUrl + "/api/v1/email/send-verification")
                     .bodyValue(emailRequestDTO)
                     .retrieve()
                     .bodyToMono(String.class)
@@ -256,7 +264,7 @@ public class AuthService {
     private ResponseEntity<PlayerCreationResponseDTO> createPlayerInPlayerService(RegisterRequestDTO playerDTO) {
         return webClientBuilder.build()
                 .post()
-                .uri("http://localhost:8081/api/v1/player/create")
+                .uri(playerServiceUrl + "/api/v1/player/create")
                 .bodyValue(playerDTO)
                 .retrieve()
                 .toEntity(PlayerCreationResponseDTO.class)
@@ -266,7 +274,7 @@ public class AuthService {
     public UserDTO fetchPlayerFromPlayerService(String username) {
         return webClientBuilder.build()
                 .get()
-                .uri("http://localhost:8081/api/v1/player/username/" + username)
+                .uri(playerServiceUrl + "/api/v1/player/username/" + username)
                 .retrieve()
                 .bodyToMono(UserDTO.class)
                 .block();
@@ -275,7 +283,7 @@ public class AuthService {
     public UserDTO fetchAdminFromAdminService(String username) {
         return webClientBuilder.build()
                 .get()
-                .uri("http://localhost:8084/api/v1/admin/username/" + username)
+                .uri(adminServiceUrl + "/api/v1/admin/username/" + username)
                 .retrieve()
                 .bodyToMono(UserDTO.class)
                 .block();
@@ -284,7 +292,7 @@ public class AuthService {
     public UserDTO fetchPlayerFromPlayerServiceByEmail(String email) {
         return webClientBuilder.build()
                 .get()
-                .uri("http://localhost:8081/api/v1/player/email/" + email)
+                .uri(playerServiceUrl + "/api/v1/player/email/" + email)
                 .retrieve()
                 .bodyToMono(UserDTO.class)
                 .block();
@@ -293,7 +301,7 @@ public class AuthService {
     public UserDTO fetchPlayerFromPlayerServiceById(Long playerId) {
         return webClientBuilder.build()
                 .get()
-                .uri("http://localhost:8081/api/v1/player/playerId/" + playerId)
+                .uri(playerServiceUrl + "/api/v1/player/playerId/" + playerId)
                 .retrieve()
                 .bodyToMono(UserDTO.class)
                 .block();
@@ -305,7 +313,7 @@ public class AuthService {
         try {
             webClientBuilder.build()
                     .put()
-                    .uri("http://localhost:8081/api/v1/player/update-password")
+                    .uri(playerServiceUrl + "/api/v1/player/update-password")
                     .bodyValue(updatePasswordRequest)
                     .retrieve()
                     .bodyToMono(Void.class)
