@@ -43,7 +43,10 @@ public class ProfileService {
             );
         } else {
             // Return PrivatePlayerProfileDTO 
-            return new PrivatePlayerProfileDTO(profile.getPlayerId());
+            return new PrivatePlayerProfileDTO(
+                profile.getPlayerId(),
+                player.getUsername(),  
+                player.getEmail()                        );
         }
     }
 }

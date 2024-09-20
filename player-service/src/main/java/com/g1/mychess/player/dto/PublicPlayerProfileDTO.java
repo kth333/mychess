@@ -1,6 +1,43 @@
 package com.g1.mychess.player.dto;
 
 import java.time.LocalDate;
+import com.g1.mychess.player.model.CustomChessRank;
+
+public class PublicPlayerProfileDTO extends PlayerProfileDTO {
+
+    private boolean isPublic;
+
+    // Constructor
+    public PublicPlayerProfileDTO(Long playerId, String fullName, String bio, String avatarUrl, String gender, 
+                                  String country, String region, String city, LocalDate birthDate, CustomChessRank rank, 
+                                  int glickoRating, double ratingDeviation, double volatility, int totalWins, 
+                                  int totalLosses, int totalDraws, int age, boolean isPublic) {
+        super(playerId, fullName, bio, avatarUrl, gender, country, region, city, birthDate, rank, glickoRating, 
+              ratingDeviation, volatility, totalWins, totalLosses, totalDraws, age);
+        this.isPublic = isPublic;
+    }
+
+    // Getter and Setter for isPublic
+    public boolean isPublic() {
+        return isPublic;
+    }
+
+    public void setPublic(boolean isPublic) {
+        this.isPublic = isPublic;
+    }
+}
+
+
+
+
+
+
+
+
+
+/* package com.g1.mychess.player.dto;
+
+import java.time.LocalDate;
 
 import com.g1.mychess.player.model.CustomChessRank;
 
@@ -93,3 +130,4 @@ public class PublicPlayerProfileDTO {
         this.totalDraws = totalDraws;
     }
 }
+*/
