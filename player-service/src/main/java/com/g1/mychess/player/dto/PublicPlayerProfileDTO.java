@@ -7,39 +7,26 @@ import com.g1.mychess.player.model.CustomChessRank;
 public class PublicPlayerProfileDTO {
 
     private Long playerId;
-    private String fullName;
+    private String username;
     private String bio;
     private String avatarUrl;
-    private String gender;
-    private String country;
-    private String region;
-    private String city;
-    private LocalDate birthDate;
     private CustomChessRank rank;
     private int glickoRating;
     private int totalWins;
     private int totalLosses;
     private int totalDraws;
-    private boolean isPublic;
-    private int age;
 
-    public PublicPlayerProfileDTO(Long playerId, String fullName, String bio, String avatarUrl, String gender, String country, String region, String city, LocalDate birthDate, CustomChessRank rank, int glickoRating, int totalWins, int totalLosses, int totalDraws, boolean isPublic, int age) {
+
+    public PublicPlayerProfileDTO(Long playerId, String username, String bio, String avatarUrl, CustomChessRank rank, int glickoRating, int totalWins, int totalLosses, int totalDraws) {
         this.playerId = playerId;
-        this.fullName = fullName;
+        this.username = username;
         this.bio = bio;
         this.avatarUrl = avatarUrl;
-        this.gender = gender;
-        this.country = country;
-        this.region = region;
-        this.city = city;
-        this.birthDate = birthDate;
         this.rank = rank;
         this.glickoRating = glickoRating;
         this.totalWins = totalWins;
         this.totalLosses = totalLosses;
         this.totalDraws = totalDraws;
-        this.isPublic = isPublic;
-        this.age = age;
     }
 
     public Long getPlayerId() {
@@ -50,13 +37,13 @@ public class PublicPlayerProfileDTO {
         this.playerId = playerId;
     }
 
-    public String getFullName() {
-        return fullName;
-    }
+    // public String getFullName() {
+    //     return fullName;
+    // }
 
-    public void setFullName(String fullName) {
-        this.fullName = fullName;
-    }
+    // public void setFullName(String fullName) {
+    //     this.fullName = fullName;
+    // }
 
     public String getAvatarUrl() {
         return avatarUrl;
