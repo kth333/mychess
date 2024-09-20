@@ -9,6 +9,6 @@ let ProtectedPlayerAPI = axios.create({
   timeout: 100000,
 });
 
-ProtectedPlayerAPI.defaults.headers.common['Authorization'] = `Bearer ${localStorage.getItem("token")}`;
+ProtectedPlayerAPI.defaults.headers.common['Authorization'] = `Bearer ${sessionStorage.getItem("token")}`;
 
 export { ProtectedPlayerAPI };

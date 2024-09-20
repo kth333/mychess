@@ -9,6 +9,6 @@ let ProtectedTournamentAPI = axios.create({
   timeout: 100000,
 });
 
-ProtectedTournamentAPI.defaults.headers.common['Authorization'] = `Bearer ${localStorage.getItem("token")}`;
+ProtectedTournamentAPI.defaults.headers.common['Authorization'] = `Bearer ${sessionStorage.getItem("token")}`;
 
 export { ProtectedTournamentAPI };
