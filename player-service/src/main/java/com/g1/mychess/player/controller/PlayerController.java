@@ -4,6 +4,7 @@ import com.g1.mychess.player.dto.*;
 import com.g1.mychess.player.service.PlayerService;
 import com.g1.mychess.player.util.JwtUtil;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;

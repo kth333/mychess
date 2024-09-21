@@ -1,25 +1,23 @@
-package com.g1.mychess.tournament.dto;
+package com.g1.mychess.match.dto;
 
 import java.time.LocalDateTime;
 
 public class TournamentPlayerDTO {
 
     private Long id;
-    private Long tournamentId;
     private Long playerId;
     private LocalDateTime signUpDateTime;
     private int glickoRating;
     private double points;
     private int roundsPlayed;
-    private String status;
+    private String status; // Use enum if needed
 
-    // Constructors
+    // Constructors, getters, setters
+
     public TournamentPlayerDTO() {}
 
-    public TournamentPlayerDTO(Long id, Long tournamentId, Long playerId, LocalDateTime signUpDateTime, int glickoRating,
-                               double points, int roundsPlayed, String status) {
+    public TournamentPlayerDTO(Long id, Long playerId, LocalDateTime signUpDateTime, int glickoRating, double points, int roundsPlayed, String status) {
         this.id = id;
-        this.tournamentId = tournamentId;
         this.playerId = playerId;
         this.signUpDateTime = signUpDateTime;
         this.glickoRating = glickoRating;
@@ -28,21 +26,12 @@ public class TournamentPlayerDTO {
         this.status = status;
     }
 
-    // Getters and Setters
     public Long getId() {
         return id;
     }
 
     public void setId(Long id) {
         this.id = id;
-    }
-
-    public Long getTournamentId() {
-        return tournamentId;
-    }
-
-    public void setTournamentId(Long tournamentId) {
-        this.tournamentId = tournamentId;
     }
 
     public Long getPlayerId() {

@@ -2,6 +2,8 @@ package com.g1.mychess.player.model;
 
 import jakarta.persistence.*;
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "profiles")
@@ -61,6 +63,12 @@ public class Profile {
 
     @Column(name = "total_draws")
     private int totalDraws;
+
+    @OneToMany(mappedBy = "profile", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<MatchHistory> matchHistory = new ArrayList<>();
+
+    @OneToMany(mappedBy = "profile", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<TournamentHistory> tournamentHistory = new ArrayList<>();
 
     @Column(name = "is_public")
     private boolean isPublic;
@@ -187,6 +195,22 @@ public class Profile {
 
     public void setTotalDraws(int totalDraws) {
         this.totalDraws = totalDraws;
+    }
+
+    public List<MatchHistory> getMatchHistory() {
+        return matchHistory;
+    }
+
+    public void setMatchHistory(List<MatchHistory> matchHistory) {
+        this.matchHistory = matchHistory;
+    }
+
+    public List<TournamentHistory> getTournamentHistory() {
+        return tournamentHistory;
+    }
+
+    public void setTournamentHistory(List<TournamentHistory> tournamentHistory) {
+        this.tournamentHistory = tournamentHistory;
     }
 
     public boolean isPublic() {

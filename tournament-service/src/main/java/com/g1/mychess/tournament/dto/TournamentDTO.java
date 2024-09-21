@@ -11,6 +11,7 @@ public class TournamentDTO {
     private Long adminId;
     private String name;
     private String description;
+    private Integer maxPlayers;
     private LocalDateTime startDateTime;
     private LocalDateTime endDateTime;
     private LocalDateTime registrationStartDate;
@@ -27,21 +28,25 @@ public class TournamentDTO {
     private String region;
     private String city;
     private String address;
+    private int currentRound;
+    private int maxRounds;
     private Set<TournamentPlayerDTO> participants;
     private TimeControlSetting timeControl;
 
     // Constructors
     public TournamentDTO() {}
 
-    public TournamentDTO(Long id, Long adminId, String name, String description, LocalDateTime startDateTime,
-                         LocalDateTime endDateTime, LocalDateTime registrationStartDate,
+    public TournamentDTO(Long id, Long adminId, String name, String description, Integer maxPlayers,
+                         LocalDateTime startDateTime, LocalDateTime endDateTime, LocalDateTime registrationStartDate,
                          LocalDateTime registrationEndDate, String format, String status, Integer minRating,
                          Integer maxRating, boolean affectsRating, Integer minAge, Integer maxAge, String requiredGender,
-                         String country, String region, String city, String address, Set<TournamentPlayerDTO> participants, TimeControlSetting timeControlSetting) {
+                         String country, String region, String city, String address, int currentRound, int maxRounds,
+                         Set<TournamentPlayerDTO> participants, TimeControlSetting timeControlSetting) {
         this.id = id;
         this.adminId = adminId;
         this.name = name;
         this.description = description;
+        this.maxPlayers = maxPlayers;
         this.startDateTime = startDateTime;
         this.endDateTime = endDateTime;
         this.registrationStartDate = registrationStartDate;
@@ -58,6 +63,8 @@ public class TournamentDTO {
         this.region = region;
         this.city = city;
         this.address = address;
+        this.currentRound = currentRound;
+        this.maxRounds = maxRounds;
         this.participants = participants;
         this.timeControl = timeControlSetting;
     }
@@ -78,6 +85,10 @@ public class TournamentDTO {
     public String getDescription() { return description; }
 
     public void setDescription(String description) { this.description = description; }
+
+    public Integer getMaxPlayers() { return maxPlayers; }
+
+    public void setMaxPlayers(Integer maxPlayers) { this.maxPlayers = maxPlayers; }
 
     public LocalDateTime getStartDateTime() { return startDateTime; }
 
@@ -144,6 +155,22 @@ public class TournamentDTO {
     public void setAddress(String address) { this.address = address; }
 
     public Set<TournamentPlayerDTO> getParticipants() { return participants; }
+
+    public int getCurrentRound() {
+        return currentRound;
+    }
+
+    public void setCurrentRound(int currentRound) {
+        this.currentRound = currentRound;
+    }
+
+    public int getMaxRounds() {
+        return maxRounds;
+    }
+
+    public void setMaxRounds(int maxRounds) {
+        this.maxRounds = maxRounds;
+    }
 
     public void setParticipants(Set<TournamentPlayerDTO> participants) { this.participants = participants; }
 

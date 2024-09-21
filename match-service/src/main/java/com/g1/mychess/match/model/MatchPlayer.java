@@ -17,11 +17,26 @@ public class MatchPlayer {
     @Column(name = "player_id", nullable = false)
     private Long playerId;
 
+    @Column(name = "points")
+    private double points;
+
     @Column(name = "initial_rating", nullable = false)
     private int initialRating;
 
-    @Column(name = "new_rating", nullable = false)
+    @Column(name = "initial_rating_deviation", nullable = false)
+    private double initialRatingDeviation;
+
+    @Column(name = "initial_volatility", nullable = false)
+    private double initialVolatility;
+
+    @Column(name = "new_rating")
     private int newRating;
+
+    @Column(name = "new_rating_deviation")
+    private double newRatingDeviation;
+
+    @Column(name = "new_volatility")
+    private double newVolatility;
 
     @Column(name = "predicted_win_rate")
     private Double predictedWinRate;
@@ -64,13 +79,35 @@ public class MatchPlayer {
 
     public void setPlayerId(Long playerId) { this.playerId = playerId; }
 
+    public double getPoints() { return points; }
+
+    public void setPoints(double points) { this.points = points; }
+
     public int getInitialRating() { return initialRating; }
 
     public void setInitialRating(int initialRating) { this.initialRating = initialRating; }
 
+    public double getInitialRatingDeviation() { return initialRatingDeviation; }
+
+    public void setInitialRatingDeviation(double initialRatingDeviation) { this.initialRatingDeviation = initialRatingDeviation; }
+
+    public double getInitialVolatility() { return initialVolatility; }
+
+    public void setInitialVolatility(double initialVolatility) { this.initialVolatility = initialVolatility; }
+
     public int getNewRating() { return newRating; }
 
     public void setNewRating(int newRating) { this.newRating = newRating; }
+
+    public double getNewRatingDeviation() { return newRatingDeviation; }
+
+    public void setNewRatingDeviation(double newRatingDeviation) {
+        this.newRatingDeviation = newRatingDeviation;
+    }
+
+    public double getNewVolatility() { return newVolatility; }
+
+    public void setNewVolatility(double newVolatility) { this.newVolatility = newVolatility; }
 
     public Double getPredictedWinRate() {
         return predictedWinRate;

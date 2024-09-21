@@ -44,6 +44,16 @@ public class TournamentController {
         return tournamentService.updateTournament(tournamentDTO, request);
     }
 
+    @PostMapping("/admin/start/{tournamentId}")
+    public ResponseEntity<String> startTournament(@PathVariable Long tournamentId) {
+        return tournamentService.startTournament(tournamentId);
+    }
+
+    @PostMapping("/admin/next-round/{tournamentId}")
+    public ResponseEntity<String> prepareNextRound(@PathVariable Long tournamentId) {
+        return tournamentService.prepareNextRound(tournamentId);
+    }
+
     @PostMapping("/player/signup/{tournamentId}/{playerId}")
     public ResponseEntity<String> signUpToTournament(@PathVariable Long tournamentId, @PathVariable Long playerId) {
         return tournamentService.signUpToTournament(tournamentId, playerId);

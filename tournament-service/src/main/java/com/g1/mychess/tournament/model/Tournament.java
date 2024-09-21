@@ -22,6 +22,9 @@ public class Tournament {
     @Column(name = "description", nullable = false)
     private String description;
 
+    @Column(name = "max_players")
+    private Integer maxPlayers;
+
     @Column(name = "start_date_time", nullable = false)
     private LocalDateTime startDateTime;
 
@@ -75,6 +78,12 @@ public class Tournament {
     @Column(name = "address", nullable = false)
     private String address;
 
+    @Column(name = "current_round", nullable = false)
+    private int currentRound;
+
+    @Column(name = "max_rounds", nullable = false)
+    private int maxRounds;
+
     @OneToMany(mappedBy = "tournament", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<TournamentPlayer> participants;
 
@@ -113,6 +122,10 @@ public class Tournament {
     public String getDescription() { return description; }
 
     public void setDescription(String description) { this.description = description; }
+
+    public Integer getMaxPlayers() { return maxPlayers; }
+
+    public void setMaxPlayers(Integer maxPlayers) { this.maxPlayers = maxPlayers; }
 
     public LocalDateTime getStartDateTime() { return startDateTime; }
 
@@ -181,6 +194,22 @@ public class Tournament {
     public String getAddress() { return address; }
 
     public void setAddress(String address) { this.address = address; }
+
+    public int getCurrentRound() {
+        return currentRound;
+    }
+
+    public void setCurrentRound(int currentRound) {
+        this.currentRound = currentRound;
+    }
+
+    public int getMaxRounds() {
+        return maxRounds;
+    }
+
+    public void setMaxRounds(int maxRounds) {
+        this.maxRounds = maxRounds;
+    }
 
     public Set<TournamentPlayer> getParticipants() { return participants; }
 
