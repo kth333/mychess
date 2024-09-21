@@ -30,15 +30,15 @@ class Login extends Component {
         if (res.data) {
           console.log("login success");
           console.log(res.data);
-          localStorage.setItem("token", res.data.token);
-          const token = localStorage.getItem('token');
+          sessionStorage.setItem("token", res.data.token);
+          const token = sessionStorage.getItem('token');
           
           // Decoding token to get role
           if (token) {
             const decodedToken = jwtDecode(token);
             console.log(decodedToken.role[0]);
             const role = decodedToken.role[0];
-            localStorage.setItem("role", role);
+            sessionStorage.setItem("role", role);
           }
 
           // Navigate after login success

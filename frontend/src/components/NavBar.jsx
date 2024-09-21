@@ -15,14 +15,14 @@ class NavBar extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      isLoggedIn: !!localStorage.getItem('token'),
-      role: localStorage.getItem('role'),
+      isLoggedIn: !!sessionStorage.getItem('token'),
+      role: sessionStorage.getItem('role'),
     };
   }
 
   handleSignOut = () => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('role');
+    sessionStorage.removeItem('token');
+    sessionStorage.removeItem('role');
     this.setState({
       isLoggedIn: false,
       role: null,

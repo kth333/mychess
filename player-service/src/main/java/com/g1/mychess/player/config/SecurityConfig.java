@@ -34,6 +34,7 @@ public class SecurityConfig {
         http.csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers("/api/v1/player/**").permitAll()
+                        .requestMatchers("/api/v1/profile/**").permitAll()
                         .anyRequest().authenticated()           // Protect other endpoints
                 )
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))

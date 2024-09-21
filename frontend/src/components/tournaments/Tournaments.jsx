@@ -96,7 +96,7 @@ class Tournaments extends Component {
                       Rating Range: {tournament.minRating} - {tournament.maxRating}
                     </p>
                     <button className="mt-4 btn btn-primary w-auto font-bold" variant="outline" asChild>
-                      <a href={`/tournaments/${tournament.id}`}>View Details</a>
+                      <a href={`/tournaments/${tournament.name}`}>View Details</a>
                     </button>
                   </CardContent>
                 </Card>
@@ -111,16 +111,7 @@ class Tournaments extends Component {
           </section>
         </main>
 
-        <footer className="bg-background border-t py-6 px-6 text-center">
-          <p>&copy; 2023 MyChess. All rights reserved.</p>
-          <div className="mt-2">
-            <a href="/about" className="text-primary hover:underline">About</a>
-            <span className="mx-2">|</span>
-            <a href="/contact" className="text-primary hover:underline">Contact</a>
-            <span className="mx-2">|</span>
-            <a href="/privacy" className="text-primary hover:underline">Privacy Policy</a>
-          </div>
-        </footer>
+        
       </div>
     );
   }

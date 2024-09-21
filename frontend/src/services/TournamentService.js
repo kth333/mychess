@@ -9,6 +9,10 @@ class TournamentService {
     async getAllTournaments() {
       return await TournamentAPI.get("/tournaments/public/all");
     }
+
+    async getTournamentByName(tournamentName) {
+      return await TournamentAPI.get(`/tournaments/public/get/${tournamentName}`);
+    }
     
 
 }

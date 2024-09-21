@@ -3,7 +3,7 @@ import { ProtectedPlayerAPI } from "./ProtectedPlayerAPI";
 class PlayerService {
   
     async getProfile() {
-        return ProtectedPlayerAPI.get("/player/profile");
+        return ProtectedPlayerAPI.get("/profile/");
     }
 
   
