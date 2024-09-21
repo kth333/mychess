@@ -11,7 +11,7 @@ class TournamentService {
     }
 
     async getTournamentByName(tournamentName) {
-      return await ProtectedTournamentAPI.get(`/tournaments/public/get/${tournamentName}`);
+      return await TournamentAPI.get(`/tournaments/public/get/${tournamentName}`);
     }
     
 

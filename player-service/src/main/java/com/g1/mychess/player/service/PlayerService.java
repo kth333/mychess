@@ -165,33 +165,4 @@ public class PlayerService {
                 player.getEmail()
         );
     }
-
-    public PlayerProfileDTO getPlayerProfile(Long playerId) {
-        Player player = playerRepository.findById(playerId)
-                .orElseThrow(() -> new PlayerNotFoundException("Player not found with id: " + playerId));
-    
-        Profile profile = player.getProfile();
-    
-        return new PlayerProfileDTO(
-            profile.getPlayerId(),
-            profile.getFullName(),
-            profile.getBio(),
-            profile.getAvatarUrl(),
-            profile.getGender(),
-            profile.getCountry(),
-            profile.getRegion(),
-            profile.getCity(),
-            profile.getBirthDate(),
-            profile.getRank(),
-            profile.getGlickoRating(),
-            profile.getRatingDeviation(),
-            profile.getVolatility(),
-            profile.getTotalWins(),
-            profile.getTotalLosses(),
-            profile.getTotalDraws(),
-            profile.isPublic(),
-            profile.getAge()
-        );
-    }
-    
 }
