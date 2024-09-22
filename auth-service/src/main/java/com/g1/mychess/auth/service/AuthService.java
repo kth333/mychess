@@ -44,6 +44,11 @@ public class AuthService {
             throw new InvalidPasswordException("Password must be at least 8 characters long and contain at least one number.");
         }
 
+        String email = registerRequestDTO.getEmail();
+        if (!isValidEmail(email)){
+            throw new InvalidEmailException("This is not a valid email address.");
+        }
+
         String hashedPassword = passwordEncoder.encode(registerRequestDTO.getPassword());
 
         RegisterRequestDTO playerDTO = new RegisterRequestDTO(
@@ -59,6 +64,7 @@ public class AuthService {
                 .retrieve()
                 .toEntity(PlayerCreationResponseDTO.class)
                 .block();
+
 
         if (playerServiceResponse == null) {
             throw new PlayerServiceException("No response from player service.");
@@ -91,8 +97,15 @@ public class AuthService {
         throw new PlayerServiceException("Player service failed to register the user. Status code: " + playerServiceResponse.getStatusCode());
     }
 
-    private static boolean isValidPassword(String password) {
+    static boolean isValidPassword(String password) {
         return password.length() < 8 || !password.matches(".*\\d.*");
+    }
+
+    static boolean isValidEmail(String email) {
+
+        String EMAIL_REGEX = "^[\\p{L}\\p{N}._%+-]+@[\\p{L}\\p{N}-]+(\\.[\\p{L}\\p{N}-]+)*\\.[\\p{L}]{2,}$";
+//        String EMAIL_REGEX = "(?:[a-zA-Z0-9!#$%&'*+/=?^_`{|}~-]+(?:\\.[a-zA-Z0-9!#$%&'*+/=?^_`{|}~-]+)*|\"(?:[!#$%&'*+/=?^_`{|}~\\-\\x20-\\x7E]|\\\\[!#$%&'*+/=?^_`{|}~\\-\\x20-\\x7E])*\")@(?:[a-zA-Z0-9](?:[a-zA-Z0-9-]*[a-zA-Z0-9])?\\.)+[a-zA-Z0-9](?:[a-zA-Z0-9-]*[a-zA-Z0-9])?";
+        return email.matches(EMAIL_REGEX);
     }
 
     public String login(String username, String password, String role) {
