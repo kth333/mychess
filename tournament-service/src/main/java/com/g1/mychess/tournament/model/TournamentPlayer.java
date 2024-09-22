@@ -22,6 +22,9 @@ public class TournamentPlayer {
     @Column(name = "sign_up_date_time", nullable = false)
     private LocalDateTime signUpDateTime;
 
+    @Column(name = "glicko_rating", nullable = false)
+    private int glickoRating;
+
     @Column(name = "points")
     private double points = 0.0;
 
@@ -75,6 +78,14 @@ public class TournamentPlayer {
 
     public void setSignUpDateTime(LocalDateTime signUpDateTime) {
         this.signUpDateTime = signUpDateTime;
+    }
+
+    public int getGlickoRating() {
+        return glickoRating;
+    }
+
+    public void setGlickoRating(int glickoRating) {
+        this.glickoRating = glickoRating;
     }
 
     public double getPoints() { return points; }

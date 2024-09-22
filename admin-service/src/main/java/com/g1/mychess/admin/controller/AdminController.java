@@ -1,7 +1,10 @@
 package com.g1.mychess.admin.controller;
 
+import com.g1.mychess.admin.dto.BlacklistDTO;
 import com.g1.mychess.admin.dto.UserDTO;
+import com.g1.mychess.admin.dto.WhitelistDTO;
 import com.g1.mychess.admin.service.AdminService;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -19,5 +22,17 @@ public class AdminController {
     public ResponseEntity<UserDTO> getAdminByUsername(@PathVariable String username) {
         UserDTO userDTO = adminService.findAdminByUsername(username);
         return ResponseEntity.ok(userDTO);
+    }
+
+    @PostMapping("/blacklist")
+    public ResponseEntity<String> blacklistPlayer(@RequestBody BlacklistDTO blacklistDTO, HttpServletRequest request) {
+        adminService.blacklistPlayer(blacklistDTO, request);
+        return ResponseEntity.ok("Player blacklisted for " + blacklistDTO.getBanDuration() + " hours.");
+    }
+
+    @PostMapping("/whitelist")
+    public ResponseEntity<String> whitelistPlayer(@RequestBody WhitelistDTO whitelistDTO, HttpServletRequest request) {
+        adminService.whitelistPlayer(whitelistDTO, request);
+        return ResponseEntity.ok("Player whitelisted successfully.");
     }
 }

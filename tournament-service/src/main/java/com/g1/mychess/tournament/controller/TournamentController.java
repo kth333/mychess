@@ -4,6 +4,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import java.util.List;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -41,6 +42,16 @@ public class TournamentController {
     @PutMapping("/admin/update")
     public ResponseEntity<TournamentDTO> updateTournament(@RequestBody TournamentDTO tournamentDTO, HttpServletRequest request) {
         return tournamentService.updateTournament(tournamentDTO, request);
+    }
+
+    @PostMapping("/admin/start/{tournamentId}")
+    public ResponseEntity<String> startTournament(@PathVariable Long tournamentId) {
+        return tournamentService.startTournament(tournamentId);
+    }
+
+    @PostMapping("/admin/next-round/{tournamentId}")
+    public ResponseEntity<String> prepareNextRound(@PathVariable Long tournamentId) {
+        return tournamentService.prepareNextRound(tournamentId);
     }
 
     @PostMapping("/player/signup/{tournamentId}/{playerId}")

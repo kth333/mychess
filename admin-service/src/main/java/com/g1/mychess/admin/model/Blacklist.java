@@ -11,8 +11,11 @@ public class Blacklist {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "user_id", nullable = false)
-    private String userId;  // Now as a string with prefixes for admins and players (e.g., "ADMIN_123", "PLAYER_456")
+    @Column(name = "player_id", nullable = false)
+    private Long playerId;
+
+    @Column(name = "admin_id")
+    private Long adminId;
 
     @Column(name = "reason")
     private String reason;
@@ -47,12 +50,20 @@ public class Blacklist {
         this.id = id;
     }
 
-    public String getUserId() {
-        return userId;
+    public Long getPlayerId() {
+        return playerId;
     }
 
-    public void setUserId(String userId) {
-        this.userId = userId;
+    public void setPlayerId(Long playerId) {
+        this.playerId = playerId;
+    }
+
+    public Long getAdminId() {
+        return adminId;
+    }
+
+    public void setAdminId(Long adminId) {
+        this.adminId = adminId;
     }
 
     public String getReason() {

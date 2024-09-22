@@ -27,9 +27,34 @@ public class PlayerRatingHistory {
     @Column(name = "date", nullable = false)
     private LocalDateTime date;  // Date when this rating was recorded
 
-    public PlayerRatingHistory() {}
+    public PlayerRatingHistory(){
+    }
+
+    public PlayerRatingHistory(Player player, int glickoRating, double ratingDeviation, double volatility, LocalDateTime now) {
+        this.player = player;
+        this.glickoRating = glickoRating;
+        this.ratingDeviation = ratingDeviation;
+        this.volatility = volatility;
+        this.date = now;
+    }
 
     // Getters and Setters
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public Player getPlayer() {
+        return player;
+    }
+
+    public void setPlayer(Player player) {
+        this.player = player;
+    }
 
     public int getGlickoRating() {
         return glickoRating;

@@ -16,6 +16,9 @@ public class Player {
     @Column(name = "role")
     private String role = "ROLE_PLAYER";
 
+    @Column(name = "is_blacklisted", nullable = false)
+    private boolean isBlacklisted = false;
+
     @Column(name = "username", nullable = false, unique = true, length = 16)
     private String username;
 
@@ -25,7 +28,7 @@ public class Player {
     @Column(name = "email", nullable = false, unique = true)
     private String email;
 
-    @OneToOne(mappedBy = "player", cascade = CascadeType.ALL)
+    @OneToOne(mappedBy = "player", cascade = CascadeType.ALL, orphanRemoval = true)
     private Profile profile;
 
     @Column(name = "joined_date")
@@ -37,7 +40,7 @@ public class Player {
     @Column(name = "last_active")
     private LocalDate lastActive;
 
-    @OneToMany(mappedBy = "player", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "player", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
     private List<PlayerRatingHistory> ratingHistory;
 
     // Getters and Setters
@@ -56,6 +59,14 @@ public class Player {
 
     public void setRole(String role) {
         this.role = role;
+    }
+
+    public boolean isBlacklisted() {
+        return isBlacklisted;
+    }
+
+    public void setBlacklisted(boolean blacklisted) {
+        isBlacklisted = blacklisted;
     }
 
     public String getUsername() {

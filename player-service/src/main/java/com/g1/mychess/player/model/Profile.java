@@ -2,6 +2,8 @@ package com.g1.mychess.player.model;
 
 import jakarta.persistence.*;
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "profiles")
@@ -44,6 +46,15 @@ public class Profile {
     @Column(name = "chess_rank")
     private CustomChessRank rank;
 
+    @Column(name = "glicko_rating", nullable = false)
+    private int glickoRating = 1500;
+
+    @Column(name = "rating_deviation", nullable = false)
+    private double ratingDeviation = 350.0;
+
+    @Column(name = "volatility", nullable = false)
+    private double volatility = 0.06;
+
     @Column(name = "total_wins")
     private int totalWins;
 
@@ -52,6 +63,12 @@ public class Profile {
 
     @Column(name = "total_draws")
     private int totalDraws;
+
+    @OneToMany(mappedBy = "profile", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<MatchHistory> matchHistory = new ArrayList<>();
+
+    @OneToMany(mappedBy = "profile", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<TournamentHistory> tournamentHistory = new ArrayList<>();
 
     @Column(name = "is_public")
     private boolean isPublic;
@@ -132,6 +149,30 @@ public class Profile {
         this.rank = rank;
     }
 
+    public int getGlickoRating() {
+        return glickoRating;
+    }
+
+    public void setGlickoRating(int glickoRating) {
+        this.glickoRating = glickoRating;
+    }
+
+    public double getRatingDeviation() {
+        return ratingDeviation;
+    }
+
+    public void setRatingDeviation(double ratingDeviation) {
+        this.ratingDeviation = ratingDeviation;
+    }
+
+    public double getVolatility() {
+        return volatility;
+    }
+
+    public void setVolatility(double volatility) {
+        this.volatility = volatility;
+    }
+
     public int getTotalWins() {
         return totalWins;
     }
@@ -154,6 +195,22 @@ public class Profile {
 
     public void setTotalDraws(int totalDraws) {
         this.totalDraws = totalDraws;
+    }
+
+    public List<MatchHistory> getMatchHistory() {
+        return matchHistory;
+    }
+
+    public void setMatchHistory(List<MatchHistory> matchHistory) {
+        this.matchHistory = matchHistory;
+    }
+
+    public List<TournamentHistory> getTournamentHistory() {
+        return tournamentHistory;
+    }
+
+    public void setTournamentHistory(List<TournamentHistory> tournamentHistory) {
+        this.tournamentHistory = tournamentHistory;
     }
 
     public boolean isPublic() {

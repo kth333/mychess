@@ -38,21 +38,21 @@ const themes = [
 const ThemeSwitcher = () => {
   const [currentTheme, setCurrentTheme] = useState('dark');
 
-  // Load the theme from localStorage on mount
+  // Load the theme from sessionStorage on mount
   useEffect(() => {
-    const savedTheme = localStorage.getItem('theme');
+    const savedTheme = sessionStorage.getItem('theme');
     if (savedTheme) {
       setCurrentTheme(savedTheme);
       document.documentElement.setAttribute('data-theme', savedTheme);
     }
   }, []);
 
-  // Handle theme change and save to localStorage
+  // Handle theme change and save to sessionStorage
   const handleThemeChange = (event) => {
     const theme = event.target.value;
     setCurrentTheme(theme);
     document.documentElement.setAttribute('data-theme', theme);
-    localStorage.setItem('theme', theme); // Save the theme to localStorage
+    sessionStorage.setItem('theme', theme); // Save the theme to sessionStorage
   };
 
   return (

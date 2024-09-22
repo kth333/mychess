@@ -5,9 +5,11 @@ import java.util.stream.Collectors;
 
 import com.g1.mychess.tournament.dto.PlayerDTO;
 import com.g1.mychess.tournament.exception.*;
+import com.g1.mychess.tournament.repository.TournamentPlayerRepository;
 import com.g1.mychess.tournament.util.JwtUtil;
 import jakarta.transaction.Transactional;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import jakarta.servlet.http.HttpServletRequest;
@@ -26,11 +28,19 @@ import org.springframework.web.reactive.function.client.WebClient;
 public class TournamentService {
 
     private final TournamentRepository tournamentRepository;
+    private final TournamentPlayerRepository tournamentPlayerRepository;
     private final WebClient.Builder webClientBuilder;
     private final JwtUtil jwtUtil;
 
-    public TournamentService(TournamentRepository tournamentRepository, JwtUtil jwtUtil, WebClient.Builder webClientBuilder) {
+    @Value("${player.service.url}")
+    private String playerServiceUrl;
+
+    @Value("${match.service.url}")
+    private String matchServiceUrl;
+
+    public TournamentService(TournamentRepository tournamentRepository, TournamentPlayerRepository tournamentPlayerRepository, JwtUtil jwtUtil, WebClient.Builder webClientBuilder) {
         this.tournamentRepository = tournamentRepository;
+        this.tournamentPlayerRepository = tournamentPlayerRepository;
         this.jwtUtil = jwtUtil;
         this.webClientBuilder = webClientBuilder;
     }
@@ -49,6 +59,7 @@ public class TournamentService {
         tournament.setAdminId(userId);
         tournament.setName(tournamentDTO.getName());
         tournament.setDescription(tournamentDTO.getDescription());
+        tournament.setMaxPlayers(tournamentDTO.getMaxPlayers());
         tournament.setStartDateTime(tournamentDTO.getStartDateTime());
         tournament.setEndDateTime(tournamentDTO.getEndDateTime());
         tournament.setRegistrationStartDate(tournamentDTO.getRegistrationStartDate());
@@ -66,6 +77,7 @@ public class TournamentService {
         tournament.setCity(tournamentDTO.getCity());
         tournament.setAddress(tournamentDTO.getAddress());
         tournament.setParticipants(new HashSet<>());
+        tournament.setTimeControlSetting(tournamentDTO.getTimeControl());
 
         // Save the tournament to the repository
         Tournament savedTournament = tournamentRepository.save(tournament);
@@ -106,6 +118,7 @@ public class TournamentService {
         tournament.setAdminId(userId);
         tournament.setName(tournamentDTO.getName());
         tournament.setDescription(tournamentDTO.getDescription());
+        tournament.setMaxPlayers(tournamentDTO.getMaxPlayers());
         tournament.setStartDateTime(tournamentDTO.getStartDateTime());
         tournament.setEndDateTime(tournamentDTO.getEndDateTime());
         tournament.setRegistrationStartDate(tournamentDTO.getRegistrationStartDate());
@@ -138,11 +151,20 @@ public class TournamentService {
         Tournament tournament = tournamentRepository.findById(tournamentId)
                 .orElseThrow(() -> new TournamentNotFoundException("Tournament not found with id: " + tournamentId));
 
+        boolean isAlreadySignedUp = tournamentPlayerRepository.existsByTournamentIdAndPlayerId(tournamentId, playerId);
+        if (isAlreadySignedUp) {
+            throw new PlayerAlreadySignedUpException("Player is already signed up for this tournament.");
+        }
+
         PlayerDTO playerDTO;
         try {
             playerDTO = getPlayerDetails(playerId);
         } catch (PlayerNotFoundException ex) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Player not found");
+        }
+
+        if (playerDTO.isBlacklisted()) {
+            throw new PlayerBlacklistedException("Player is blacklisted from participating in tournaments.");
         }
 
         // Check rating requirements
@@ -159,7 +181,7 @@ public class TournamentService {
         }
 
         // Check gender requirements
-        if (tournament.getRequiredGender() != null && !tournament.getRequiredGender().equals(playerDTO.getGender())) {
+        if (tournament.getRequiredGender() != null && !tournament.getRequiredGender().equals(playerDTO.getGender()) && !tournament.getRequiredGender().equals("ANY")) {
             throw new RequirementNotMetException("Player does not meet the gender requirement");
         }
 
@@ -177,6 +199,58 @@ public class TournamentService {
         return ResponseEntity.status(HttpStatus.OK).body("Player successfully signed up to the tournament");
     }
 
+    @Transactional
+    public ResponseEntity<String> startTournament(Long tournamentId) {
+        Tournament tournament = tournamentRepository.findById(tournamentId)
+                .orElseThrow(() -> new TournamentNotFoundException("Tournament not found with id: " + tournamentId));
+
+        // Initialize the tournament's first round
+        tournament.setCurrentRound(1);
+        tournament.setStatus(Tournament.TournamentStatus.ONGOING);
+        tournamentRepository.save(tournament);
+
+        // Call MatchService to run matchmaking for the first round
+        runMatchmaking(tournamentId);
+
+        return ResponseEntity.status(HttpStatus.OK).body("Tournament started successfully.");
+    }
+
+    private void runMatchmaking(Long tournamentId) {
+        webClientBuilder.build()
+                .post()
+                .uri(matchServiceUrl + "/api/v1/matches/matchmaking/" + tournamentId)
+                .retrieve()
+                .bodyToMono(Void.class)
+                .block();
+    }
+
+    @Transactional
+    public ResponseEntity<String> prepareNextRound(Long tournamentId) {
+        Tournament tournament = tournamentRepository.findById(tournamentId)
+                .orElseThrow(() -> new TournamentNotFoundException("Tournament not found with id: " + tournamentId));
+
+        // Increment the round and save the tournament state
+        if (tournament.getCurrentRound() < tournament.getMaxRounds()) {
+            tournament.setCurrentRound(tournament.getCurrentRound() + 1);
+        }
+
+        tournamentRepository.save(tournament);
+
+        // Call MatchService to either prepare the next round or finalize the tournament
+        runPrepareNextRoundInMatchService(tournamentId);
+
+        return ResponseEntity.status(HttpStatus.OK).body("Next round prepared successfully.");
+    }
+
+    private void runPrepareNextRoundInMatchService(Long tournamentId) {
+        webClientBuilder.build()
+                .post()
+                .uri(matchServiceUrl + "/api/v1/matches/prepare-next-round/" + tournamentId)
+                .retrieve()
+                .bodyToMono(Void.class)
+                .block();
+    }
+
     public TournamentDTO convertToDTO(Tournament tournament) {
         // Convert each TournamentPlayer to PlayerDTO using the correct fields
         Set<TournamentPlayerDTO> participantDTOs = tournament.getParticipants().stream()
@@ -185,6 +259,7 @@ public class TournamentService {
                         player.getTournament().getId(), // Assuming you want to include the tournament ID
                         player.getPlayerId(),
                         player.getSignUpDateTime(),
+                        player.getGlickoRating(),
                         player.getPoints(),
                         player.getRoundsPlayed(),
                         player.getStatus().name() // Convert enum to string
@@ -197,6 +272,7 @@ public class TournamentService {
                 tournament.getAdminId(),
                 tournament.getName(),
                 tournament.getDescription(),
+                tournament.getMaxPlayers(),
                 tournament.getStartDateTime(),
                 tournament.getEndDateTime(),
                 tournament.getRegistrationStartDate(),
@@ -213,14 +289,17 @@ public class TournamentService {
                 tournament.getRegion(),
                 tournament.getCity(),
                 tournament.getAddress(),
-                participantDTOs // Pass the converted set of participant DTOs
+                tournament.getCurrentRound(),
+                tournament.getMaxRounds(),
+                participantDTOs, // Pass the converted set of participant DTOs
+                tournament.getTimeControlSetting()
         );
     }
 
     public PlayerDTO getPlayerDetails(Long playerId) {
         return webClientBuilder.build()
                 .get()
-                .uri("http://player-service:8081/api/v1/" + playerId + "/details")
+                .uri(playerServiceUrl + "/api/v1/player/" + playerId + "/details")
                 .retrieve()
                 .bodyToMono(PlayerDTO.class)
                 .block();

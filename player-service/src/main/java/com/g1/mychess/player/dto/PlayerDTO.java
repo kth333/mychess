@@ -3,6 +3,7 @@ package com.g1.mychess.player.dto;
 public class PlayerDTO {
 
     private Long id;
+    private boolean isBlacklisted;
     private String username;
     private int age;
     private String gender;
@@ -13,8 +14,9 @@ public class PlayerDTO {
     private double volatility;
 
     // Full Constructor
-    public PlayerDTO(Long id, String username, int age, String gender, int glickoRating, double ratingDeviation, double volatility) {
+    public PlayerDTO(Long id, boolean isBlacklisted, String username, int age, String gender, int glickoRating, double ratingDeviation, double volatility) {
         this.id = id;
+        this.isBlacklisted = isBlacklisted;
         this.username = username;
         this.age = age;
         this.gender = gender;
@@ -30,6 +32,14 @@ public class PlayerDTO {
 
     public void setId(Long id) {
         this.id = id;
+    }
+
+    public boolean isBlacklisted() {
+        return isBlacklisted;
+    }
+
+    public void setBlacklisted(boolean blacklisted) {
+        isBlacklisted = blacklisted;
     }
 
     public String getUsername() {
