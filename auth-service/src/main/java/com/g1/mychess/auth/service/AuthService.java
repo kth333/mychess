@@ -104,11 +104,11 @@ public class AuthService {
         throw new PlayerServiceException("Player service failed to register the user. Status code: " + playerServiceResponse.getStatusCode());
     }
 
-    private static boolean isValidPassword(String password) {
+    public static boolean isValidPassword(String password) {
         return !(password.length() < 8 || !password.matches(".*\\d.*"));
     }
 
-    static boolean isValidEmail(String email) {
+    public static boolean isValidEmail(String email) {
 
         String EMAIL_REGEX = "^[\\p{L}\\p{N}._%+-]+@[\\p{L}\\p{N}-]+(\\.[\\p{L}\\p{N}-]+)*\\.[\\p{L}]{2,}$";
 //        String EMAIL_REGEX = "(?:[a-zA-Z0-9!#$%&'*+/=?^_`{|}~-]+(?:\\.[a-zA-Z0-9!#$%&'*+/=?^_`{|}~-]+)*|\"(?:[!#$%&'*+/=?^_`{|}~\\-\\x20-\\x7E]|\\\\[!#$%&'*+/=?^_`{|}~\\-\\x20-\\x7E])*\")@(?:[a-zA-Z0-9](?:[a-zA-Z0-9-]*[a-zA-Z0-9])?\\.)+[a-zA-Z0-9](?:[a-zA-Z0-9-]*[a-zA-Z0-9])?";

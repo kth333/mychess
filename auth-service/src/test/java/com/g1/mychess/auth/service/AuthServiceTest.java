@@ -26,6 +26,10 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 import reactor.core.publisher.Mono;
+import java.time.LocalDate;
+
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 import static com.g1.mychess.auth.service.AuthService.isValidEmail;
 import static org.mockito.Mockito.*;
@@ -79,7 +83,7 @@ public class AuthServiceTest {
     @Test
     void test_Passwords_Without_Numbers_Should_Throw_InvalidPasswordException() {
 
-        RegisterRequestDTO BadPasswordregisterRequestDTO = new RegisterRequestDTO("ValidUsername", "password", "ValidEmail@domain.com");
+        RegisterRequestDTO BadPasswordregisterRequestDTO = new RegisterRequestDTO();
         InvalidPasswordException expectedThrow = assertThrows(InvalidPasswordException.class, () ->
                 authServiceMock.registerUser(BadPasswordregisterRequestDTO),"Expected to throw InvalidPasswordException because password does not contain a number");
         assertTrue(expectedThrow.getMessage().contains("number"));
@@ -88,8 +92,8 @@ public class AuthServiceTest {
 
     @Test
     void test_Password_That_Are_Too_Short_Should_Throw_InvalidPasswordException() {
-
-        RegisterRequestDTO BadPasswordregisterRequestDTO = new RegisterRequestDTO("ValidUsername", "P@ssw01", "ValidEmail@domain.com");
+        LocalDate localDate = LocalDate.now().plusDays(1);
+        RegisterRequestDTO BadPasswordregisterRequestDTO = new RegisterRequestDTO("ValidUsername", "P@ssw01", "ValidEmail@domain.com","Male","Durkadurkastan","Capital", "Bakalakadaka", localDate);
         InvalidPasswordException expectedThrow = assertThrows(InvalidPasswordException.class, () ->
                 authServiceMock.registerUser(BadPasswordregisterRequestDTO),"Expected to throw InvalidPasswordException because password is too short");
         assertTrue(expectedThrow.getMessage().contains("characters"));
@@ -184,7 +188,9 @@ public class AuthServiceTest {
     // no need to repeat by testing this segment too many times.
     @Test
     void test_Invalid_Emails_Should_Throw_InvalidEmailException(){
-        RegisterRequestDTO badEmailRegisterRequestDTO = new RegisterRequestDTO("ValidUsername", "ValidPassword123", "Bad(),<>:;Local@domain.com");
+
+        LocalDate localDate = LocalDate.now().plusDays(1);
+        RegisterRequestDTO badEmailRegisterRequestDTO = new RegisterRequestDTO("ValidUsername", "ValidPassword123", "Bad(),<>:;Local@domain.com","Male","Durkadurkastan","Capital", "Bakalakadaka", localDate);
         InvalidEmailException expectedThrow = assertThrows(InvalidEmailException.class, () ->
                 authServiceMock.registerUser(badEmailRegisterRequestDTO),"Expected to throw InvalidEmailException because the local part contains illegal special characters");
         assertTrue(expectedThrow.getMessage().contains("email"));}
