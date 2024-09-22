@@ -10,7 +10,5 @@ import java.util.Optional;
 public interface MatchPlayerRepository extends JpaRepository<MatchPlayer, Long> {
 
     // Method to find all MatchPlayers by tournamentId
-    List<MatchPlayer> findByMatch_TournamentId(Long tournamentId);
-    Optional<MatchPlayer> findByPlayerIdAndCurrentRound(Long playerId, int roundNumber);
-
+    List<MatchPlayer> findByMatch_TournamentIdAndCurrentRound(Long tournamentId, int currentRound);
 }
