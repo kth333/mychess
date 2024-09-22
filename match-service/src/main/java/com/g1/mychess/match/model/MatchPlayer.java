@@ -3,7 +3,7 @@ package com.g1.mychess.match.model;
 import jakarta.persistence.*;
 
 @Entity
-@Table(name = "match_player")
+@Table(name = "match_players")
 public class MatchPlayer {
 
     @Id
@@ -16,6 +16,9 @@ public class MatchPlayer {
 
     @Column(name = "player_id", nullable = false)
     private Long playerId;
+
+    @Column(name = "current_round", nullable = false)
+    private int currentRound;
 
     @Column(name = "points")
     private double points;
@@ -78,6 +81,10 @@ public class MatchPlayer {
     public Long getPlayerId() { return playerId; }
 
     public void setPlayerId(Long playerId) { this.playerId = playerId; }
+
+    public int getCurrentRound() { return currentRound; }
+
+    public void setCurrentRound(int currentRound) { this.currentRound = currentRound; }
 
     public double getPoints() { return points; }
 

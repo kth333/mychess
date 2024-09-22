@@ -9,6 +9,7 @@ import com.g1.mychess.tournament.repository.TournamentPlayerRepository;
 import com.g1.mychess.tournament.util.JwtUtil;
 import jakarta.transaction.Transactional;
 
+import org.springframework.http.HttpHeaders;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -93,6 +94,14 @@ public class TournamentService {
     public ResponseEntity<TournamentDTO> findTournamentByName(String name) {
         Tournament tournament = tournamentRepository.findByName(name)
                 .orElseThrow(() -> new IllegalArgumentException("Tournament not found with name: " + name));
+
+        // Convert Tournament to TournamentDTO
+        return ResponseEntity.status(HttpStatus.OK).body(convertToDTO(tournament));
+    }
+
+    public ResponseEntity<TournamentDTO> findTournamentById(Long id) {
+        Tournament tournament = tournamentRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Tournament not found with tournament id: " + id));
 
         // Convert Tournament to TournamentDTO
         return ResponseEntity.status(HttpStatus.OK).body(convertToDTO(tournament));
@@ -202,7 +211,7 @@ public class TournamentService {
     }
 
     @Transactional
-    public ResponseEntity<String> startTournament(Long tournamentId) {
+    public ResponseEntity<String> startTournament(Long tournamentId, HttpServletRequest request) {
         Tournament tournament = tournamentRepository.findById(tournamentId)
                 .orElseThrow(() -> new TournamentNotFoundException("Tournament not found with id: " + tournamentId));
 
@@ -211,23 +220,26 @@ public class TournamentService {
         tournament.setStatus(Tournament.TournamentStatus.ONGOING);
         tournamentRepository.save(tournament);
 
+        String jwtToken = request.getHeader("Authorization").substring(7);
+
         // Call MatchService to run matchmaking for the first round
-        runMatchmaking(tournamentId);
+        runMatchmaking(tournamentId, jwtToken);
 
         return ResponseEntity.status(HttpStatus.OK).body("Tournament started successfully.");
     }
 
-    private void runMatchmaking(Long tournamentId) {
+    private void runMatchmaking(Long tournamentId, String jwtToken) {
         webClientBuilder.build()
                 .post()
-                .uri(matchServiceUrl + "/api/v1/matches/matchmaking/" + tournamentId)
+                .uri(matchServiceUrl + "/api/v1/matches/admin/matchmaking/" + tournamentId)
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + jwtToken)
                 .retrieve()
                 .bodyToMono(Void.class)
                 .block();
     }
 
     @Transactional
-    public ResponseEntity<String> prepareNextRound(Long tournamentId) {
+    public ResponseEntity<String> prepareNextRound(Long tournamentId, HttpServletRequest request) {
         Tournament tournament = tournamentRepository.findById(tournamentId)
                 .orElseThrow(() -> new TournamentNotFoundException("Tournament not found with id: " + tournamentId));
 
@@ -238,16 +250,19 @@ public class TournamentService {
 
         tournamentRepository.save(tournament);
 
+        String jwtToken = request.getHeader("Authorization").substring(7);
+
         // Call MatchService to either prepare the next round or finalize the tournament
-        runPrepareNextRoundInMatchService(tournamentId);
+        runPrepareNextRoundInMatchService(tournamentId, jwtToken);
 
         return ResponseEntity.status(HttpStatus.OK).body("Next round prepared successfully.");
     }
 
-    private void runPrepareNextRoundInMatchService(Long tournamentId) {
+    private void runPrepareNextRoundInMatchService(Long tournamentId, String jwtToken) {
         webClientBuilder.build()
                 .post()
-                .uri(matchServiceUrl + "/api/v1/matches/prepare-next-round/" + tournamentId)
+                .uri(matchServiceUrl + "/api/v1/matches/admin/prepare-next-round/" + tournamentId)
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + jwtToken)
                 .retrieve()
                 .bodyToMono(Void.class)
                 .block();

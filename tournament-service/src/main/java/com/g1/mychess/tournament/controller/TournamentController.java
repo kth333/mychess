@@ -34,6 +34,11 @@ public class TournamentController {
         return tournamentService.findTournamentByName(tournamentName);
     }
 
+    @GetMapping("/public/{id}")
+    public ResponseEntity<TournamentDTO> getTournamentById(@PathVariable Long id) {
+        return tournamentService.findTournamentById(id);
+    }
+
     @GetMapping("/public/all")
     public ResponseEntity<List<TournamentDTO>> getAllTournaments() {
         return tournamentService.getAllTournaments();
@@ -45,13 +50,13 @@ public class TournamentController {
     }
 
     @PostMapping("/admin/start/{tournamentId}")
-    public ResponseEntity<String> startTournament(@PathVariable Long tournamentId) {
-        return tournamentService.startTournament(tournamentId);
+    public ResponseEntity<String> startTournament(@PathVariable Long tournamentId, HttpServletRequest request) {
+        return tournamentService.startTournament(tournamentId, request);
     }
 
     @PostMapping("/admin/next-round/{tournamentId}")
-    public ResponseEntity<String> prepareNextRound(@PathVariable Long tournamentId) {
-        return tournamentService.prepareNextRound(tournamentId);
+    public ResponseEntity<String> prepareNextRound(@PathVariable Long tournamentId, HttpServletRequest request) {
+        return tournamentService.prepareNextRound(tournamentId, request);
     }
 
     @PostMapping("/player/signup/{tournamentId}/{playerId}")
