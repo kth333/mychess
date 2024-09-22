@@ -76,6 +76,7 @@ public class TournamentService {
         tournament.setRegion(tournamentDTO.getRegion());
         tournament.setCity(tournamentDTO.getCity());
         tournament.setAddress(tournamentDTO.getAddress());
+        tournament.setMaxRounds(tournamentDTO.getMaxRounds());
         tournament.setParticipants(new HashSet<>());
         tournament.setTimeControlSetting(tournamentDTO.getTimeControl());
 
@@ -135,6 +136,7 @@ public class TournamentService {
         tournament.setRegion(tournamentDTO.getRegion());
         tournament.setCity(tournamentDTO.getCity());
         tournament.setAddress(tournamentDTO.getAddress());
+        tournament.setMaxRounds(tournamentDTO.getMaxRounds());
 
         // Save the updated tournament to the repository
         Tournament updatedTournament = tournamentRepository.save(tournament);
