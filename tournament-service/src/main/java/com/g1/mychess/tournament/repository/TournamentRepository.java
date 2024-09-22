@@ -10,4 +10,5 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface TournamentRepository extends JpaRepository<Tournament, Long>{
     Optional<Tournament> findByName(String name);
+    Optional<Tournament> findById(Long id);
 }

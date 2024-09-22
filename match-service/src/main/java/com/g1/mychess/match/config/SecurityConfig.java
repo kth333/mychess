@@ -33,7 +33,9 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http.csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(authorize -> authorize
-                        .requestMatchers("/api/v1/matches/**").permitAll()
+                        .requestMatchers("/api/v1/matches/public/**").permitAll()  // Public access
+                        .requestMatchers("/api/v1/matches/admin/**").hasRole("ADMIN")  // Only ADMIN can access
+                        .requestMatchers("/api/v1/matches/player/**").hasRole("PLAYER")  // Only PLAYER can access
                         .anyRequest().authenticated()           // Protect other endpoints
                 )
                 .addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class)

@@ -17,21 +17,18 @@ public class MatchController {
         this.matchService = matchService;
     }
 
-    @PreAuthorize("hasRole('ADMIN')")
-    @PostMapping("/matchmaking/{tournamentId}")
+    @PostMapping("/admin/matchmaking/{tournamentId}")
     public ResponseEntity<String> runMatchmaking(@PathVariable Long tournamentId) {
         matchService.runMatchmaking(tournamentId);
         return ResponseEntity.status(HttpStatus.OK).body("Matchmaking for tournament " + tournamentId + " started successfully.");
     }
 
-    @PreAuthorize("hasRole('ADMIN')")
-    @PostMapping("/complete/{matchId}")
+    @PostMapping("/admin/complete/{matchId}")
     public ResponseEntity<String> completeMatch(@PathVariable Long matchId, @RequestBody MatchResultDTO matchResultDTO) {
-        return matchService.completeMatch(matchId, matchResultDTO);
+        return matchService.completeMatch(matchId, matchResultDTO.getWinnerId(), matchResultDTO.getLoserId(), matchResultDTO.isDraw());
     }
 
-    @PreAuthorize("hasRole('ADMIN')")
-    @PostMapping("/prepare-next-round/{tournamentId}")
+    @PostMapping("/admin/prepare-next-round/{tournamentId}")
     public ResponseEntity<String> prepareNextRound(@PathVariable Long tournamentId) {
         matchService.prepareNextRound(tournamentId);
         return ResponseEntity.status(HttpStatus.OK).body("Next round for tournament " + tournamentId + " prepared successfully.");
