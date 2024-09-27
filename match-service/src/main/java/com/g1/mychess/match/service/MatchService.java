@@ -1,6 +1,8 @@
 package com.g1.mychess.match.service;
 
 import com.g1.mychess.match.dto.TournamentDTO;
+import com.g1.mychess.match.exception.TournamentNotFoundException;
+import com.g1.mychess.match.exception.TournamentRoundNotFoundException;
 import com.g1.mychess.match.model.Match;
 import com.g1.mychess.match.model.MatchPlayer;
 import com.g1.mychess.match.repository.MatchRepository;
@@ -219,7 +221,8 @@ public class MatchService {
 
     @Transactional
     public void finalizeTournament(Long tournamentId) {
-        List<Match> matches = matchRepository.findByTournamentId(tournamentId);
+        List<Match> matches = matchRepository.findByTournamentId(tournamentId)
+                .orElseThrow(() -> new TournamentNotFoundException("Tournament with id = " + tournamentId + " does not exist."));
 
         for (Match match : matches) {
             if (match.getStatus() != Match.MatchStatus.COMPLETED) {
@@ -293,5 +296,18 @@ public class MatchService {
                 .retrieve()
                 .bodyToMono(TournamentDTO.class)
                 .block();
+    }
+
+    public List<Match> findAllMatchByTournament(Long tournamentId) {
+        return matchRepository.findByTournamentId(tournamentId)
+                .orElseThrow(() -> new TournamentNotFoundException("Tournament with id = " + tournamentId + " does not exist."));
+    }
+
+    public List<Match> findAllMatchByTournamentRound(Long tournamentId, Integer roundNumber) {
+        matchRepository.findByTournamentId(tournamentId)
+                .orElseThrow(() -> new TournamentNotFoundException("Tournament with id = " + tournamentId + " does not exist."));
+
+        return matchRepository.findByTournamentIdAndRoundNumber(tournamentId, roundNumber)
+                .orElseThrow(() -> new TournamentRoundNotFoundException("Tournament with id = " + tournamentId + " does not have round = " + roundNumber));
     }
 }

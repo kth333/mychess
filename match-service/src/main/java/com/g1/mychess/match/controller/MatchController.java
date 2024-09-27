@@ -1,7 +1,10 @@
 package com.g1.mychess.match.controller;
 
+import java.util.*;
+
 import com.g1.mychess.match.dto.MatchResultDTO;
 import com.g1.mychess.match.service.MatchService;
+import com.g1.mychess.match.model.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -32,5 +35,17 @@ public class MatchController {
     public ResponseEntity<String> prepareNextRound(@PathVariable Long tournamentId) {
         matchService.prepareNextRound(tournamentId);
         return ResponseEntity.status(HttpStatus.OK).body("Next round for tournament " + tournamentId + " prepared successfully.");
+    }
+
+    @GetMapping("/public/all/{tournamentId}")
+    public ResponseEntity<List<Match>> getAllMatchByTournamentId(@PathVariable Long tournamentId) {
+        List<Match> matches = matchService.findAllMatchByTournament(tournamentId);
+        return ResponseEntity.ok(matches);
+    }
+
+    @GetMapping("/public/all/{tournamentId}/round/{roundNumber}")
+    public ResponseEntity<List<Match>> getAllMatchByTournamentIdAndRoundNum(@PathVariable Long tournamentId, @PathVariable Integer roundNumber) {
+        List<Match> matches = matchService.findAllMatchByTournamentRound(tournamentId, roundNumber);
+        return ResponseEntity.ok(matches);
     }
 }
