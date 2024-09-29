@@ -32,3 +32,5 @@ build/
 
 ### VS Code ###
 .vscode/
+auth-service/src/test/java/com/g1/mychess/auth/service/AuthServiceIntegrationTest.java
+auth-service/src/test/java/com/g1/mychess/auth/service/IntegrationTest.java
