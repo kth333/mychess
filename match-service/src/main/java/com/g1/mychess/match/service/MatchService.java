@@ -1,6 +1,8 @@
 package com.g1.mychess.match.service;
 
 import com.g1.mychess.match.dto.TournamentDTO;
+import com.g1.mychess.match.exception.TournamentNotFoundException;
+import com.g1.mychess.match.exception.TournamentRoundNotFoundException;
 import com.g1.mychess.match.model.Match;
 import com.g1.mychess.match.model.MatchPlayer;
 import com.g1.mychess.match.repository.MatchRepository;
@@ -121,8 +123,9 @@ public class MatchService {
     private List<Match> createSwissSystemMatches(List<MatchPlayer> players, Long tournamentId, int roundNumber) {
         List<Match> matches = new ArrayList<>();
 
-        players.sort(Comparator.comparingDouble(MatchPlayer::getPoints).reversed()
-                .thenComparing(MatchPlayer::getInitialRating).reversed());
+        players.sort(Comparator.comparingDouble(MatchPlayer::getPoints)
+                .thenComparing(MatchPlayer::getInitialRating)
+                .reversed());
 
         Set<Long> pairedPlayers = new HashSet<>(); // To track already paired players in this round
 
@@ -194,9 +197,11 @@ public class MatchService {
     public void prepareNextRound(Long tournamentId) {
         TournamentDTO tournament = getTournamentDetails(tournamentId);
 
-        int currentRound = determineCurrentRound(tournamentId) + 1;
+        int currentRound = tournament.getCurrentRound();
 
         List<MatchPlayer> players = getOrCreateTournamentPlayers(tournament, currentRound);
+
+        
 
         players.sort(Comparator.comparingDouble(MatchPlayer::getPoints).reversed()
                 .thenComparing(MatchPlayer::getInitialRating).reversed());
@@ -205,6 +210,9 @@ public class MatchService {
             finalizeTournament(tournamentId);
             return;
         }
+
+        currentRound = determineCurrentRound(tournamentId) + 1;
+
         List<Match> nextRoundMatches = createSwissSystemMatches(players, tournamentId, currentRound);
         matchRepository.saveAll(nextRoundMatches);
     }
@@ -219,7 +227,8 @@ public class MatchService {
 
     @Transactional
     public void finalizeTournament(Long tournamentId) {
-        List<Match> matches = matchRepository.findByTournamentId(tournamentId);
+        List<Match> matches = matchRepository.findByTournamentId(tournamentId)
+                .orElseThrow(() -> new TournamentNotFoundException("Tournament with id = " + tournamentId + " does not exist."));
 
         for (Match match : matches) {
             if (match.getStatus() != Match.MatchStatus.COMPLETED) {
@@ -293,5 +302,18 @@ public class MatchService {
                 .retrieve()
                 .bodyToMono(TournamentDTO.class)
                 .block();
+    }
+
+    public List<Match> findAllMatchByTournament(Long tournamentId) {
+        return matchRepository.findByTournamentId(tournamentId)
+                .orElseThrow(() -> new TournamentNotFoundException("Tournament with id = " + tournamentId + " does not exist."));
+    }
+
+    public List<Match> findAllMatchByTournamentRound(Long tournamentId, Integer roundNumber) {
+        matchRepository.findByTournamentId(tournamentId)
+                .orElseThrow(() -> new TournamentNotFoundException("Tournament with id = " + tournamentId + " does not exist."));
+
+        return matchRepository.findByTournamentIdAndRoundNumber(tournamentId, roundNumber)
+                .orElseThrow(() -> new TournamentRoundNotFoundException("Tournament with id = " + tournamentId + " does not have round = " + roundNumber));
     }
 }
