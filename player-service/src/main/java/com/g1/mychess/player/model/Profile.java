@@ -64,6 +64,9 @@ public class Profile {
     @Column(name = "total_draws")
     private int totalDraws;
 
+    @Column(name = "last_active")
+    private LocalDate lastActive;
+
     @OneToMany(mappedBy = "profile", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<MatchHistory> matchHistory = new ArrayList<>();
 
@@ -72,6 +75,7 @@ public class Profile {
 
     @Column(name = "is_public")
     private boolean isPublic;
+
 
     // Getters and Setters
 
@@ -195,6 +199,14 @@ public class Profile {
 
     public void setTotalDraws(int totalDraws) {
         this.totalDraws = totalDraws;
+    }
+
+    public LocalDate getLastActive() {
+        return lastActive;
+    }
+
+    public void setLastActive(LocalDate lastActive) {
+        this.lastActive = lastActive;
     }
 
     public List<MatchHistory> getMatchHistory() {

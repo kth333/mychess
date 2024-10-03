@@ -24,7 +24,7 @@ public class MatchPlayer {
     private double points;
 
     @Column(name = "initial_rating", nullable = false)
-    private int initialRating;
+    private double initialRating;
 
     @Column(name = "initial_rating_deviation", nullable = false)
     private double initialRatingDeviation;
@@ -33,7 +33,7 @@ public class MatchPlayer {
     private double initialVolatility;
 
     @Column(name = "new_rating")
-    private int newRating;
+    private double newRating;
 
     @Column(name = "new_rating_deviation")
     private double newRatingDeviation;
@@ -90,9 +90,9 @@ public class MatchPlayer {
 
     public void setPoints(double points) { this.points = points; }
 
-    public int getInitialRating() { return initialRating; }
+    public double getInitialRating() { return initialRating; }
 
-    public void setInitialRating(int initialRating) { this.initialRating = initialRating; }
+    public void setInitialRating(double initialRating) { this.initialRating = initialRating; }
 
     public double getInitialRatingDeviation() { return initialRatingDeviation; }
 
@@ -102,9 +102,9 @@ public class MatchPlayer {
 
     public void setInitialVolatility(double initialVolatility) { this.initialVolatility = initialVolatility; }
 
-    public int getNewRating() { return newRating; }
+    public double getNewRating() { return newRating; }
 
-    public void setNewRating(int newRating) { this.newRating = newRating; }
+    public void setNewRating(double newRating) { this.newRating = newRating; }
 
     public double getNewRatingDeviation() { return newRatingDeviation; }
 

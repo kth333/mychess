@@ -117,14 +117,6 @@ public class Player {
         this.tournamentCount = tournamentCount;
     }
 
-    public LocalDate getLastActive() {
-        return lastActive;
-    }
-
-    public void setLastActive(LocalDate lastActive) {
-        this.lastActive = lastActive;
-    }
-
     public List<PlayerRatingHistory> getRatingHistory() {
         return ratingHistory;
     }

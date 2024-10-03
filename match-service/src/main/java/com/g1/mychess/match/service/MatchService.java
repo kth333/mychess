@@ -38,39 +38,83 @@ public class MatchService {
         this.webClientBuilder = webClientBuilder;
     }
 
-    private void calculateAndUpdatePlayerRatings(MatchPlayer matchPlayer) {
-        // Placeholder for rating calculation logic
-        int newGlickoRating = calculateNewRating(matchPlayer.getInitialRating(), matchPlayer.getResult());
-        double newRatingDeviation = calculateNewRatingDeviation(matchPlayer.getInitialRatingDeviation(), matchPlayer.getResult()); // Implement based on Glicko-2 or other rating system
-        double newVolatility = calculateNewVolatility(matchPlayer.getInitialVolatility(), matchPlayer.getResult()); // Implement based on Glicko-2 or other rating system
+    private void calculateAndUpdatePlayerRatings(MatchPlayer winner, MatchPlayer loser, boolean isDraw) {
+        // Implement based on Glicko-2 or other rating system
+        double winnerScore = 1;
+        double loserScore = 0;
+
+        if (isDraw) {
+            winnerScore = 0.5;
+            loserScore = 0.5;
+        }
+        // for Winner
+        double winner_d2 = calculate_D2(winner.getInitialRating(), loser.getInitialRating(), loser.getInitialRatingDeviation());
+        double winnerNewGlickoRating = calculateNewRating(winner.getInitialRating(), winner.getInitialRatingDeviation(), loser.getInitialRating(), loser.getInitialRatingDeviation(), winnerScore, winner_d2);
+        double winnerNewRatingDeviation = calculateNewRatingDeviation(winner.getInitialRatingDeviation(), winner_d2);
+
+        // for Loser
+        double loser_d2 = calculate_D2(loser.getInitialRating(), winner.getInitialRating(), winner.getInitialRatingDeviation());
+        double loserNewGlickoRating = calculateNewRating(loser.getInitialRating(), loser.getInitialRatingDeviation(), winner.getInitialRating(), winner.getInitialRatingDeviation(), loserScore,loser_d2);
+        double loserNewRatingDeviation = calculateNewRatingDeviation(loser.getInitialRatingDeviation(), loser_d2);
+
+        // Not implemented yet
+        // double newVolatility = calculateNewVolatility(matchPlayer.getInitialVolatility(), matchPlayer.getResult());
 
         // Update the matchPlayer with new values
-        matchPlayer.setNewRating(newGlickoRating);
-        matchPlayer.setNewRatingDeviation(newRatingDeviation);
-        matchPlayer.setNewVolatility(newVolatility);
+        winner.setNewRating(winnerNewGlickoRating);
+        winner.setNewRatingDeviation(winnerNewRatingDeviation);
+
+        loser.setNewRating(loserNewGlickoRating);
+        loser.setNewRatingDeviation(loserNewRatingDeviation);
 
         // Update the player's profile and rating history in PlayerService
-        PlayerRatingUpdateDTO ratingUpdate = new PlayerRatingUpdateDTO(
-                matchPlayer.getPlayerId(),
-                newGlickoRating,
-                newRatingDeviation,
-                newVolatility,
-                matchPlayer.getMatch().getTournamentId(),
-                matchPlayer.getResult().name()
+        PlayerRatingUpdateDTO winnerRatingUpdate = new PlayerRatingUpdateDTO(
+                winner.getPlayerId(),
+                winnerNewGlickoRating,
+                winnerNewRatingDeviation,
+                winner.getInitialVolatility(),
+                winner.getMatch().getTournamentId(),
+                winner.getResult().name()
         );
 
-        updatePlayerProfileAndRatingHistory(ratingUpdate);
+        PlayerRatingUpdateDTO loserRatingUpdate = new PlayerRatingUpdateDTO(
+                loser.getPlayerId(),
+                loserNewGlickoRating,
+                loserNewRatingDeviation,
+                loser.getInitialVolatility(),
+                loser.getMatch().getTournamentId(),
+                loser.getResult().name()
+        );
+
+        updatePlayerProfileAndRatingHistory(winnerRatingUpdate);
+        updatePlayerProfileAndRatingHistory(loserRatingUpdate);
     }
 
-    private int calculateNewRating(int initialRating, MatchPlayer.Result result) {
+    public static double calculate_g(double RD) {
+        return 1.0 / Math.sqrt(1.0 + (3.0 * RD * RD) / (Math.PI * Math.PI));
+    }
+
+    public static double calculate_E(double R, double Rj, double RDj) {
+        return 1.0 / (1.0 + Math.pow(10.0, -calculate_g(RDj) * (R - Rj) / 400.0));
+    }
+
+    public static double calculate_D2(double R, double opponentsRating, double opponentsRatingDeviation) {
+        double q = Math.log(10) / Math.log(Math.E) / 400; // constant q
+        double g_RDj = calculate_g(opponentsRatingDeviation);
+        double E_R_Rj = calculate_E(R, opponentsRating, opponentsRatingDeviation);
+        return 1.0 / (q * q * g_RDj * g_RDj * E_R_Rj * (1 - E_R_Rj));
+    }
+
+    private double calculateNewRating(double initialRating, double currentRatingDeviation, double opponentRating, double opponentRatingDeviation, double result, double d2) {
         // Implement rating calculation logic here based on the result
-        return initialRating + (result == MatchPlayer.Result.WIN ? 10 : result == MatchPlayer.Result.LOSS ? -10 : 0);
+        double q = Math.log(10) / Math.log(Math.E) / 400; // constant q
+
+        return initialRating + (q / (1.0 / (currentRatingDeviation * currentRatingDeviation) + 1.0 / d2)) * (calculate_g(opponentRatingDeviation) * (result - calculate_E(initialRating, opponentRating, opponentRatingDeviation)));
     }
 
-    private double calculateNewRatingDeviation(double initialRatingDeviation, MatchPlayer.Result result) {
+    private double calculateNewRatingDeviation(double initialRatingDeviation, double d2) {
         // Implement rating deviation calculation logic here
-        // This is a placeholder
-        return initialRatingDeviation * 0.9; // Example logic: Reduce deviation as more matches are played
+        return 1.0 / Math.sqrt(1.0 / (initialRatingDeviation * initialRatingDeviation) + 1.0 / d2);
     }
 
     private double calculateNewVolatility(double initialVolatility, MatchPlayer.Result result) {
@@ -268,8 +312,8 @@ public class MatchService {
             winner.setPoints(winner.getPoints() + 1);
         }
 
+        calculateAndUpdatePlayerRatings(winner, loser, isDraw);
         match.setStatus(Match.MatchStatus.COMPLETED);
-
         matchRepository.save(match);
         matchPlayerRepository.saveAll(participants);
 
