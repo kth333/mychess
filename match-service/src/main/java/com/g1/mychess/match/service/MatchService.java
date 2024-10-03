@@ -167,8 +167,9 @@ public class MatchService {
     private List<Match> createSwissSystemMatches(List<MatchPlayer> players, Long tournamentId, int roundNumber) {
         List<Match> matches = new ArrayList<>();
 
-        players.sort(Comparator.comparingDouble(MatchPlayer::getPoints).reversed()
-                .thenComparing(MatchPlayer::getInitialRating).reversed());
+        players.sort(Comparator.comparingDouble(MatchPlayer::getPoints)
+                .thenComparing(MatchPlayer::getInitialRating)
+                .reversed());
 
         Set<Long> pairedPlayers = new HashSet<>(); // To track already paired players in this round
 
@@ -240,9 +241,11 @@ public class MatchService {
     public void prepareNextRound(Long tournamentId) {
         TournamentDTO tournament = getTournamentDetails(tournamentId);
 
-        int currentRound = determineCurrentRound(tournamentId) + 1;
+        int currentRound = tournament.getCurrentRound();
 
         List<MatchPlayer> players = getOrCreateTournamentPlayers(tournament, currentRound);
+
+        
 
         players.sort(Comparator.comparingDouble(MatchPlayer::getPoints).reversed()
                 .thenComparing(MatchPlayer::getInitialRating).reversed());
@@ -251,6 +254,9 @@ public class MatchService {
             finalizeTournament(tournamentId);
             return;
         }
+
+        currentRound = determineCurrentRound(tournamentId) + 1;
+
         List<Match> nextRoundMatches = createSwissSystemMatches(players, tournamentId, currentRound);
         matchRepository.saveAll(nextRoundMatches);
     }
