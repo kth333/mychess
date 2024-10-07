@@ -10,18 +10,22 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import com.g1.mychess.tournament.service.*;
 import org.springframework.web.bind.annotation.RestController;
 import com.g1.mychess.tournament.dto.*;
+import com.g1.mychess.tournament.util.JwtUtil;
 
 @RestController
 @RequestMapping("/api/v1/tournaments")
 public class TournamentController {
     private final TournamentService tournamentService;
+    private final JwtUtil jwtUtil;
 
-    public TournamentController(TournamentService tournamentService) {
+    public TournamentController(TournamentService tournamentService, JwtUtil jwtUtil) {
         this.tournamentService = tournamentService;
+        this.jwtUtil = jwtUtil;
     }
 
     @PostMapping("/admin/create")
@@ -59,8 +63,13 @@ public class TournamentController {
         return tournamentService.prepareNextRound(tournamentId, request);
     }
 
-    @PostMapping("/player/signup/{tournamentId}/{playerId}")
-    public ResponseEntity<String> signUpToTournament(@PathVariable Long tournamentId, @PathVariable Long playerId) {
+    @PostMapping("/player/signup/{tournamentId}")
+    public ResponseEntity<String> signUpToTournament(@PathVariable Long tournamentId, @RequestHeader(value = "Authorization", required = true) String authorizationHeader) {
+        String token = null;
+        if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
+            token = authorizationHeader.substring(7); // Remove "Bearer " prefix
+        }
+        Long playerId = jwtUtil.extractUserId(token);
         return tournamentService.signUpToTournament(tournamentId, playerId);
     }
 }

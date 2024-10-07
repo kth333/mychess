@@ -17,11 +17,25 @@ class TournamentDetails extends Component {
         await this.fetchData();
     }
 
+    signUp = async () => {
+        const { id } = this.state.tournament;
+        try {
+            await TournamentService.signUp(id);
+            // Redirect to player profile after successful sign up
+            
+        } catch (error) {
+            console.error("Failed to sign up for tournament", error);
+            alert("Failed to sign up for tournament\nReason: " + error.response.data);
+        }
+        // this.props.navigate('/profile');
+    };
+
     fetchData = async () => {
         const { name } = this.props.params;
     
         try {
           const res = await TournamentService.getTournamentByName(name);
+          console.log("Tournament data:", res.data);
           this.setState({ tournament: res.data });
         } catch (error) {
           console.error("Failed to fetch tournament", error);
@@ -30,6 +44,8 @@ class TournamentDetails extends Component {
 
     render() {
         const { tournament } = this.state;
+        const userRole = sessionStorage.getItem("role");
+        const isPlayer = userRole === 'ROLE_PLAYER';
 
         if (!tournament) {
             return <p>Loading...</p>; // Display loading if tournament data is not yet fetched
@@ -107,7 +123,7 @@ class TournamentDetails extends Component {
                         </p>
                     </div>
 
-                    <Button className="btn btn-primary mt-6">
+                    <Button className="btn btn-primary mt-6" onClick={this.signUp} disabled={!isPlayer}>
                         Sign Up
                     </Button>
                 </Card>

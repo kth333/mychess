@@ -9,11 +9,12 @@ let ProtectedTournamentAPI = axios.create({
   timeout: 100000,
 });
 
-ProtectedTournamentAPI.defaults.headers.common['Authorization'] = `Bearer ${sessionStorage.getItem("token")}`;
-
-// Interceptor to log request details
 ProtectedTournamentAPI.interceptors.request.use(
   (config) => {
+    const token = sessionStorage.getItem("token");
+    if (token) {
+      config.headers['Authorization'] = `Bearer ${token}`;
+    }
     console.log('Request Headers:', config.headers);
     return config;
   },

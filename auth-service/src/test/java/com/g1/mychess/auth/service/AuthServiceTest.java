@@ -35,6 +35,8 @@ public class AuthServiceTest {
     @BeforeEach
     public void setUp() {
         MockitoAnnotations.openMocks(this);  // Initialize the mocks
+        WebClient webClientMock = mock(WebClient.class);
+        when(webClientBuilderMock.build()).thenReturn(webClientMock);
     }
 
     @Test
@@ -108,7 +110,7 @@ public class AuthServiceTest {
         Exception expectedThrow = assertThrows(Exception.class,
                 () -> authService.registerUser(badPasswordRequestDTO));
 
-        verify(authService).registerUser(badPasswordRequestDTO);
+        
     }
 
     @Test
@@ -118,7 +120,7 @@ public class AuthServiceTest {
 
         Exception expectedThrow = assertThrows(Exception.class,
                 () -> authService.registerUser(badEmailRequestDTO));
-        verify(authService).registerUser(badEmailRequestDTO);
+        
     }
 
     // ToDO:

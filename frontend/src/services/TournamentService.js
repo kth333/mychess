@@ -13,6 +13,10 @@ class TournamentService {
     async getTournamentByName(tournamentName) {
       return await TournamentAPI.get(`/tournaments/public/get/${tournamentName}`);
     }
+
+    async signUp(tournamentId) {
+      return await ProtectedTournamentAPI.post(`/tournaments/player/signup/${tournamentId}`);
+  }
     
 
 }
