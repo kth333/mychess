@@ -11,4 +11,16 @@ let ProtectedTournamentAPI = axios.create({
 
 ProtectedTournamentAPI.defaults.headers.common['Authorization'] = `Bearer ${sessionStorage.getItem("token")}`;
 
+// Interceptor to log request details
+ProtectedTournamentAPI.interceptors.request.use(
+  (config) => {
+    console.log('Request Headers:', config.headers);
+    return config;
+  },
+  (error) => {
+    console.error('Request Error:', error);
+    return Promise.reject(error);
+  }
+);
+
 export { ProtectedTournamentAPI };
