@@ -6,6 +6,10 @@ class TournamentService {
       return await ProtectedTournamentAPI.post("/tournaments/admin/create", tournament);
     }
 
+    async updateTournament(tournament) {
+      return await ProtectedTournamentAPI.put("/tournaments/admin/update", tournament);
+    }
+
     async getAllTournaments() {
       return await TournamentAPI.get("/tournaments/public/all");
     }
