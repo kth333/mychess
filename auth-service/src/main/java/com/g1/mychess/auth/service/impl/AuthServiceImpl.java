@@ -47,7 +47,7 @@ public class AuthServiceImpl implements AuthService {
     public ResponseEntity<String> registerUser(RegisterRequestDTO registerRequestDTO) {
         String password = registerRequestDTO.getPassword();
 
-        if (isValidPassword(password)) {
+        if (!isValidPassword(password)) {
             throw new InvalidPasswordException("Password must be at least 8 characters long and contain at least one number.");
         }
 

@@ -20,7 +20,15 @@ class TournamentService {
 
     async signUp(tournamentId) {
       return await ProtectedTournamentAPI.post(`/tournaments/player/signup/${tournamentId}`);
-  }
+    }
+
+    async startTournament(tournamentId) {
+      return await ProtectedTournamentAPI.post(`/tournaments/admin/start/${tournamentId}`);
+    }
+
+    async prepareNextRound(tournamentId) {
+      return await ProtectedTournamentAPI.post(`/tournaments/admin/next-round/${tournamentId}`);
+    }
     
 
 }

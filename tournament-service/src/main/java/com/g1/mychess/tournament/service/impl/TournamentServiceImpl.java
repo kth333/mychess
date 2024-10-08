@@ -117,9 +117,12 @@ public class TournamentServiceImpl implements TournamentService {
                 .orElseThrow(() -> new IllegalArgumentException("Tournament not found with ID: " + tournamentDTO.getId()));
 
         String jwtToken = request.getHeader("Authorization").substring(7);
-        Long userId = jwtUtil.extractUserId(jwtToken);
+        Long adminId = jwtUtil.extractUserId(jwtToken);
+        if (tournament.getAdminId() != adminId) {
+            throw new UnauthorizedActionException("Only the tournament admin can update the tournament.");
+        }
 
-        tournament.setAdminId(userId);
+        tournament.setAdminId(adminId);
         tournament.setName(tournamentDTO.getName());
         tournament.setDescription(tournamentDTO.getDescription());
         tournament.setMaxPlayers(tournamentDTO.getMaxPlayers());
@@ -201,11 +204,17 @@ public class TournamentServiceImpl implements TournamentService {
         Tournament tournament = tournamentRepository.findById(tournamentId)
                 .orElseThrow(() -> new TournamentNotFoundException("Tournament not found with id: " + tournamentId));
 
+        String jwtToken = request.getHeader("Authorization").substring(7);
+
+        Long adminId = jwtUtil.extractUserId(jwtToken);
+        if(tournament.getAdminId() != adminId) {
+            throw new UnauthorizedActionException("Only the tournament admin can start the tournament.");
+        }
+
         tournament.setCurrentRound(1);
         tournament.setStatus(Tournament.TournamentStatus.ONGOING);
         tournamentRepository.save(tournament);
 
-        String jwtToken = request.getHeader("Authorization").substring(7);
         runMatchmaking(tournamentId, jwtToken);
 
         return ResponseEntity.status(HttpStatus.OK).body("Tournament started successfully.");
