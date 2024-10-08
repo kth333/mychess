@@ -58,6 +58,9 @@ class Tournaments extends Component {
     const filteredTournaments = this.filterTournaments(tournaments);
     const paginatedTournaments = this.paginateTournaments(filteredTournaments);
 
+    const userRole = sessionStorage.getItem("role");
+    const isAdmin = userRole === 'ROLE_ADMIN';
+
     return (
       <div className="flex flex-col min-h-screen">
         <main className="flex-grow">
@@ -95,9 +98,22 @@ class Tournaments extends Component {
                       <TrophyIcon className="mr-2 h-4 w-4 text-yellow-500" />
                       Rating Range: {tournament.minRating} - {tournament.maxRating}
                     </p>
-                    <button className="mt-4 btn btn-primary w-auto font-bold" variant="outline" asChild>
-                      <a href={`/tournaments/${tournament.name}`}>View Details</a>
-                    </button>
+                    {!isAdmin ? (
+                      <button className="mt-4 btn btn-primary w-auto font-bold" variant="outline" asChild>
+                        <a href={`/tournaments/${tournament.name}`}>View Details</a>
+                      </button>
+                    ) : (
+                      <>
+                      <button className="mt-4 btn btn-primary w-auto font-bold" variant="outline" asChild>
+                        <a href={`/tournaments/${tournament.name}`}>View Details</a>
+                      </button>
+                      <button className="mt-4 btn btn-primary w-auto font-bold" variant="outline" asChild>
+                        <a href={`/update-tournament/${tournament.name}`}>Update</a>
+                      </button>
+                    </>
+                      
+                  )}
+                    
                   </CardContent>
                 </Card>
               ))}

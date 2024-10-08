@@ -10,6 +10,7 @@ import CreateTournament from './components/tournaments/CreateTournament';
 import Profile from './components/Profile';
 import TournamentDetails from './components/tournaments/TournamentDetails';
 import ProtectedRoute from './components/ProtectedRoute';
+import UpdateTournament from './components/tournaments/UpdateTournament';
 
 function App() {
   return (
@@ -25,6 +26,7 @@ function App() {
             
             <Route element={<ProtectedRoute />}>
               <Route exact path="/create-tournament" element={<CreateTournament />} />
+              <Route exact path="/update-tournament/:name" element={<UpdateTournament />} />
               <Route exact path="/profile" element={<Profile/>} />
             </Route>
 

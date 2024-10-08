@@ -20,8 +20,8 @@ class TournamentDetails extends Component {
     signUp = async () => {
         const { id } = this.state.tournament;
         try {
-            await TournamentService.signUp(id);
-            // Redirect to player profile after successful sign up
+            await TournamentService.signUp(id).then((res) => {console.log("register success");});
+            
             
         } catch (error) {
             console.error("Failed to sign up for tournament", error);
