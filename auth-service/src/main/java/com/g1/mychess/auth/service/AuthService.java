@@ -44,6 +44,15 @@ public class AuthService {
         this.jwtUtil = jwtUtil;
     }
 
+    // Setter Injections to allow Integration Testing
+    public void setPlayerServiceUrl(String url) {
+        this.playerServiceUrl = url;
+    }
+    // Setter Injections to allow Integration Testing
+    public void setEmailServiceUrl(String url) {
+        this.emailServiceUrl = url;
+    }
+
     public ResponseEntity<String> registerUser(RegisterRequestDTO registerRequestDTO) {
 
         String password = registerRequestDTO.getPassword();
@@ -134,18 +143,30 @@ public class AuthService {
         return domain.matches(DOMAIN_REGEX);
     }
 
-    public String login(String username, String password, String role) {
-        UserDTO userDTO;
-
+    // Refactored from login method
+    public UserDTO fetchUserDTO(String username, String role){
         if (role.equals("ROLE_PLAYER")) {
             // Fetch player details from player service
-            userDTO = fetchPlayerFromPlayerService(username);
+            return fetchPlayerFromPlayerService(username);
         } else if (role.equals("ROLE_ADMIN")) {
             // Fetch admin details from admin service
-            userDTO = fetchAdminFromAdminService(username);
+            return fetchAdminFromAdminService(username);
         } else {
             throw new InvalidRoleException("Invalid role provided.");
         }
+    }
+
+    // Refactored from login method
+    public UserDetails getUserDetails(UserDTO userDTO,String role) {
+        return new org.springframework.security.core.userdetails.User(
+                userDTO.getUsername(),
+                userDTO.getPassword(),
+                Collections.singleton(new org.springframework.security.core.authority.SimpleGrantedAuthority(role))
+        );
+    }
+
+    public String login(String username, String password, String role) {
+        UserDTO userDTO = fetchUserDTO(username, role);
 
         if (userDTO == null) {
             throw new UserNotFoundException("User not found.");
@@ -164,11 +185,7 @@ public class AuthService {
         }
 
         // Generate JWT token after successful authentication
-        UserDetails userDetails = new org.springframework.security.core.userdetails.User(
-                userDTO.getUsername(),
-                userDTO.getPassword(),
-                Collections.singleton(new org.springframework.security.core.authority.SimpleGrantedAuthority(role))
-        );
+        UserDetails userDetails = getUserDetails(userDTO,role);
 
         return jwtUtil.generateToken(userDetails, userDTO.getUserId());
     }
