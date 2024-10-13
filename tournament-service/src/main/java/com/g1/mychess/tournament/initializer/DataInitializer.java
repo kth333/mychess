@@ -65,7 +65,7 @@ public class DataInitializer implements CommandLineRunner {
 
         Tournament tournament2 = new Tournament();
         tournament2.setAdminId(2L);
-        tournament2.setName("Women’s Grand Prix 2025");
+        tournament2.setName("Women Grand Prix 2025");
         tournament2.setDescription("An exclusive tournament for female chess players");
         tournament2.setMaxPlayers(32);
         tournament2.setStartDateTime(LocalDateTime.of(2025, 6, 10, 9, 0));
