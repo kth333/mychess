@@ -98,6 +98,9 @@ public class MatchServiceImpl implements MatchService {
             player1.setMatch(match);
             player2.setMatch(match);
 
+            player1.setOpponentId(player2.getPlayerId());
+            player2.setOpponentId(player1.getPlayerId());
+
             matches.add(match);
 
             pairedPlayers.add(player1.getPlayerId());
@@ -138,6 +141,30 @@ public class MatchServiceImpl implements MatchService {
         matchPlayerRepository.save(byePlayer);
     }
 
+    public List<MatchPlayer> getAllOpponents(List<MatchPlayer> matchPlayerList) {
+        List<MatchPlayer> opponents = new ArrayList<>();
+
+        for (MatchPlayer matchPlayer : matchPlayerList) {
+            opponents.add(matchPlayerRepository.findByPlayerIdAndMatchId(matchPlayer.getOpponentId(), matchPlayer.getMatch().getId()));
+        }
+
+        return opponents;
+    }
+
+    public double[] getAllResults(List<MatchPlayer> matchPlayerList) {
+        double[] result = new double[matchPlayerList.size()];
+        for (int i = 0; i < matchPlayerList.size(); i++) {
+            if (matchPlayerList.get(i).getResult() == MatchPlayer.Result.WIN) {
+                result[i] = 1.0;
+            } else if (matchPlayerList.get(i).getResult() == MatchPlayer.Result.DRAW) {
+                result[i] = 0.5;
+            } else {
+                result[i] = 0.0;
+            }
+        }
+        return result;
+    }
+
     @Override
     @Transactional
     public void prepareNextRound(Long tournamentId) {
@@ -151,6 +178,14 @@ public class MatchServiceImpl implements MatchService {
                 .reversed());
 
         if (isTournamentOver(tournament)) {
+            List<MatchPlayer> matchPlayers = matchPlayerRepository.findByMatch_TournamentIdAndCurrentRound(tournamentId, tournament.getMaxRounds()); // what if matchPlayer is bye on last round
+            for (MatchPlayer player : matchPlayers) {
+                List<MatchPlayer> matchPlayerList = matchPlayerRepository.findByPlayerIdAndMatch_TournamentId(player.getPlayerId(), tournamentId);
+                List<MatchPlayer> opponents = getAllOpponents(matchPlayerList);
+                double[] results = getAllResults(matchPlayerList);
+                calculatePlayerRatings(player, opponents, results);
+            }
+            updatePlayerRatings(matchPlayers);
             finalizeTournament(tournamentId);
             return;
         }
@@ -217,7 +252,6 @@ public class MatchServiceImpl implements MatchService {
             winner.setPoints(winner.getPoints() + 1);
         }
 
-        calculateAndUpdatePlayerRatings(winner, loser, isDraw);
         match.setStatus(Match.MatchStatus.COMPLETED);
         matchRepository.save(match);
         matchPlayerRepository.saveAll(participants);
@@ -225,50 +259,43 @@ public class MatchServiceImpl implements MatchService {
         return ResponseEntity.ok("Match completed successfully.");
     }
 
-    private void calculateAndUpdatePlayerRatings(MatchPlayer winner, MatchPlayer loser, boolean isDraw) {
-        // Implement based on Glicko-2 or other rating system
-        double winnerScore = 1;
-        double loserScore = 0;
+    public void calculatePlayerRatings(MatchPlayer player, List<MatchPlayer> opponents, double[] result) {
+        // converting rating and rating deviation to glicko-2 scale
+        double R = (player.getInitialRating() - 1500) / 173.7178;
+        double RD = player.getInitialRatingDeviation() / 173.7178;
 
-        if (isDraw) {
-            winnerScore = 0.5;
-            loserScore = 0.5;
+        double[] opponents_rating = new double[opponents.size()];
+        double[] opponents_RD = new double[opponents.size()];
+
+        for (int j = 0; j < opponents.size(); j++) {
+            opponents_rating[j] = (opponents.get(j).getInitialRating() - 1500) / 173.7178;
+            opponents_RD[j] = opponents.get(j).getInitialVolatility() / 173.7178;
         }
 
-        double winner_d2 = calculate_D2(winner.getInitialRating(), loser.getInitialRating(), loser.getInitialRatingDeviation());
-        double winnerNewGlickoRating = calculateNewRating(winner.getInitialRating(), winner.getInitialRatingDeviation(), loser.getInitialRating(), loser.getInitialRatingDeviation(), winnerScore, winner_d2);
-        double winnerNewRatingDeviation = calculateNewRatingDeviation(winner.getInitialRatingDeviation(), winner_d2);
+        double delta = calculate_delta(R, opponents_rating, opponents_RD, result);
+        double v = calculate_v(R, opponents_rating, opponents_RD);
 
-        double loser_d2 = calculate_D2(loser.getInitialRating(), winner.getInitialRating(), winner.getInitialRatingDeviation());
-        double loserNewGlickoRating = calculateNewRating(loser.getInitialRating(), loser.getInitialRatingDeviation(), winner.getInitialRating(), winner.getInitialRatingDeviation(), loserScore, loser_d2);
-        double loserNewRatingDeviation = calculateNewRatingDeviation(loser.getInitialRatingDeviation(), loser_d2);
+        double newVolatility = calculate_volatility(RD, player.getInitialVolatility(), v, delta * delta);
+        double newRatingDeviation = calculateNewRatingDeviation(RD, newVolatility, v);
+        double newRating = calculateNewRating(R, RD, delta, v);
 
-        winner.setNewRating(winnerNewGlickoRating);
-        winner.setNewRatingDeviation(winnerNewRatingDeviation);
+        player.setNewVolatility(newVolatility);
+        player.setNewRatingDeviation(173.7178 * newRatingDeviation);
+        player.setNewRating(173.7178 * newRating + 1500);
+    }
 
-        loser.setNewRating(loserNewGlickoRating);
-        loser.setNewRatingDeviation(loserNewRatingDeviation);
-
-        PlayerRatingUpdateDTO winnerRatingUpdate = new PlayerRatingUpdateDTO(
-                winner.getPlayerId(),
-                winnerNewGlickoRating,
-                winnerNewRatingDeviation,
-                winner.getInitialVolatility(),
-                winner.getMatch().getTournamentId(),
-                winner.getResult().name()
-        );
-
-        PlayerRatingUpdateDTO loserRatingUpdate = new PlayerRatingUpdateDTO(
-                loser.getPlayerId(),
-                loserNewGlickoRating,
-                loserNewRatingDeviation,
-                loser.getInitialVolatility(),
-                loser.getMatch().getTournamentId(),
-                loser.getResult().name()
-        );
-
-        updatePlayerProfileAndRatingHistory(winnerRatingUpdate);
-        updatePlayerProfileAndRatingHistory(loserRatingUpdate);
+    public void updatePlayerRatings(List<MatchPlayer> players) {
+        for (MatchPlayer player : players) {
+            PlayerRatingUpdateDTO playerRatingUpdate = new PlayerRatingUpdateDTO(
+                    player.getPlayerId(),
+                    player.getNewRating(),
+                    player.getNewRatingDeviation(),
+                    player.getNewVolatility(),
+                    player.getMatch().getTournamentId(),
+                    player.getResult().name()
+            );
+            updatePlayerProfileAndRatingHistory(playerRatingUpdate);
+        }
     }
 
     public static double calculate_g(double RD) {
@@ -276,24 +303,87 @@ public class MatchServiceImpl implements MatchService {
     }
 
     public static double calculate_E(double R, double Rj, double RDj) {
-        return 1.0 / (1.0 + Math.pow(10.0, -calculate_g(RDj) * (R - Rj) / 400.0));
+        return 1.0 / (1.0 + Math.exp(-calculate_g(RDj) * (R - Rj)));
     }
 
-    public static double calculate_D2(double R, double opponentsRating, double opponentsRatingDeviation) {
-        double q = Math.log(10) / Math.log(Math.E) / 400;
-        double g_RDj = calculate_g(opponentsRatingDeviation);
-        double E_R_Rj = calculate_E(R, opponentsRating, opponentsRatingDeviation);
-        return 1.0 / (q * q * g_RDj * g_RDj * E_R_Rj * (1 - E_R_Rj));
+    public static double calculate_v(double R, double[] opponents_rating, double[] opponents_RD) {
+        double v_inverse = 0;
+        for (int j = 0; j < opponents_rating.length; j++) {
+            double Rj = opponents_rating[j];
+            double RDj = opponents_RD[j];
+            double g_RDj = calculate_g(RDj);
+            double E_R_Rj = calculate_E(R, Rj, RDj);
+            v_inverse += g_RDj * g_RDj * E_R_Rj * (1 - E_R_Rj);
+        }
+        return 1 / v_inverse;
     }
 
-    private double calculateNewRating(double initialRating, double currentRatingDeviation, double opponentRating, double opponentRatingDeviation, double result, double d2) {
-        double q = Math.log(10) / Math.log(Math.E) / 400;
-
-        return initialRating + (q / (1.0 / (currentRatingDeviation * currentRatingDeviation) + 1.0 / d2)) * (calculate_g(opponentRatingDeviation) * (result - calculate_E(initialRating, opponentRating, opponentRatingDeviation)));
+    public static double calculate_delta(double R, double[] opponents_rating, double[] opponents_RD, double[] results) {
+        double temp = 0;
+        for (int j = 0; j < opponents_rating.length; j++) {
+            double Rj = opponents_rating[j];
+            double RDj = opponents_RD[j];
+            double g_RDj = calculate_g(RDj);
+            double E_R_Rj = calculate_E(R, Rj, RDj);
+            temp += g_RDj * (results[j] - E_R_Rj);
+        }
+        return calculate_v(R, opponents_rating, opponents_RD) * temp;
     }
 
-    private double calculateNewRatingDeviation(double initialRatingDeviation, double d2) {
-        return 1.0 / Math.sqrt(1.0 / (initialRatingDeviation * initialRatingDeviation) + 1.0 / d2);
+    public static double calculate_function(double x, double delta_squared, double RD_squared, double v, double A) {
+        double expX = Math.exp(x);
+
+        double numerator = expX * Math.pow(delta_squared - RD_squared - v - expX, 2);
+        double denominator = Math.pow(RD_squared + v + expX, 2);
+
+        double firstPart = numerator / denominator;
+        double secondPart = (x - A) / (0.5 * 0.5);
+
+        return firstPart - secondPart;
+    }
+
+    public static double calculate_volatility(double RD, double volatility, double v, double delta_squared) {
+        double A = Math.log(Math.pow(volatility, 2));
+        double B;
+        double convergence_tolerance = 0.000001;
+
+        if (delta_squared > (RD * RD) + v) {
+            B = Math.log(delta_squared - (RD * RD) - v);
+        } else {
+            int k = 1;
+            while (Math.log(A - k * 0.5) < 0) { // tau is set at 0.5
+                k++;
+            }
+            B = A - k * 0.5;
+        }
+
+        double f_A = calculate_function(A, delta_squared, RD * RD, v, A);
+        double f_B = calculate_function(B, delta_squared, RD * RD, v, A);
+
+        while (Math.abs(B - A) > convergence_tolerance) {
+            double C = A + ((A - B) * f_A) / (f_B - f_A);
+            double f_C = calculate_function(C, delta_squared, RD * RD, v, A);
+
+            if (f_C * f_B <= 0) {
+                A = B;
+                f_A = f_B;
+            } else {
+                f_A /= 2;
+            }
+            B = C;
+            f_B = f_C;
+        }
+
+        return Math.exp(A / 2);
+    }
+
+    private double calculateNewRatingDeviation(double RD, double newVolatility, double v) {
+        double pre_rating_RD = Math.sqrt(RD * RD + newVolatility * newVolatility);
+        return 1 / Math.sqrt((1 / pre_rating_RD * pre_rating_RD) + (1 / v));
+    }
+
+    private double calculateNewRating(double R, double newRD, double delta, double v) {
+        return R + newRD * newRD * delta / v;
     }
 
     private void updatePlayerProfileAndRatingHistory(PlayerRatingUpdateDTO ratingUpdate) {

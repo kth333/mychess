@@ -17,6 +17,9 @@ public class MatchPlayer {
     @Column(name = "player_id", nullable = false)
     private Long playerId;
 
+    @Column(name = "opponent_id", nullable = false)
+    private Long opponentId;
+
     @Column(name = "current_round", nullable = false)
     private int currentRound;
 
@@ -78,43 +81,85 @@ public class MatchPlayer {
         this.match = match;
     }
 
-    public Long getPlayerId() { return playerId; }
+    public Long getPlayerId() {
+        return playerId;
+    }
 
-    public void setPlayerId(Long playerId) { this.playerId = playerId; }
+    public void setPlayerId(Long playerId) {
+        this.playerId = playerId;
+    }
 
-    public int getCurrentRound() { return currentRound; }
+    public Long getOpponentId() {
+        return opponentId;
+    }
 
-    public void setCurrentRound(int currentRound) { this.currentRound = currentRound; }
+    public void setOpponentId(Long opponentId) {
+        this.opponentId = opponentId;
+    }
 
-    public double getPoints() { return points; }
+    public int getCurrentRound() {
+        return currentRound;
+    }
 
-    public void setPoints(double points) { this.points = points; }
+    public void setCurrentRound(int currentRound) {
+        this.currentRound = currentRound;
+    }
 
-    public double getInitialRating() { return initialRating; }
+    public double getPoints() {
+        return points;
+    }
 
-    public void setInitialRating(double initialRating) { this.initialRating = initialRating; }
+    public void setPoints(double points) {
+        this.points = points;
+    }
 
-    public double getInitialRatingDeviation() { return initialRatingDeviation; }
+    public double getInitialRating() {
+        return initialRating;
+    }
 
-    public void setInitialRatingDeviation(double initialRatingDeviation) { this.initialRatingDeviation = initialRatingDeviation; }
+    public void setInitialRating(double initialRating) {
+        this.initialRating = initialRating;
+    }
 
-    public double getInitialVolatility() { return initialVolatility; }
+    public double getInitialRatingDeviation() {
+        return initialRatingDeviation;
+    }
 
-    public void setInitialVolatility(double initialVolatility) { this.initialVolatility = initialVolatility; }
+    public void setInitialRatingDeviation(double initialRatingDeviation) {
+        this.initialRatingDeviation = initialRatingDeviation;
+    }
 
-    public double getNewRating() { return newRating; }
+    public double getInitialVolatility() {
+        return initialVolatility;
+    }
 
-    public void setNewRating(double newRating) { this.newRating = newRating; }
+    public void setInitialVolatility(double initialVolatility) {
+        this.initialVolatility = initialVolatility;
+    }
 
-    public double getNewRatingDeviation() { return newRatingDeviation; }
+    public double getNewRating() {
+        return newRating;
+    }
+
+    public void setNewRating(double newRating) {
+        this.newRating = newRating;
+    }
+
+    public double getNewRatingDeviation() {
+        return newRatingDeviation;
+    }
 
     public void setNewRatingDeviation(double newRatingDeviation) {
         this.newRatingDeviation = newRatingDeviation;
     }
 
-    public double getNewVolatility() { return newVolatility; }
+    public double getNewVolatility() {
+        return newVolatility;
+    }
 
-    public void setNewVolatility(double newVolatility) { this.newVolatility = newVolatility; }
+    public void setNewVolatility(double newVolatility) {
+        this.newVolatility = newVolatility;
+    }
 
     public Double getPredictedWinRate() {
         return predictedWinRate;
