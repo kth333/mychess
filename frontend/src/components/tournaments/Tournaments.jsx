@@ -105,14 +105,11 @@ class Tournaments extends Component {
                     ) : (
                       <>
                       <button className="mt-4 btn btn-primary w-auto font-bold" variant="outline" asChild>
-                        <a href={`/tournaments/${tournament.name}`}>View Details</a>
-                      </button>
-                      <button className="mt-4 btn btn-primary w-auto font-bold" variant="outline" asChild>
-                        <a href={`/update-tournament/${tournament.name}`}>Update</a>
+                        <a href={`/tournaments/${tournament.name}`}>Manage</a>
                       </button>
                     </>
                       
-                  )}
+                    )}
                     
                   </CardContent>
                 </Card>

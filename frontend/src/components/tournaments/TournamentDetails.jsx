@@ -30,6 +30,29 @@ class TournamentDetails extends Component {
         // this.props.navigate('/profile');
     };
 
+    startTournament = async () => {
+        const { id } = this.state.tournament;
+        try{
+            await TournamentService.startTournament(id).then((res) => {
+                console.log("start success");
+                window.location.reload();
+            });
+        } catch (error) {
+            console.error("Failed to start tournament", error);
+            alert("Failed to start tournament\nReason: " + error.response.data);
+        }
+    };
+
+    startNextRound = async () => {
+        const { id } = this.state.tournament;
+        try{
+            await TournamentService.startNextRound(id).then((res) => {console.log("next round success");});
+        } catch (error){
+            console.error("Failed to start next round", error);
+            alert("Failed to start next round\nReason: " + error.response.data);
+        }
+    };
+
     fetchData = async () => {
         const { name } = this.props.params;
     
@@ -46,12 +69,14 @@ class TournamentDetails extends Component {
         const { tournament } = this.state;
         const userRole = sessionStorage.getItem("role");
         const isPlayer = userRole === 'ROLE_PLAYER';
+        
 
         if (!tournament) {
             return <p>Loading...</p>; // Display loading if tournament data is not yet fetched
         }
 
         const { 
+            adminId,
             name, 
             description, 
             startDateTime, 
@@ -80,6 +105,9 @@ class TournamentDetails extends Component {
                     </h2>
                     <p className="my-2 text-accent">
                         {description}
+                    </p>
+                    <p className="my-2 text-secondary">
+                        Host: admin{adminId}
                     </p>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 my-4">
@@ -123,9 +151,27 @@ class TournamentDetails extends Component {
                         </p>
                     </div>
 
-                    <Button className="btn btn-primary mt-6" onClick={this.signUp} disabled={!isPlayer}>
-                        Sign Up
-                    </Button>
+                    {isPlayer ? (
+                        <Button className="btn btn-primary mt-6" onClick={this.signUp} disabled={!isPlayer}>
+                            Sign Up
+                        </Button>
+                    ) : (
+                      <>
+                      <Button className="btn btn-primary mt-6" >
+                        <a href={`/update-tournament/${tournament.name}`}>Update</a>
+                      </Button>
+                      <Button className="btn btn-primary mt-6" onClick={this.startTournament} disabled={status === "ONGOING"}>
+                        Start tournament
+                      </Button>
+                      <Button className="btn btn-primary mt-6" onClick={this.startNextRound}>
+                        Start next round
+                      </Button>
+
+                    </>
+                      
+                    )}
+
+                    
                 </Card>
             </div>
         );
