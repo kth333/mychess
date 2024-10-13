@@ -35,4 +35,9 @@ public class AdminController {
         adminService.whitelistPlayer(whitelistDTO, request);
         return ResponseEntity.ok("Player whitelisted successfully.");
     }
+
+    @GetMapping("/health")
+    public ResponseEntity<String> healthCheck() {
+        return ResponseEntity.ok("Service is up and running");
+    }
 }

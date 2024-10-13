@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_BASE_URL = "http://localhost:8083/api/v1";
+const API_BASE_URL = "http://18.139.122.212:8083/api/v1";
 
 
 

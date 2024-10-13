@@ -72,4 +72,9 @@ public class TournamentController {
         Long playerId = jwtUtil.extractUserId(token);
         return tournamentService.signUpToTournament(tournamentId, playerId);
     }
+
+    @GetMapping("/health")
+    public ResponseEntity<String> healthCheck() {
+        return ResponseEntity.ok("Service is up and running");
+    }
 }
