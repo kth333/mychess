@@ -9,12 +9,12 @@ public class PlayerDTO {
     private String gender;
 
     // Rating details
-    private int glickoRating;
+    private double glickoRating;
     private double ratingDeviation;
     private double volatility;
 
     // Full Constructor
-    public PlayerDTO(Long id, boolean isBlacklisted, String username, int age, String gender, int glickoRating, double ratingDeviation, double volatility) {
+    public PlayerDTO(Long id, boolean isBlacklisted, String username, int age, String gender, double glickoRating, double ratingDeviation, double volatility) {
         this.id = id;
         this.isBlacklisted = isBlacklisted;
         this.username = username;
@@ -66,11 +66,11 @@ public class PlayerDTO {
         this.gender = gender;
     }
 
-    public int getGlickoRating() {
+    public double getGlickoRating() {
         return glickoRating;
     }
 
-    public void setGlickoRating(int glickoRating) {
+    public void setGlickoRating(double glickoRating) {
         this.glickoRating = glickoRating;
     }
 

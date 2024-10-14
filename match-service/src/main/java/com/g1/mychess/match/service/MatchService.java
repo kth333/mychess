@@ -1,24 +1,22 @@
 package com.g1.mychess.match.service;
 
-import com.g1.mychess.match.dto.TournamentDTO;
-import com.g1.mychess.match.model.Match;
+import com.g1.mychess.match.dto.MatchDTO;
+import com.g1.mychess.match.dto.MatchmakingDTO;
 import org.springframework.http.ResponseEntity;
 
 import java.util.List;
 
 public interface MatchService {
 
-    void runMatchmaking(Long tournamentId);
+    void runMatchmaking(MatchmakingDTO matchmakingDTO);
 
-    void prepareNextRound(Long tournamentId);
+    void prepareNextRound(MatchmakingDTO matchmakingDTO);
 
-    void finalizeTournament(Long tournamentId);
+    void finalizeTournament(MatchmakingDTO matchmakingDTO);
 
     ResponseEntity<String> completeMatch(Long matchId, Long winnerPlayerId, Long loserPlayerId, boolean isDraw);
 
-    TournamentDTO getTournamentDetails(Long tournamentId);
+    List<MatchDTO> findAllMatchByTournament(Long tournamentId);
 
-    List<Match> findAllMatchByTournament(Long tournamentId);
-
-    List<Match> findAllMatchByTournamentRound(Long tournamentId, Integer roundNumber);
+    List<MatchDTO> findAllMatchByTournamentRound(Long tournamentId, Integer roundNumber);
 }

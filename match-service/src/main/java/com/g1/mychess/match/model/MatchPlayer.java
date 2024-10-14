@@ -17,29 +17,23 @@ public class MatchPlayer {
     @Column(name = "player_id", nullable = false)
     private Long playerId;
 
+    @Column(name = "opponent_id", nullable = false)
+    private Long opponentId;
+
     @Column(name = "current_round", nullable = false)
     private int currentRound;
 
     @Column(name = "points")
     private double points;
 
-    @Column(name = "initial_rating", nullable = false)
-    private double initialRating;
+    @Column(name = "glicko_rating", nullable = false)
+    private double glickoRating;
 
-    @Column(name = "initial_rating_deviation", nullable = false)
-    private double initialRatingDeviation;
+    @Column(name = "rating_deviation", nullable = false)
+    private double ratingDeviation;
 
-    @Column(name = "initial_volatility", nullable = false)
-    private double initialVolatility;
-
-    @Column(name = "new_rating")
-    private double newRating;
-
-    @Column(name = "new_rating_deviation")
-    private double newRatingDeviation;
-
-    @Column(name = "new_volatility")
-    private double newVolatility;
+    @Column(name = "volatility", nullable = false)
+    private double volatility;
 
     @Column(name = "predicted_win_rate")
     private Double predictedWinRate;
@@ -78,43 +72,61 @@ public class MatchPlayer {
         this.match = match;
     }
 
-    public Long getPlayerId() { return playerId; }
-
-    public void setPlayerId(Long playerId) { this.playerId = playerId; }
-
-    public int getCurrentRound() { return currentRound; }
-
-    public void setCurrentRound(int currentRound) { this.currentRound = currentRound; }
-
-    public double getPoints() { return points; }
-
-    public void setPoints(double points) { this.points = points; }
-
-    public double getInitialRating() { return initialRating; }
-
-    public void setInitialRating(double initialRating) { this.initialRating = initialRating; }
-
-    public double getInitialRatingDeviation() { return initialRatingDeviation; }
-
-    public void setInitialRatingDeviation(double initialRatingDeviation) { this.initialRatingDeviation = initialRatingDeviation; }
-
-    public double getInitialVolatility() { return initialVolatility; }
-
-    public void setInitialVolatility(double initialVolatility) { this.initialVolatility = initialVolatility; }
-
-    public double getNewRating() { return newRating; }
-
-    public void setNewRating(double newRating) { this.newRating = newRating; }
-
-    public double getNewRatingDeviation() { return newRatingDeviation; }
-
-    public void setNewRatingDeviation(double newRatingDeviation) {
-        this.newRatingDeviation = newRatingDeviation;
+    public Long getPlayerId() {
+        return playerId;
     }
 
-    public double getNewVolatility() { return newVolatility; }
+    public void setPlayerId(Long playerId) {
+        this.playerId = playerId;
+    }
 
-    public void setNewVolatility(double newVolatility) { this.newVolatility = newVolatility; }
+    public Long getOpponentId() {
+        return opponentId;
+    }
+
+    public void setOpponentId(Long opponentId) {
+        this.opponentId = opponentId;
+    }
+
+    public int getCurrentRound() {
+        return currentRound;
+    }
+
+    public void setCurrentRound(int currentRound) {
+        this.currentRound = currentRound;
+    }
+
+    public double getPoints() {
+        return points;
+    }
+
+    public void setPoints(double points) {
+        this.points = points;
+    }
+
+    public double getGlickoRating() {
+        return glickoRating;
+    }
+
+    public void setGlickoRating(double glickoRating) {
+        this.glickoRating = glickoRating;
+    }
+
+    public double getRatingDeviation() {
+        return ratingDeviation;
+    }
+
+    public void setRatingDeviation(double ratingDeviation) {
+        this.ratingDeviation = ratingDeviation;
+    }
+
+    public double getVolatility() {
+        return volatility;
+    }
+
+    public void setVolatility(double volatility) {
+        this.volatility = volatility;
+    }
 
     public Double getPredictedWinRate() {
         return predictedWinRate;

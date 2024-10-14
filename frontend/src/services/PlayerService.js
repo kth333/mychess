@@ -6,7 +6,7 @@ class PlayerService {
         return ProtectedPlayerAPI.get("/profile/");
     }
 
-  
+
 }
 
 export default new PlayerService();

@@ -47,7 +47,7 @@ public class Profile {
     private CustomChessRank rank;
 
     @Column(name = "glicko_rating", nullable = false)
-    private int glickoRating = 1500;
+    private double glickoRating = 1500;
 
     @Column(name = "rating_deviation", nullable = false)
     private double ratingDeviation = 350.0;
@@ -153,11 +153,11 @@ public class Profile {
         this.rank = rank;
     }
 
-    public int getGlickoRating() {
+    public double getGlickoRating() {
         return glickoRating;
     }
 
-    public void setGlickoRating(int glickoRating) {
+    public void setGlickoRating(double glickoRating) {
         this.glickoRating = glickoRating;
     }
 

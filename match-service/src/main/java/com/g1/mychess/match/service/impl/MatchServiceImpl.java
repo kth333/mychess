@@ -1,14 +1,15 @@
 package com.g1.mychess.match.service.impl;
 
-import com.g1.mychess.match.dto.PlayerRatingUpdateDTO;
-import com.g1.mychess.match.dto.TournamentDTO;
+import com.g1.mychess.match.dto.*;
 import com.g1.mychess.match.exception.TournamentNotFoundException;
 import com.g1.mychess.match.exception.TournamentRoundNotFoundException;
 import com.g1.mychess.match.model.Match;
 import com.g1.mychess.match.model.MatchPlayer;
 import com.g1.mychess.match.repository.MatchRepository;
 import com.g1.mychess.match.repository.MatchPlayerRepository;
+import com.g1.mychess.match.service.Glicko2RatingService;
 import com.g1.mychess.match.service.MatchService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -26,6 +27,7 @@ public class MatchServiceImpl implements MatchService {
     private final MatchRepository matchRepository;
     private final MatchPlayerRepository matchPlayerRepository;
     private final WebClient.Builder webClientBuilder;
+    private final Glicko2RatingService glicko2RatingService;
 
     @Value("${player.service.url}")
     private String playerServiceUrl;
@@ -33,155 +35,141 @@ public class MatchServiceImpl implements MatchService {
     @Value("${tournament.service.url}")
     private String tournamentServiceUrl;
 
-    public MatchServiceImpl(MatchRepository matchRepository, MatchPlayerRepository matchPlayerRepository, WebClient.Builder webClientBuilder) {
+    @Autowired
+    public MatchServiceImpl(MatchRepository matchRepository, MatchPlayerRepository matchPlayerRepository, WebClient.Builder webClientBuilder, Glicko2RatingService glicko2RatingService) {
         this.matchRepository = matchRepository;
         this.matchPlayerRepository = matchPlayerRepository;
         this.webClientBuilder = webClientBuilder;
+        this.glicko2RatingService = glicko2RatingService;
     }
 
     @Override
     @Transactional
-    public void runMatchmaking(Long tournamentId) {
-        TournamentDTO tournament = getTournamentDetails(tournamentId);
+    public void runMatchmaking(MatchmakingDTO matchmakingDTO) {
+        Long tournamentId = matchmakingDTO.getTournamentId();
+        int currentRound = matchmakingDTO.getCurrentRound();
+        Set<TournamentPlayerDTO> participants = matchmakingDTO.getParticipants();
 
-        int currentRound = 1;
-        List<MatchPlayer> players = getOrCreateTournamentPlayers(tournament, currentRound);
+        List<MatchPlayer> players = initializePlayers(participants, currentRound);
 
         List<Match> newMatches = createSwissSystemMatches(players, tournamentId, currentRound);
 
         matchRepository.saveAll(newMatches);
+        saveMatchPlayers(newMatches);
     }
 
-    private List<MatchPlayer> getOrCreateTournamentPlayers(TournamentDTO tournament, int roundNumber) {
-        List<MatchPlayer> existingPlayers = matchPlayerRepository.findByMatch_TournamentIdAndCurrentRound(tournament.getId(), roundNumber);
-
-        if (existingPlayers.isEmpty()) {
-            return tournament.getParticipants().stream()
-                    .map(participant -> {
-                        MatchPlayer player = new MatchPlayer();
-                        player.setPlayerId(participant.getPlayerId());
-                        player.setInitialRating(participant.getGlickoRating());
-                        player.setCurrentRound(roundNumber);
-                        player.setPoints(0);
-                        return player;
-                    })
-                    .collect(Collectors.toList());
-        } else {
-            return existingPlayers;
-        }
-    }
-
-    private List<Match> createSwissSystemMatches(List<MatchPlayer> players, Long tournamentId, int roundNumber) {
+    private List<Match> createSwissSystemMatches(List<MatchPlayer> players, Long tournamentId, int currentRound) {
         List<Match> matches = new ArrayList<>();
-
-        players.sort(Comparator.comparingDouble(MatchPlayer::getPoints)
-                .thenComparing(MatchPlayer::getInitialRating)
-                .reversed());
+        players = sortPlayersByPointsAndRating(players);
 
         Set<Long> pairedPlayers = new HashSet<>();
-
         for (int i = 0; i < players.size() - 1; i += 2) {
-            MatchPlayer player1 = createNewMatchPlayer(players.get(i), roundNumber);
-            MatchPlayer player2 = createNewMatchPlayer(players.get(i + 1), roundNumber);
-
-            if (pairedPlayers.contains(player1.getPlayerId()) || pairedPlayers.contains(player2.getPlayerId())) {
-                continue;
+            Match match = createMatch(players.get(i), players.get(i + 1), tournamentId, currentRound, pairedPlayers);
+            if (match != null) {
+                matches.add(match);
             }
-
-            Match match = new Match();
-            match.setTournamentId(tournamentId);
-            match.setScheduledTime(LocalDateTime.now().plusDays(1));
-            match.setStatus(Match.MatchStatus.SCHEDULED);
-            match.setRoundNumber(roundNumber);
-
-            match.setParticipants(new HashSet<>(Arrays.asList(player1, player2)));
-            player1.setMatch(match);
-            player2.setMatch(match);
-
-            matches.add(match);
-
-            pairedPlayers.add(player1.getPlayerId());
-            pairedPlayers.add(player2.getPlayerId());
         }
 
-        if (players.size() % 2 != 0 && !pairedPlayers.contains(players.get(players.size() - 1).getPlayerId())) {
-            MatchPlayer byePlayer = createNewMatchPlayer(players.get(players.size() - 1), roundNumber);
-            assignByeToPlayer(byePlayer, tournamentId);
-        }
-
+        handleByeIfNeeded(players, tournamentId, currentRound);
         return matches;
     }
 
-    private MatchPlayer createNewMatchPlayer(MatchPlayer existingPlayer, int roundNumber) {
-        MatchPlayer newPlayer = new MatchPlayer();
-        newPlayer.setPlayerId(existingPlayer.getPlayerId());
-        newPlayer.setInitialRating(existingPlayer.getNewRating());
-        newPlayer.setInitialRatingDeviation(existingPlayer.getNewRatingDeviation());
-        newPlayer.setInitialVolatility(existingPlayer.getNewVolatility());
-        newPlayer.setCurrentRound(roundNumber);
-        newPlayer.setPoints(existingPlayer.getPoints());
-        return newPlayer;
-    }
+    private List<MatchPlayer> initializePlayers(Set<TournamentPlayerDTO> participants, int currentRound) {
+        List<MatchPlayer> players = new ArrayList<>();
 
-    private void assignByeToPlayer(MatchPlayer byePlayer, Long tournamentId) {
-        byePlayer.setPoints(byePlayer.getPoints() + 1);
+        for (TournamentPlayerDTO participant : participants) {
+            MatchPlayer player = new MatchPlayer();
+            player.setPlayerId(participant.getPlayerId());
+            player.setGlickoRating(participant.getGlickoRating());
+            player.setRatingDeviation(participant.getRatingDeviation());
+            player.setVolatility(participant.getVolatility());
+            player.setCurrentRound(currentRound);
 
-        Match byeMatch = new Match();
-        byeMatch.setTournamentId(tournamentId);
-        byeMatch.setScheduledTime(LocalDateTime.now().plusDays(1));
-        byeMatch.setStatus(Match.MatchStatus.COMPLETED);
-        byeMatch.setRoundNumber(byePlayer.getCurrentRound());
-
-        byePlayer.setMatch(byeMatch);
-
-        matchRepository.save(byeMatch);
-        matchPlayerRepository.save(byePlayer);
-    }
-
-    @Override
-    @Transactional
-    public void prepareNextRound(Long tournamentId) {
-        TournamentDTO tournament = getTournamentDetails(tournamentId);
-
-        int currentRound = tournament.getCurrentRound();
-        List<MatchPlayer> players = getOrCreateTournamentPlayers(tournament, currentRound);
-
-        players.sort(Comparator.comparingDouble(MatchPlayer::getPoints)
-                .thenComparing(MatchPlayer::getInitialRating)
-                .reversed());
-
-        if (isTournamentOver(tournament)) {
-            finalizeTournament(tournamentId);
-            return;
-        }
-
-        currentRound = determineCurrentRound(tournamentId) + 1;
-        List<Match> nextRoundMatches = createSwissSystemMatches(players, tournamentId, currentRound);
-        matchRepository.saveAll(nextRoundMatches);
-    }
-
-    private int determineCurrentRound(Long tournamentId) {
-        return matchRepository.findMaxRoundNumberByTournamentId(tournamentId).orElse(0);
-    }
-
-    private boolean isTournamentOver(TournamentDTO tournament) {
-        return tournament.getCurrentRound() >= tournament.getMaxRounds();
-    }
-
-    @Override
-    @Transactional
-    public void finalizeTournament(Long tournamentId) {
-        List<Match> matches = matchRepository.findByTournamentId(tournamentId)
-                .orElseThrow(() -> new TournamentNotFoundException("Tournament with id = " + tournamentId + " does not exist."));
-
-        for (Match match : matches) {
-            if (match.getStatus() != Match.MatchStatus.COMPLETED) {
-                match.setStatus(Match.MatchStatus.COMPLETED);
-                matchRepository.save(match);
+            // If first round, set points to 0, otherwise carry forward points
+            if (currentRound == 1) {
+                player.setPoints(0);
+            } else {
+                MatchPlayer previousRoundPlayer = matchPlayerRepository.findByPlayerIdAndMatch_TournamentIdAndCurrentRound(participant.getPlayerId(), participant.getTournamentId(), currentRound - 1);
+                player.setPoints(previousRoundPlayer.getPoints());
             }
+
+            players.add(player);
         }
-        calculateFinalStandings(tournamentId);
-        updatePlayerProfiles(tournamentId);
+
+        return players;
+    }
+
+    private void saveMatchPlayers(List<Match> matches) {
+        List<MatchPlayer> matchPlayers = new ArrayList<>();
+        for (Match match : matches) {
+            matchPlayers.addAll(match.getParticipants());  // Get the participants from the match
+        }
+        matchPlayerRepository.saveAll(matchPlayers);  // Save match players to the repository after matches are created
+    }
+
+    private Match createMatch(MatchPlayer player1, MatchPlayer player2, Long tournamentId, int currentRound, Set<Long> pairedPlayers) {
+        if (pairedPlayers.contains(player1.getPlayerId()) || pairedPlayers.contains(player2.getPlayerId())) return null;
+
+        Match match = new Match();
+        match.setTournamentId(tournamentId);
+        match.setScheduledTime(LocalDateTime.now().plusDays(1));
+        match.setStatus(Match.MatchStatus.SCHEDULED);
+        match.setRoundNumber(currentRound);  // Use the correct round number
+
+        // Set the match players as participants
+        match.setParticipants(new HashSet<>(Arrays.asList(player1, player2)));
+        player1.setMatch(match);
+        player2.setMatch(match);
+
+        player1.setOpponentId(player2.getPlayerId());
+        player2.setOpponentId(player1.getPlayerId());
+
+        pairedPlayers.add(player1.getPlayerId());
+        pairedPlayers.add(player2.getPlayerId());
+
+        return match;
+    }
+
+    private void handleByeIfNeeded(List<MatchPlayer> players, Long tournamentId, int currentRound) {
+        if (players.size() % 2 != 0) {
+            MatchPlayer byePlayer = players.get(players.size() - 1);
+            byePlayer.setPoints(byePlayer.getPoints() + 1);
+
+            Match byeMatch = new Match();
+            byeMatch.setTournamentId(tournamentId);
+            byeMatch.setScheduledTime(LocalDateTime.now().plusDays(1));
+            byeMatch.setStatus(Match.MatchStatus.COMPLETED);
+            byeMatch.setRoundNumber(currentRound);
+
+            byeMatch.setParticipants(Collections.singleton(byePlayer));
+
+            matchRepository.save(byeMatch);
+            matchPlayerRepository.save(byePlayer);
+        }
+    }
+
+    private List<MatchPlayer> sortPlayersByPointsAndRating(List<MatchPlayer> players) {
+        players.sort(Comparator.comparingDouble(MatchPlayer::getPoints)
+                .thenComparing(MatchPlayer::getGlickoRating)
+                .reversed());
+        return players;
+    }
+
+    @Override
+    @Transactional
+    public void prepareNextRound(MatchmakingDTO matchmakingDTO) {
+        Long tournamentId = matchmakingDTO.getTournamentId();
+        int currentRound = matchmakingDTO.getCurrentRound();
+        Set<TournamentPlayerDTO> participants = matchmakingDTO.getParticipants();
+
+        List<MatchPlayer> players = initializePlayers(participants, currentRound);
+        startNextRound(tournamentId, players, currentRound);
+    }
+
+    private void startNextRound(Long tournamentId, List<MatchPlayer> players, int currentRound) {
+        List<Match> nextRoundMatches = createSwissSystemMatches(players, tournamentId, currentRound);
+
+        matchRepository.saveAll(nextRoundMatches);
     }
 
     @Override
@@ -217,7 +205,6 @@ public class MatchServiceImpl implements MatchService {
             winner.setPoints(winner.getPoints() + 1);
         }
 
-        calculateAndUpdatePlayerRatings(winner, loser, isDraw);
         match.setStatus(Match.MatchStatus.COMPLETED);
         matchRepository.save(match);
         matchPlayerRepository.saveAll(participants);
@@ -225,117 +212,100 @@ public class MatchServiceImpl implements MatchService {
         return ResponseEntity.ok("Match completed successfully.");
     }
 
-    private void calculateAndUpdatePlayerRatings(MatchPlayer winner, MatchPlayer loser, boolean isDraw) {
-        // Implement based on Glicko-2 or other rating system
-        double winnerScore = 1;
-        double loserScore = 0;
+    @Override
+    @Transactional
+    public void finalizeTournament(MatchmakingDTO matchmakingDTO) {
+        Long tournamentId = matchmakingDTO.getTournamentId();
+        int maxRounds = matchmakingDTO.getMaxRounds();
 
-        if (isDraw) {
-            winnerScore = 0.5;
-            loserScore = 0.5;
+        if (matchmakingDTO.getCurrentRound() < maxRounds) {
+            throw new IllegalStateException("Cannot complete tournament. Rounds not completed yet.");
         }
 
-        double winner_d2 = calculate_D2(winner.getInitialRating(), loser.getInitialRating(), loser.getInitialRatingDeviation());
-        double winnerNewGlickoRating = calculateNewRating(winner.getInitialRating(), winner.getInitialRatingDeviation(), loser.getInitialRating(), loser.getInitialRatingDeviation(), winnerScore, winner_d2);
-        double winnerNewRatingDeviation = calculateNewRatingDeviation(winner.getInitialRatingDeviation(), winner_d2);
+        List<Match> matches = matchRepository.findByTournamentId(tournamentId)
+                .orElseThrow(() -> new TournamentNotFoundException("Tournament with id = " + tournamentId + " does not exist."));
 
-        double loser_d2 = calculate_D2(loser.getInitialRating(), winner.getInitialRating(), winner.getInitialRatingDeviation());
-        double loserNewGlickoRating = calculateNewRating(loser.getInitialRating(), loser.getInitialRatingDeviation(), winner.getInitialRating(), winner.getInitialRatingDeviation(), loserScore, loser_d2);
-        double loserNewRatingDeviation = calculateNewRatingDeviation(loser.getInitialRatingDeviation(), loser_d2);
+        for (Match match : matches) {
+            if (match.getStatus() == Match.MatchStatus.SCHEDULED) {
+                throw new IllegalStateException("Cannot complete tournament. Matches not completed yet.");
+            }
+        }
 
-        winner.setNewRating(winnerNewGlickoRating);
-        winner.setNewRatingDeviation(winnerNewRatingDeviation);
+        List<MatchPlayer> matchPlayers = matchPlayerRepository.findByMatch_TournamentIdAndCurrentRound(tournamentId, matchmakingDTO.getMaxRounds()); // what if matchPlayer is bye on last round
 
-        loser.setNewRating(loserNewGlickoRating);
-        loser.setNewRatingDeviation(loserNewRatingDeviation);
+        for (MatchPlayer player : matchPlayers) {
+            List<MatchPlayer> matchPlayerList = matchPlayerRepository.findByPlayerIdAndMatch_TournamentId(player.getPlayerId(), tournamentId);
+            List<MatchPlayer> opponents = getAllOpponents(matchPlayerList);
+            double[] results = getAllResults(matchPlayerList);
 
-        PlayerRatingUpdateDTO winnerRatingUpdate = new PlayerRatingUpdateDTO(
-                winner.getPlayerId(),
-                winnerNewGlickoRating,
-                winnerNewRatingDeviation,
-                winner.getInitialVolatility(),
-                winner.getMatch().getTournamentId(),
-                winner.getResult().name()
-        );
+            PlayerRatingUpdateDTO playerRatingUpdate = glicko2RatingService.calculatePlayerRatings(player, opponents, results);
 
-        PlayerRatingUpdateDTO loserRatingUpdate = new PlayerRatingUpdateDTO(
-                loser.getPlayerId(),
-                loserNewGlickoRating,
-                loserNewRatingDeviation,
-                loser.getInitialVolatility(),
-                loser.getMatch().getTournamentId(),
-                loser.getResult().name()
-        );
-
-        updatePlayerProfileAndRatingHistory(winnerRatingUpdate);
-        updatePlayerProfileAndRatingHistory(loserRatingUpdate);
+            updatePlayerProfileRating(playerRatingUpdate);
+        }
     }
 
-    public static double calculate_g(double RD) {
-        return 1.0 / Math.sqrt(1.0 + (3.0 * RD * RD) / (Math.PI * Math.PI));
+    public List<MatchPlayer> getAllOpponents(List<MatchPlayer> matchPlayerList) {
+        List<MatchPlayer> opponents = new ArrayList<>();
+
+        for (MatchPlayer matchPlayer : matchPlayerList) {
+            opponents.add(matchPlayerRepository.findByPlayerIdAndMatchId(matchPlayer.getOpponentId(), matchPlayer.getMatch().getId()));
+        }
+
+        return opponents;
     }
 
-    public static double calculate_E(double R, double Rj, double RDj) {
-        return 1.0 / (1.0 + Math.pow(10.0, -calculate_g(RDj) * (R - Rj) / 400.0));
+    public double[] getAllResults(List<MatchPlayer> matchPlayerList) {
+        double[] result = new double[matchPlayerList.size()];
+        for (int i = 0; i < matchPlayerList.size(); i++) {
+            if (matchPlayerList.get(i).getResult() == MatchPlayer.Result.WIN) {
+                result[i] = 1.0;
+            } else if (matchPlayerList.get(i).getResult() == MatchPlayer.Result.DRAW) {
+                result[i] = 0.5;
+            } else {
+                result[i] = 0.0;
+            }
+        }
+        return result;
     }
 
-    public static double calculate_D2(double R, double opponentsRating, double opponentsRatingDeviation) {
-        double q = Math.log(10) / Math.log(Math.E) / 400;
-        double g_RDj = calculate_g(opponentsRatingDeviation);
-        double E_R_Rj = calculate_E(R, opponentsRating, opponentsRatingDeviation);
-        return 1.0 / (q * q * g_RDj * g_RDj * E_R_Rj * (1 - E_R_Rj));
-    }
-
-    private double calculateNewRating(double initialRating, double currentRatingDeviation, double opponentRating, double opponentRatingDeviation, double result, double d2) {
-        double q = Math.log(10) / Math.log(Math.E) / 400;
-
-        return initialRating + (q / (1.0 / (currentRatingDeviation * currentRatingDeviation) + 1.0 / d2)) * (calculate_g(opponentRatingDeviation) * (result - calculate_E(initialRating, opponentRating, opponentRatingDeviation)));
-    }
-
-    private double calculateNewRatingDeviation(double initialRatingDeviation, double d2) {
-        return 1.0 / Math.sqrt(1.0 / (initialRatingDeviation * initialRatingDeviation) + 1.0 / d2);
-    }
-
-    private void updatePlayerProfileAndRatingHistory(PlayerRatingUpdateDTO ratingUpdate) {
+    private void updatePlayerProfileRating(PlayerRatingUpdateDTO ratingUpdate) {
         webClientBuilder.build()
                 .post()
-                .uri(playerServiceUrl + "/api/v1/player/update-rating")
+                .uri(playerServiceUrl + "/api/v1/profile/update-rating")
                 .bodyValue(ratingUpdate)
                 .retrieve()
                 .bodyToMono(Void.class)
                 .block();
     }
 
-    private void calculateFinalStandings(Long tournamentId) {
-        // Implement logic to calculate and store final standings
-    }
-
-    private void updatePlayerProfiles(Long tournamentId) {
-        // Implement logic to update player profiles
-    }
-
     @Override
-    public TournamentDTO getTournamentDetails(Long tournamentId) {
-        return webClientBuilder.build()
-                .get()
-                .uri(tournamentServiceUrl + "/api/v1/tournaments/public/" + tournamentId)
-                .retrieve()
-                .bodyToMono(TournamentDTO.class)
-                .block();
-    }
-
-    @Override
-    public List<Match> findAllMatchByTournament(Long tournamentId) {
-        return matchRepository.findByTournamentId(tournamentId)
+    @Transactional
+    public List<MatchDTO> findAllMatchByTournament(Long tournamentId) {
+        List<Match> matches = matchRepository.findByTournamentId(tournamentId)
                 .orElseThrow(() -> new TournamentNotFoundException("Tournament with id = " + tournamentId + " does not exist."));
+        return convertToDTOList(matches);
+    }
+
+    // Convert a list of Match objects to a list of MatchDTOs
+    public List<MatchDTO> convertToDTOList(List<Match> matches) {
+        return matches.stream()
+                      .map(this::convertToDTO)
+                      .collect(Collectors.toList());
     }
 
     @Override
-    public List<Match> findAllMatchByTournamentRound(Long tournamentId, Integer roundNumber) {
+    @Transactional
+    public List<MatchDTO> findAllMatchByTournamentRound(Long tournamentId, Integer roundNumber) {
         matchRepository.findByTournamentId(tournamentId)
                 .orElseThrow(() -> new TournamentNotFoundException("Tournament with id = " + tournamentId + " does not exist."));
 
-        return matchRepository.findByTournamentIdAndRoundNumber(tournamentId, roundNumber)
+        List<Match> matches = matchRepository.findByTournamentIdAndRoundNumber(tournamentId, roundNumber)
                 .orElseThrow(() -> new TournamentRoundNotFoundException("Tournament with id = " + tournamentId + " does not have round = " + roundNumber));
+
+        return convertToDTOList(matches);
+    }
+
+    private MatchDTO convertToDTO(Match match) {
+        return MatchDTO.fromEntity(match);
     }
 }

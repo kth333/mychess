@@ -16,7 +16,7 @@ public class PlayerProfileDTO {
     private String city;
     private LocalDate birthDate;
     private CustomChessRank rank;
-    private int glickoRating;
+    private double glickoRating;
     private double ratingDeviation;
     private double volatility;
     private int totalWins;
@@ -25,7 +25,7 @@ public class PlayerProfileDTO {
     private boolean isPublic;
     private int age;
 
-    public PlayerProfileDTO(Long playerId, String fullName, String bio, String avatarUrl, String gender, String country, String region, String city, LocalDate birthDate, CustomChessRank rank, int glickoRating, double ratingDeviation, double volatility, int totalWins, int totalLosses, int totalDraws, boolean isPublic, int age) {
+    public PlayerProfileDTO(Long playerId, String fullName, String bio, String avatarUrl, String gender, String country, String region, String city, LocalDate birthDate, CustomChessRank rank, double glickoRating, double ratingDeviation, double volatility, int totalWins, int totalLosses, int totalDraws, boolean isPublic, int age) {
         this.playerId = playerId;
         this.fullName = fullName;
         this.bio = bio;
@@ -128,11 +128,11 @@ public class PlayerProfileDTO {
         this.rank = rank;
     }
 
-    public int getGlickoRating() {
+    public double getGlickoRating() {
         return glickoRating;
     }
 
-    public void setGlickoRating(int glickoRating) {
+    public void setGlickoRating(double glickoRating) {
         this.glickoRating = glickoRating;
     }
 

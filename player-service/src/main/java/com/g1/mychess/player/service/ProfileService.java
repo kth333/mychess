@@ -5,7 +5,7 @@ import com.g1.mychess.player.dto.PlayerRatingUpdateDTO;
 
 public interface ProfileService {
 
-    void updatePlayerProfile(PlayerRatingUpdateDTO ratingUpdateDTO);
+    void updateProfileRating(PlayerRatingUpdateDTO ratingUpdateDTO);
 
     PlayerProfileDTO getPlayerProfile(Long playerId);
 }
