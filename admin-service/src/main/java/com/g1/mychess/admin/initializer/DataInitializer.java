@@ -13,12 +13,8 @@ public class DataInitializer implements CommandLineRunner {
     @Autowired
     private AdminRepository adminRepository;
 
-    @Autowired
-    private JdbcTemplate jdbcTemplate;
-
     @Override
     public void run(String... args) throws Exception {
-        reCreateDatabase();
         // Check if admins already exist to avoid duplicate entries
         if (adminRepository.count() == 0) {
             createAdmin("admin1", "admin1@example.com");
@@ -28,19 +24,6 @@ public class DataInitializer implements CommandLineRunner {
             System.out.println("Admin accounts initialized.");
         } else {
             System.out.println("Admin accounts already exist in the database.");
-        }
-    }
-
-    private void reCreateDatabase() {
-        // Adjust the SQL command according to your database
-        String dropSQL = "DROP DATABASE admin_service_db;";
-        String createSQL = "CREATE DATABASE admin_service_db;";
-        try {
-            jdbcTemplate.execute(dropSQL);
-            jdbcTemplate.execute(createSQL);
-            System.out.println("Database recreated successfully.");
-        } catch (Exception e) {
-            System.err.println("Failed to drop database: " + e.getMessage());
         }
     }
 
