@@ -14,9 +14,9 @@ class Home extends Component {
           <section className="py-20 px-6 text-center bg-gradient-to-r from-blue-500 to-purple-600 text-white">
             <h1 className="text-4xl font-bold mb-4">Welcome to MyChess</h1>
             <p className="text-xl mb-8">Manage and participate in chess tournaments with ease</p>
-            <button className="btn btn-primary w-auto font-bold">
-              <a href="/tournaments">Explore Tournaments</a>
-            </button>
+            <Link className="btn btn-primary w-auto font-bold" to="/tournaments">
+              Explore Tournaments
+            </Link>
           </section>
 
           <section className="py-16 px-6">
@@ -40,9 +40,9 @@ class Home extends Component {
                       <UsersIcon className="mr-2 h-4 w-4" />
                       {tournament.players} players
                     </p>
-                    <button className="mt-4 btn btn-primary w-auto font-bold" variant="outline" asChild>
-                      <a href={`/tournaments/${index + 1}`}>View Details</a>
-                    </button>
+                    <Link className="mt-4 btn btn-primary w-auto font-bold" to={`/tournaments/${index + 1}`} variant="outline" asChild>
+                      View Details
+                    </Link>
                   </CardContent>
                 </Card>
               ))}

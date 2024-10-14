@@ -258,9 +258,9 @@ class TournamentDetails extends Component {
                         </Button>
                     ) : (
                         <>
-                            <Button className="btn btn-primary mt-6">
-                                <a href={`/update-tournament/${tournament.name}`}>Update</a>
-                            </Button>
+                            <Link className="btn btn-primary mt-6" to={`/update-tournament/${tournament.name}`}>
+                                Update
+                            </Link>
                             <Button className="btn btn-primary mt-6" onClick={this.startTournament} disabled={status === 'ONGOING'}>
                                 Start tournament
                             </Button>
