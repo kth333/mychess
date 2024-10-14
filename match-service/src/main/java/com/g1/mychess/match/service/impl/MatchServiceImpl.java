@@ -50,7 +50,7 @@ public class MatchServiceImpl implements MatchService {
         int currentRound = matchmakingDTO.getCurrentRound();
         Set<TournamentPlayerDTO> participants = matchmakingDTO.getParticipants();
 
-        List<MatchPlayer> players = initializePlayersForRound(participants, currentRound);
+        List<MatchPlayer> players = initializePlayers(participants, currentRound);
 
         List<Match> newMatches = createSwissSystemMatches(players, tournamentId, currentRound);
 
@@ -74,7 +74,7 @@ public class MatchServiceImpl implements MatchService {
         return matches;
     }
 
-    private List<MatchPlayer> initializePlayersForRound(Set<TournamentPlayerDTO> participants, int currentRound) {
+    private List<MatchPlayer> initializePlayers(Set<TournamentPlayerDTO> participants, int currentRound) {
         List<MatchPlayer> players = new ArrayList<>();
 
         for (TournamentPlayerDTO participant : participants) {
@@ -89,7 +89,8 @@ public class MatchServiceImpl implements MatchService {
             if (currentRound == 1) {
                 player.setPoints(0);
             } else {
-                player.setPoints(participant.getPoints());
+                MatchPlayer previousRoundPlayer = matchPlayerRepository.findByPlayerIdAndMatch_TournamentIdAndCurrentRound(participant.getPlayerId(), participant.getTournamentId(), currentRound - 1);
+                player.setPoints(previousRoundPlayer.getPoints());
             }
 
             players.add(player);
@@ -161,7 +162,7 @@ public class MatchServiceImpl implements MatchService {
         int currentRound = matchmakingDTO.getCurrentRound();
         Set<TournamentPlayerDTO> participants = matchmakingDTO.getParticipants();
 
-        List<MatchPlayer> players = initializePlayersForRound(participants, currentRound);
+        List<MatchPlayer> players = initializePlayers(participants, currentRound);
         startNextRound(tournamentId, players, currentRound);
     }
 
