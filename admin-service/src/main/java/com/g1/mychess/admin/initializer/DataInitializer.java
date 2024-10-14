@@ -18,7 +18,7 @@ public class DataInitializer implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws Exception {
-        dropDatabase();
+        reCreateDatabase();
         // Check if admins already exist to avoid duplicate entries
         if (adminRepository.count() == 0) {
             createAdmin("admin1", "admin1@example.com");
@@ -31,12 +31,14 @@ public class DataInitializer implements CommandLineRunner {
         }
     }
 
-    private void dropDatabase() {
+    private void reCreateDatabase() {
         // Adjust the SQL command according to your database
-        String dropSQL = "DROP DATABASE ADMIN_SERVICE_DB;"; 
+        String dropSQL = "DROP DATABASE tournament_service_db;";
+        String createSQL = "CREATE DATABASE tournament_service_db;";
         try {
             jdbcTemplate.execute(dropSQL);
-            System.out.println("Database dropped successfully.");
+            jdbcTemplate.execute(createSQL);
+            System.out.println("Database recreated successfully.");
         } catch (Exception e) {
             System.err.println("Failed to drop database: " + e.getMessage());
         }

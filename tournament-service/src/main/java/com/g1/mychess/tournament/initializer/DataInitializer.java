@@ -30,7 +30,7 @@ public class DataInitializer implements CommandLineRunner {
 
     @Override
     public void run(String... args) {
-        dropDatabase();
+        reCreateDatabase();
         // Check if tournaments already exist to avoid duplicate entries
         if (tournamentRepository.count() == 0) {
             createTournaments();
@@ -41,12 +41,14 @@ public class DataInitializer implements CommandLineRunner {
 
     }
 
-    private void dropDatabase() {
+    private void reCreateDatabase() {
         // Adjust the SQL command according to your database
-        String dropSQL = "DROP DATABASE TOURNAMENT_SERVICE_DB;";
+        String dropSQL = "DROP DATABASE tournament_service_db;";
+        String createSQL = "CREATE DATABASE tournament_service_db;";
         try {
             jdbcTemplate.execute(dropSQL);
-            System.out.println("Database dropped successfully.");
+            jdbcTemplate.execute(createSQL);
+            System.out.println("Database recreated successfully.");
         } catch (Exception e) {
             System.err.println("Failed to drop database: " + e.getMessage());
         }
