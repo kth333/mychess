@@ -38,6 +38,12 @@ public class MatchController {
         return ResponseEntity.status(HttpStatus.OK).body("Next round for tournament " + tournamentId + " prepared successfully.");
     }
 
+    @PostMapping("/admin/finalize/{tournamentId}")
+    public ResponseEntity<Void> finalizeTournament(@PathVariable Long tournamentId) {
+        matchService.finalizeTournament(tournamentId);
+        return ResponseEntity.ok().build();
+    }
+
     @GetMapping("/public/all/{tournamentId}")
     public ResponseEntity<List<MatchDTO>> getAllMatchByTournamentId(@PathVariable Long tournamentId) {
         List<MatchDTO> matches = matchService.findAllMatchByTournament(tournamentId);

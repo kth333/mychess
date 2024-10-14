@@ -5,17 +5,13 @@ public class PlayerRatingUpdateDTO {
     private double glickoRating;
     private double ratingDeviation;
     private double volatility;
-    private Long tournamentId;
-    private String result; // WIN, LOSS, or DRAW
 
     // Constructors, Getters, and Setters
-    public PlayerRatingUpdateDTO(Long playerId, double glickoRating, double ratingDeviation, double volatility, Long tournamentId, String result) {
+    public PlayerRatingUpdateDTO(Long playerId, double glickoRating, double ratingDeviation, double volatility) {
         this.playerId = playerId;
         this.glickoRating = glickoRating;
         this.ratingDeviation = ratingDeviation;
         this.volatility = volatility;
-        this.tournamentId = tournamentId;
-        this.result = result;
     }
 
     // Getters and Setters
@@ -34,12 +30,4 @@ public class PlayerRatingUpdateDTO {
     public double getVolatility() { return volatility; }
 
     public void setVolatility(double volatility) { this.volatility = volatility; }
-
-    public Long getTournamentId() { return tournamentId; }
-
-    public void setTournamentId(Long tournamentId) { this.tournamentId = tournamentId; }
-
-    public String getResult() { return result; }
-
-    public void setResult(String result) { this.result = result; }
 }

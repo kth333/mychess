@@ -2,7 +2,6 @@ package com.g1.mychess.match.service;
 
 import com.g1.mychess.match.dto.MatchDTO;
 import com.g1.mychess.match.dto.TournamentDTO;
-import com.g1.mychess.match.model.Match;
 import org.springframework.http.ResponseEntity;
 
 import java.util.List;

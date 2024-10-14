@@ -95,9 +95,9 @@ public class TournamentServiceImpl implements TournamentService {
     }
 
     @Override
-    public ResponseEntity<TournamentDTO> findTournamentById(Long id) {
-        Tournament tournament = tournamentRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Tournament not found with tournament id: " + id));
+    public ResponseEntity<TournamentDTO> findTournamentById(Long tournamentId) {
+        Tournament tournament = tournamentRepository.findById(tournamentId)
+                .orElseThrow(() -> new IllegalArgumentException("Tournament not found with tournament id: " + tournamentId));
         return ResponseEntity.status(HttpStatus.OK).body(convertToDTO(tournament));
     }
 
@@ -236,10 +236,11 @@ public class TournamentServiceImpl implements TournamentService {
         Tournament tournament = tournamentRepository.findById(tournamentId)
                 .orElseThrow(() -> new TournamentNotFoundException("Tournament not found with id: " + tournamentId));
 
-        if (tournament.getCurrentRound() < tournament.getMaxRounds()) {
-            tournament.setCurrentRound(tournament.getCurrentRound() + 1);
+        if (tournament.getCurrentRound() >= tournament.getMaxRounds()) {
+            throw new IllegalStateException("Cannot start the next round. The tournament has reached the maximum number of rounds. Please finalize the tournament.");
         }
 
+        tournament.setCurrentRound(tournament.getCurrentRound() + 1);
         tournamentRepository.save(tournament);
 
         String jwtToken = request.getHeader("Authorization").substring(7);
@@ -256,6 +257,40 @@ public class TournamentServiceImpl implements TournamentService {
                 .retrieve()
                 .bodyToMono(Void.class)
                 .block();
+    }
+
+    @Override
+    @Transactional
+    public ResponseEntity<String> completeTournament(Long tournamentId, HttpServletRequest request) {
+        Tournament tournament = tournamentRepository.findById(tournamentId)
+                .orElseThrow(() -> new TournamentNotFoundException("Tournament not found with id: " + tournamentId));
+
+        if (tournament.getStatus()==Tournament.TournamentStatus.COMPLETED) {
+            throw new IllegalStateException("Tournament already completed.");
+        }
+
+        String jwtToken = request.getHeader("Authorization").substring(7);
+        finalizeTournamentInMatchService(tournamentId, jwtToken);
+        markTournamentAsCompleted(tournamentId);
+
+        return ResponseEntity.status(HttpStatus.OK).body("Tournament completed successfully.");
+    }
+
+    private void finalizeTournamentInMatchService(Long tournamentId, String jwtToken) {
+        webClientBuilder.build()
+                .post()
+                .uri(matchServiceUrl + "/api/v1/matches/admin/finalize/" + tournamentId)
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + jwtToken)
+                .retrieve()
+                .bodyToMono(Void.class)
+                .block();
+    }
+
+    private void markTournamentAsCompleted(Long tournamentId) {
+        Tournament tournament = tournamentRepository.findById(tournamentId)
+                .orElseThrow(() -> new IllegalArgumentException("Tournament not found with tournament id: " + tournamentId));
+        tournament.setStatus(Tournament.TournamentStatus.COMPLETED);
+        tournamentRepository.save(tournament);
     }
 
     private TournamentDTO convertToDTO(Tournament tournament) {

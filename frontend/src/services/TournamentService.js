@@ -29,6 +29,11 @@ class TournamentService {
     async startNextRound(tournamentId) {
       return await ProtectedTournamentAPI.post(`/tournaments/admin/next-round/${tournamentId}`);
     }
+
+    async completeTournament(tournamentId) {
+      return await ProtectedTournamentAPI.post(`/tournaments/admin/complete/${tournamentId}`);
+    }
+
     
 
 }

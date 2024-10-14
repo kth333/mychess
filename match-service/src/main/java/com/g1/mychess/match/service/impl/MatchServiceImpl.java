@@ -9,7 +9,9 @@ import com.g1.mychess.match.model.Match;
 import com.g1.mychess.match.model.MatchPlayer;
 import com.g1.mychess.match.repository.MatchRepository;
 import com.g1.mychess.match.repository.MatchPlayerRepository;
+import com.g1.mychess.match.service.Glicko2RatingService;
 import com.g1.mychess.match.service.MatchService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -27,6 +29,7 @@ public class MatchServiceImpl implements MatchService {
     private final MatchRepository matchRepository;
     private final MatchPlayerRepository matchPlayerRepository;
     private final WebClient.Builder webClientBuilder;
+    private final Glicko2RatingService glicko2RatingService;
 
     @Value("${player.service.url}")
     private String playerServiceUrl;
@@ -34,10 +37,12 @@ public class MatchServiceImpl implements MatchService {
     @Value("${tournament.service.url}")
     private String tournamentServiceUrl;
 
-    public MatchServiceImpl(MatchRepository matchRepository, MatchPlayerRepository matchPlayerRepository, WebClient.Builder webClientBuilder) {
+    @Autowired
+    public MatchServiceImpl(MatchRepository matchRepository, MatchPlayerRepository matchPlayerRepository, WebClient.Builder webClientBuilder, Glicko2RatingService glicko2RatingService) {
         this.matchRepository = matchRepository;
         this.matchPlayerRepository = matchPlayerRepository;
         this.webClientBuilder = webClientBuilder;
+        this.glicko2RatingService = glicko2RatingService;
     }
 
     @Override
@@ -46,14 +51,14 @@ public class MatchServiceImpl implements MatchService {
         TournamentDTO tournament = getTournamentDetails(tournamentId);
 
         int currentRound = 1;
-        List<MatchPlayer> players = getOrCreateTournamentPlayers(tournament, currentRound);
+        List<MatchPlayer> players = initializeTournamentPlayersForRound(tournament, currentRound);
 
         List<Match> newMatches = createSwissSystemMatches(players, tournamentId, currentRound);
 
         matchRepository.saveAll(newMatches);
     }
 
-    private List<MatchPlayer> getOrCreateTournamentPlayers(TournamentDTO tournament, int roundNumber) {
+    private List<MatchPlayer> initializeTournamentPlayersForRound(TournamentDTO tournament, int roundNumber) {
         List<MatchPlayer> existingPlayers = matchPlayerRepository.findByMatch_TournamentIdAndCurrentRound(tournament.getId(), roundNumber);
 
         if (existingPlayers.isEmpty()) {
@@ -74,49 +79,55 @@ public class MatchServiceImpl implements MatchService {
 
     private List<Match> createSwissSystemMatches(List<MatchPlayer> players, Long tournamentId, int roundNumber) {
         List<Match> matches = new ArrayList<>();
-
-        players.sort(Comparator.comparingDouble(MatchPlayer::getPoints)
-                .thenComparing(MatchPlayer::getInitialRating)
-                .reversed());
+        players = sortPlayersByPointsAndRating(players);
 
         Set<Long> pairedPlayers = new HashSet<>();
-
         for (int i = 0; i < players.size() - 1; i += 2) {
-            MatchPlayer player1 = createNewMatchPlayer(players.get(i), roundNumber);
-            MatchPlayer player2 = createNewMatchPlayer(players.get(i + 1), roundNumber);
-
-            if (pairedPlayers.contains(player1.getPlayerId()) || pairedPlayers.contains(player2.getPlayerId())) {
-                continue;
-            }
-
-            Match match = new Match();
-            match.setTournamentId(tournamentId);
-            match.setScheduledTime(LocalDateTime.now().plusDays(1));
-            match.setStatus(Match.MatchStatus.SCHEDULED);
-            match.setRoundNumber(roundNumber);
-
-            match.setParticipants(new HashSet<>(Arrays.asList(player1, player2)));
-            player1.setMatch(match);
-            player2.setMatch(match);
-
-            player1.setOpponentId(player2.getPlayerId());
-            player2.setOpponentId(player1.getPlayerId());
-
-            matches.add(match);
-
-            pairedPlayers.add(player1.getPlayerId());
-            pairedPlayers.add(player2.getPlayerId());
+            Match match = createMatch(players.get(i), players.get(i + 1), tournamentId, roundNumber, pairedPlayers);
+            if (match != null) matches.add(match);
         }
 
-        if (players.size() % 2 != 0 && !pairedPlayers.contains(players.get(players.size() - 1).getPlayerId())) {
-            MatchPlayer byePlayer = createNewMatchPlayer(players.get(players.size() - 1), roundNumber);
-            assignByeToPlayer(byePlayer, tournamentId);
-        }
-
+        handleByeIfNeeded(players, pairedPlayers, tournamentId, roundNumber);
         return matches;
     }
 
-    private MatchPlayer createNewMatchPlayer(MatchPlayer existingPlayer, int roundNumber) {
+    private List<MatchPlayer> sortPlayersByPointsAndRating(List<MatchPlayer> players) {
+        players.sort(Comparator.comparingDouble(MatchPlayer::getPoints)
+                .thenComparing(MatchPlayer::getInitialRating)
+                .reversed());
+        return players;
+    }
+
+    private Match createMatch(MatchPlayer player1, MatchPlayer player2, Long tournamentId, int roundNumber, Set<Long> pairedPlayers) {
+        if (pairedPlayers.contains(player1.getPlayerId()) || pairedPlayers.contains(player2.getPlayerId())) return null;
+
+        Match match = new Match();
+        match.setTournamentId(tournamentId);
+        match.setScheduledTime(LocalDateTime.now().plusDays(1));
+        match.setStatus(Match.MatchStatus.SCHEDULED);
+        match.setRoundNumber(roundNumber);
+
+        match.setParticipants(new HashSet<>(Arrays.asList(player1, player2)));
+        player1.setMatch(match);
+        player2.setMatch(match);
+
+        player1.setOpponentId(player2.getPlayerId());
+        player2.setOpponentId(player1.getPlayerId());
+
+        pairedPlayers.add(player1.getPlayerId());
+        pairedPlayers.add(player2.getPlayerId());
+
+        return match;
+    }
+
+    private void handleByeIfNeeded(List<MatchPlayer> players, Set<Long> pairedPlayers, Long tournamentId, int roundNumber) {
+        if (players.size() % 2 != 0 && !pairedPlayers.contains(players.get(players.size() - 1).getPlayerId())) {
+            MatchPlayer byePlayer = cloneMatchPlayerForNextRound(players.get(players.size() - 1), roundNumber);
+            assignByeToPlayer(byePlayer, tournamentId);
+        }
+    }
+
+    private MatchPlayer cloneMatchPlayerForNextRound(MatchPlayer existingPlayer, int roundNumber) {
         MatchPlayer newPlayer = new MatchPlayer();
         newPlayer.setPlayerId(existingPlayer.getPlayerId());
         newPlayer.setInitialRating(existingPlayer.getNewRating());
@@ -171,53 +182,38 @@ public class MatchServiceImpl implements MatchService {
     public void prepareNextRound(Long tournamentId) {
         TournamentDTO tournament = getTournamentDetails(tournamentId);
 
-        int currentRound = tournament.getCurrentRound();
-        List<MatchPlayer> players = getOrCreateTournamentPlayers(tournament, currentRound);
+        List<MatchPlayer> players = initializeAndSortPlayersForRound(tournament, tournament.getCurrentRound());
 
+        if (isTournamentOver(tournament)) {
+            throw new IllegalStateException("Cannot start the next round. The tournament has reached the maximum number of rounds. Please finalize the tournament.");
+        }
+        startNextRound(tournamentId, players);
+    }
+
+    private List<MatchPlayer> initializeAndSortPlayersForRound(TournamentDTO tournament, int currentRound) {
+        List<MatchPlayer> players = initializeTournamentPlayersForRound(tournament, currentRound);
+
+        // Sort players by points and rating
         players.sort(Comparator.comparingDouble(MatchPlayer::getPoints)
                 .thenComparing(MatchPlayer::getInitialRating)
                 .reversed());
 
-        if (isTournamentOver(tournament)) {
-            List<MatchPlayer> matchPlayers = matchPlayerRepository.findByMatch_TournamentIdAndCurrentRound(tournamentId, tournament.getMaxRounds()); // what if matchPlayer is bye on last round
-            for (MatchPlayer player : matchPlayers) {
-                List<MatchPlayer> matchPlayerList = matchPlayerRepository.findByPlayerIdAndMatch_TournamentId(player.getPlayerId(), tournamentId);
-                List<MatchPlayer> opponents = getAllOpponents(matchPlayerList);
-                double[] results = getAllResults(matchPlayerList);
-                calculatePlayerRatings(player, opponents, results);
-            }
-            updatePlayerRatings(matchPlayers);
-            finalizeTournament(tournamentId);
-            return;
-        }
-
-        currentRound = determineCurrentRound(tournamentId) + 1;
-        List<Match> nextRoundMatches = createSwissSystemMatches(players, tournamentId, currentRound);
-        matchRepository.saveAll(nextRoundMatches);
-    }
-
-    private int determineCurrentRound(Long tournamentId) {
-        return matchRepository.findMaxRoundNumberByTournamentId(tournamentId).orElse(0);
+        return players;
     }
 
     private boolean isTournamentOver(TournamentDTO tournament) {
         return tournament.getCurrentRound() >= tournament.getMaxRounds();
     }
 
-    @Override
-    @Transactional
-    public void finalizeTournament(Long tournamentId) {
-        List<Match> matches = matchRepository.findByTournamentId(tournamentId)
-                .orElseThrow(() -> new TournamentNotFoundException("Tournament with id = " + tournamentId + " does not exist."));
+    private void startNextRound(Long tournamentId, List<MatchPlayer> players) {
+        int currentRound = determineCurrentRound(tournamentId) + 1;
+        List<Match> nextRoundMatches = createSwissSystemMatches(players, tournamentId, currentRound);
 
-        for (Match match : matches) {
-            if (match.getStatus() != Match.MatchStatus.COMPLETED) {
-                match.setStatus(Match.MatchStatus.COMPLETED);
-                matchRepository.save(match);
-            }
-        }
-        calculateFinalStandings(tournamentId);
-        updatePlayerProfiles(tournamentId);
+        matchRepository.saveAll(nextRoundMatches);
+    }
+
+    private int determineCurrentRound(Long tournamentId) {
+        return matchRepository.findMaxRoundNumberByTournamentId(tournamentId).orElse(0);
     }
 
     @Override
@@ -260,29 +256,32 @@ public class MatchServiceImpl implements MatchService {
         return ResponseEntity.ok("Match completed successfully.");
     }
 
-    public void calculatePlayerRatings(MatchPlayer player, List<MatchPlayer> opponents, double[] result) {
-        // converting rating and rating deviation to glicko-2 scale
-        double R = (player.getInitialRating() - 1500) / 173.7178;
-        double RD = player.getInitialRatingDeviation() / 173.7178;
+    @Override
+    @Transactional
+    public void finalizeTournament(Long tournamentId) {
+        TournamentDTO tournament = getTournamentDetails(tournamentId);
 
-        double[] opponents_rating = new double[opponents.size()];
-        double[] opponents_RD = new double[opponents.size()];
-
-        for (int j = 0; j < opponents.size(); j++) {
-            opponents_rating[j] = (opponents.get(j).getInitialRating() - 1500) / 173.7178;
-            opponents_RD[j] = opponents.get(j).getInitialVolatility() / 173.7178;
+        if (!isTournamentOver(tournament)) {
+            throw new IllegalStateException("Cannot complete tournament. Rounds not completed yet.");
         }
 
-        double delta = calculate_delta(R, opponents_rating, opponents_RD, result);
-        double v = calculate_v(R, opponents_rating, opponents_RD);
+        List<Match> matches = matchRepository.findByTournamentId(tournamentId)
+                .orElseThrow(() -> new TournamentNotFoundException("Tournament with id = " + tournamentId + " does not exist."));
 
-        double newVolatility = calculate_volatility(RD, player.getInitialVolatility(), v, delta * delta);
-        double newRatingDeviation = calculateNewRatingDeviation(RD, newVolatility, v);
-        double newRating = calculateNewRating(R, RD, delta, v);
+        for (Match match : matches) {
+            if (match.getStatus() == Match.MatchStatus.SCHEDULED) {
+                throw new IllegalStateException("Cannot complete tournament. Matches not completed yet");
+            }
+        }
 
-        player.setNewVolatility(newVolatility);
-        player.setNewRatingDeviation(173.7178 * newRatingDeviation);
-        player.setNewRating(173.7178 * newRating + 1500);
+        List<MatchPlayer> matchPlayers = matchPlayerRepository.findByMatch_TournamentIdAndCurrentRound(tournamentId, tournament.getMaxRounds()); // what if matchPlayer is bye on last round
+        for (MatchPlayer player : matchPlayers) {
+            List<MatchPlayer> matchPlayerList = matchPlayerRepository.findByPlayerIdAndMatch_TournamentId(player.getPlayerId(), tournamentId);
+            List<MatchPlayer> opponents = getAllOpponents(matchPlayerList);
+            double[] results = getAllResults(matchPlayerList);
+            glicko2RatingService.calculatePlayerRatings(player, opponents, results);
+        }
+        updatePlayerRatings(matchPlayers);
     }
 
     public void updatePlayerRatings(List<MatchPlayer> players) {
@@ -291,103 +290,13 @@ public class MatchServiceImpl implements MatchService {
                     player.getPlayerId(),
                     player.getNewRating(),
                     player.getNewRatingDeviation(),
-                    player.getNewVolatility(),
-                    player.getMatch().getTournamentId(),
-                    player.getResult().name()
+                    player.getNewVolatility()
             );
-            updatePlayerProfileAndRatingHistory(playerRatingUpdate);
+            updatePlayerProfileRating(playerRatingUpdate);
         }
     }
 
-    public static double calculate_g(double RD) {
-        return 1.0 / Math.sqrt(1.0 + (3.0 * RD * RD) / (Math.PI * Math.PI));
-    }
-
-    public static double calculate_E(double R, double Rj, double RDj) {
-        return 1.0 / (1.0 + Math.exp(-calculate_g(RDj) * (R - Rj)));
-    }
-
-    public static double calculate_v(double R, double[] opponents_rating, double[] opponents_RD) {
-        double v_inverse = 0;
-        for (int j = 0; j < opponents_rating.length; j++) {
-            double Rj = opponents_rating[j];
-            double RDj = opponents_RD[j];
-            double g_RDj = calculate_g(RDj);
-            double E_R_Rj = calculate_E(R, Rj, RDj);
-            v_inverse += g_RDj * g_RDj * E_R_Rj * (1 - E_R_Rj);
-        }
-        return 1 / v_inverse;
-    }
-
-    public static double calculate_delta(double R, double[] opponents_rating, double[] opponents_RD, double[] results) {
-        double temp = 0;
-        for (int j = 0; j < opponents_rating.length; j++) {
-            double Rj = opponents_rating[j];
-            double RDj = opponents_RD[j];
-            double g_RDj = calculate_g(RDj);
-            double E_R_Rj = calculate_E(R, Rj, RDj);
-            temp += g_RDj * (results[j] - E_R_Rj);
-        }
-        return calculate_v(R, opponents_rating, opponents_RD) * temp;
-    }
-
-    public static double calculate_function(double x, double delta_squared, double RD_squared, double v, double A) {
-        double expX = Math.exp(x);
-
-        double numerator = expX * Math.pow(delta_squared - RD_squared - v - expX, 2);
-        double denominator = Math.pow(RD_squared + v + expX, 2);
-
-        double firstPart = numerator / denominator;
-        double secondPart = (x - A) / (0.5 * 0.5);
-
-        return firstPart - secondPart;
-    }
-
-    public static double calculate_volatility(double RD, double volatility, double v, double delta_squared) {
-        double A = Math.log(Math.pow(volatility, 2));
-        double B;
-        double convergence_tolerance = 0.000001;
-
-        if (delta_squared > (RD * RD) + v) {
-            B = Math.log(delta_squared - (RD * RD) - v);
-        } else {
-            int k = 1;
-            while (Math.log(A - k * 0.5) < 0) { // tau is set at 0.5
-                k++;
-            }
-            B = A - k * 0.5;
-        }
-
-        double f_A = calculate_function(A, delta_squared, RD * RD, v, A);
-        double f_B = calculate_function(B, delta_squared, RD * RD, v, A);
-
-        while (Math.abs(B - A) > convergence_tolerance) {
-            double C = A + ((A - B) * f_A) / (f_B - f_A);
-            double f_C = calculate_function(C, delta_squared, RD * RD, v, A);
-
-            if (f_C * f_B <= 0) {
-                A = B;
-                f_A = f_B;
-            } else {
-                f_A /= 2;
-            }
-            B = C;
-            f_B = f_C;
-        }
-
-        return Math.exp(A / 2);
-    }
-
-    private double calculateNewRatingDeviation(double RD, double newVolatility, double v) {
-        double pre_rating_RD = Math.sqrt(RD * RD + newVolatility * newVolatility);
-        return 1 / Math.sqrt((1 / pre_rating_RD * pre_rating_RD) + (1 / v));
-    }
-
-    private double calculateNewRating(double R, double newRD, double delta, double v) {
-        return R + newRD * newRD * delta / v;
-    }
-
-    private void updatePlayerProfileAndRatingHistory(PlayerRatingUpdateDTO ratingUpdate) {
+    private void updatePlayerProfileRating(PlayerRatingUpdateDTO ratingUpdate) {
         webClientBuilder.build()
                 .post()
                 .uri(playerServiceUrl + "/api/v1/player/update-rating")
@@ -395,14 +304,6 @@ public class MatchServiceImpl implements MatchService {
                 .retrieve()
                 .bodyToMono(Void.class)
                 .block();
-    }
-
-    private void calculateFinalStandings(Long tournamentId) {
-        // Implement logic to calculate and store final standings
-    }
-
-    private void updatePlayerProfiles(Long tournamentId) {
-        // Implement logic to update player profiles
     }
 
     @Override
@@ -422,8 +323,6 @@ public class MatchServiceImpl implements MatchService {
                 .orElseThrow(() -> new TournamentNotFoundException("Tournament with id = " + tournamentId + " does not exist."));
         return convertToDTOList(matches);
     }
-
-    
 
     // Convert a list of Match objects to a list of MatchDTOs
     public List<MatchDTO> convertToDTOList(List<Match> matches) {

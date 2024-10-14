@@ -113,6 +113,17 @@ class TournamentDetails extends Component {
         }
     };
 
+    completeTournament = async () => {
+        const { id } = this.state.tournament;
+        try {
+            await TournamentService.completeTournament(id);
+            console.log("Complete tournament success");
+        } catch (error) {
+            console.error("Failed to complete tournament", error);
+            alert("Failed to complete tournament\nReason: " + error.response.data);
+        }
+    };
+
     renderMatchesTable = () => {
         const { matches } = this.state;
 
@@ -255,6 +266,9 @@ class TournamentDetails extends Component {
                             </Button>
                             <Button className="btn btn-primary mt-6" onClick={this.startNextRound}>
                                 Start next round
+                            </Button>
+                            <Button className="btn btn-primary mt-6" onClick={this.completeTournament}>
+                                Complete tournament
                             </Button>
                         </>
                     )}

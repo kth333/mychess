@@ -63,6 +63,11 @@ public class TournamentController {
         return tournamentService.prepareNextRound(tournamentId, request);
     }
 
+    @PostMapping("/admin/complete/{tournamentId}")
+    public ResponseEntity<String> completeTournament(@PathVariable Long tournamentId, HttpServletRequest request) {
+        return tournamentService.completeTournament(tournamentId, request);
+    }
+
     @PostMapping("/player/signup/{tournamentId}")
     public ResponseEntity<String> signUpToTournament(@PathVariable Long tournamentId, @RequestHeader(value = "Authorization", required = true) String authorizationHeader) {
         String token = null;
