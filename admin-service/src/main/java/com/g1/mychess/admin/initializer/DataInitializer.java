@@ -33,7 +33,7 @@ public class DataInitializer implements CommandLineRunner {
 
     private void dropDatabase() {
         // Adjust the SQL command according to your database
-        String dropSQL = "DROP DATABASE ADMIN_SERVICE_DB"; 
+        String dropSQL = "DROP DATABASE ADMIN_SERVICE_DB;"; 
         try {
             jdbcTemplate.execute(dropSQL);
             System.out.println("Database dropped successfully.");
