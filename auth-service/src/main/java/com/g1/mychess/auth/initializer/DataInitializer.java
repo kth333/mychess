@@ -4,6 +4,7 @@ import com.g1.mychess.auth.model.UserToken;
 import com.g1.mychess.auth.repository.UserTokenRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
@@ -16,9 +17,30 @@ public class DataInitializer implements CommandLineRunner {
     @Autowired
     private UserTokenRepository userTokenRepository;
 
+    @Autowired
+    private JdbcTemplate jdbcTemplate;
+
     @Override
     public void run(String... args) {
-        initializeUserTokens();
+        dropDatabase();
+        if(userTokenRepository.count() == 0){
+            initializeUserTokens();
+            System.out.println("User tokens initialized successfully!");
+        } else {
+            System.out.println("User tokens already exist in the database.");
+        }
+        
+    }
+
+    private void dropDatabase() {
+        // Adjust the SQL command according to your database
+        String dropSQL = "DROP DATABASE AUTH_SERVICE_DB";
+        try {
+            jdbcTemplate.execute(dropSQL);
+            System.out.println("Database dropped successfully.");
+        } catch (Exception e) {
+            System.err.println("Failed to drop database: " + e.getMessage());
+        }
     }
 
     private void initializeUserTokens() {
