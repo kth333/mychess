@@ -4,7 +4,7 @@ on:
   push:
     branches:
       - main
-      - frontend-test
+      - deployment
   pull_request:
     branches:
       - main
