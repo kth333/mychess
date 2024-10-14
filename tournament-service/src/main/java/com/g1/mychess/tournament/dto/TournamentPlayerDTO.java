@@ -4,42 +4,33 @@ import java.time.LocalDateTime;
 
 public class TournamentPlayerDTO {
 
-    private Long id;
     private Long tournamentId;
     private Long playerId;
     private LocalDateTime signUpDateTime;
     private double glickoRating;
+    private double ratingDeviation;
+    private double volatility;
     private double points;
     private int roundsPlayed;
     private String status;
 
-    // Constructors
+    // Constructors, getters, setters
+
     public TournamentPlayerDTO() {}
 
-    public TournamentPlayerDTO(Long id, Long tournamentId, Long playerId, LocalDateTime signUpDateTime, double glickoRating,
-                               double points, int roundsPlayed, String status) {
-        this.id = id;
+    public TournamentPlayerDTO(Long tournamentId, Long playerId, LocalDateTime signUpDateTime, double glickoRating, double ratingDeviation, double volatility, double points, int roundsPlayed, String status) {
         this.tournamentId = tournamentId;
         this.playerId = playerId;
         this.signUpDateTime = signUpDateTime;
         this.glickoRating = glickoRating;
+        this.ratingDeviation = ratingDeviation;
+        this.volatility = volatility;
         this.points = points;
         this.roundsPlayed = roundsPlayed;
         this.status = status;
     }
 
-    // Getters and Setters
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public Long getTournamentId() {
-        return tournamentId;
-    }
+    public Long getTournamentId() { return tournamentId; }
 
     public void setTournamentId(Long tournamentId) {
         this.tournamentId = tournamentId;
@@ -68,6 +59,14 @@ public class TournamentPlayerDTO {
     public void setGlickoRating(double glickoRating) {
         this.glickoRating = glickoRating;
     }
+
+    public double getRatingDeviation() { return ratingDeviation; }
+
+    public void setRatingDeviation(double ratingDeviation) { this.ratingDeviation = ratingDeviation; }
+
+    public double getVolatility() { return volatility; }
+
+    public void setVolatility(double volatility) { this.volatility = volatility; }
 
     public double getPoints() {
         return points;

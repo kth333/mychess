@@ -25,6 +25,12 @@ public class TournamentPlayer {
     @Column(name = "glicko_rating", nullable = false)
     private double glickoRating;
 
+    @Column(name = "rating_deviation", nullable = false)
+    private double ratingDeviation;
+
+    @Column(name = "volatility", nullable = false)
+    private double volatility;
+
     @Column(name = "points")
     private double points = 0.0;
 
@@ -87,6 +93,14 @@ public class TournamentPlayer {
     public void setGlickoRating(double glickoRating) {
         this.glickoRating = glickoRating;
     }
+
+    public double getRatingDeviation() { return ratingDeviation; }
+
+    public void setRatingDeviation(double ratingDeviation) { this.ratingDeviation = ratingDeviation; }
+
+    public double getVolatility() { return volatility; }
+
+    public void setVolatility(double volatility) { this.volatility = volatility; }
 
     public double getPoints() { return points; }
 

@@ -4,6 +4,7 @@ import java.util.*;
 
 import com.g1.mychess.match.dto.MatchDTO;
 import com.g1.mychess.match.dto.MatchResultDTO;
+import com.g1.mychess.match.dto.MatchmakingDTO;
 import com.g1.mychess.match.service.MatchService;
 import com.g1.mychess.match.model.*;
 import org.springframework.http.HttpStatus;
@@ -22,8 +23,8 @@ public class MatchController {
     }
 
     @PostMapping("/admin/matchmaking/{tournamentId}")
-    public ResponseEntity<String> runMatchmaking(@PathVariable Long tournamentId) {
-        matchService.runMatchmaking(tournamentId);
+    public ResponseEntity<String> runMatchmaking(@PathVariable Long tournamentId, @RequestBody MatchmakingDTO matchmakingDTO) {
+        matchService.runMatchmaking(matchmakingDTO);
         return ResponseEntity.status(HttpStatus.OK).body("Matchmaking for tournament " + tournamentId + " started successfully.");
     }
 
@@ -33,15 +34,15 @@ public class MatchController {
     }
 
     @PostMapping("/admin/prepare-next-round/{tournamentId}")
-    public ResponseEntity<String> prepareNextRound(@PathVariable Long tournamentId) {
-        matchService.prepareNextRound(tournamentId);
+    public ResponseEntity<String> prepareNextRound(@PathVariable Long tournamentId, @RequestBody MatchmakingDTO matchmakingDTO) {
+        matchService.prepareNextRound(matchmakingDTO);
         return ResponseEntity.status(HttpStatus.OK).body("Next round for tournament " + tournamentId + " prepared successfully.");
     }
 
     @PostMapping("/admin/finalize/{tournamentId}")
-    public ResponseEntity<Void> finalizeTournament(@PathVariable Long tournamentId) {
-        matchService.finalizeTournament(tournamentId);
-        return ResponseEntity.ok().build();
+    public ResponseEntity<String> finalizeTournament(@RequestBody MatchmakingDTO matchmakingDTO) {
+        matchService.finalizeTournament(matchmakingDTO);
+        return ResponseEntity.ok("Tournament finalized successfully.");
     }
 
     @GetMapping("/public/all/{tournamentId}")
