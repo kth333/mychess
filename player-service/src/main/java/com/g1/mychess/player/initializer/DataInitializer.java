@@ -46,6 +46,7 @@ public class DataInitializer implements CommandLineRunner {
             player.setEmail("player" + i + "@example.com");
             player.setJoinedDate(LocalDate.now());
             player.setTournamentCount(0); // Starting with 0 tournaments
+            player.setRatingHistory(new ArrayList<>());
 
             // Create and set profile for each player
             Profile profile = new Profile();
