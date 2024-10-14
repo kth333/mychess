@@ -112,6 +112,7 @@ jobs:
           docker run -d --name auth-service -p 8080:8080 --env-file /home/ec2-user/.env ppv1/auth-service:latest --spring.profiles.active=docker
           "
       - name: Deploy Admin Service
+        if: ${{ inputs.skip_backend != 'true' }} # Skip backend deploy conditionally
         run: |
           echo "${{ secrets.EC2_SSH_KEY }}" > ec2_key.pem
           chmod 600 ec2_key.pem
@@ -122,6 +123,7 @@ jobs:
           docker run -d --name admin-service -p 8084:8084 --env-file /home/ec2-user/.env ppv1/admin-service:latest --spring.profiles.active=docker
           "
       - name: Deploy Player Service
+        if: ${{ inputs.skip_backend != 'true' }} # Skip backend deploy conditionally
         run: |
           echo "${{ secrets.EC2_SSH_KEY }}" > ec2_key.pem
           chmod 600 ec2_key.pem
@@ -132,6 +134,7 @@ jobs:
           docker run -d --name player-service -p 8081:8081 --env-file /home/ec2-user/.env ppv1/player-service:latest --spring.profiles.active=docker
           "
       - name: Deploy Email Service
+        if: ${{ inputs.skip_backend != 'true' }} # Skip backend deploy conditionally
         run: |
           echo "${{ secrets.EC2_SSH_KEY }}" > ec2_key.pem
           chmod 600 ec2_key.pem
@@ -142,6 +145,7 @@ jobs:
           docker run -d --name email-service -p 8085:8085 --env-file /home/ec2-user/.env ppv1/email-service:latest --spring.profiles.active=docker
           "
       - name: Deploy Tournament Service
+        if: ${{ inputs.skip_backend != 'true' }} # Skip backend deploy conditionally
         run: |
           echo "${{ secrets.EC2_SSH_KEY }}" > ec2_key.pem
           chmod 600 ec2_key.pem
@@ -153,6 +157,7 @@ jobs:
           "
 
       - name: Deploy Match Service
+        if: ${{ inputs.skip_backend != 'true' }} # Skip backend deploy conditionally
         run: |
           echo "${{ secrets.EC2_SSH_KEY }}" > ec2_key.pem
           chmod 600 ec2_key.pem
@@ -163,7 +168,6 @@ jobs:
           docker run -d --name match-service -p 8082:8082 --env-file /home/ec2-user/.env ppv1/match-service:latest --spring.profiles.active=docker
           "
 
-          
 
   # Job 5: Deploy Frontend
   deploy-frontend:
