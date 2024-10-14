@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { Card } from '../ui/card';
 import { Button } from '../ui/button';
-import { useParams } from 'react-router-dom';
+import { useParams, Link } from 'react-router-dom';
 import withNavigateandLocation from '../withNavigateandLocation';
 import TournamentService from '../../services/TournamentService';
 import MatchService from '../../services/MatchService'; // Import MatchService
