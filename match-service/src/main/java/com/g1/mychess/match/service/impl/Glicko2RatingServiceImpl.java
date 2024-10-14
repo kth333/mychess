@@ -11,6 +11,7 @@ public class Glicko2RatingServiceImpl implements Glicko2RatingService {
     public PlayerRatingUpdateDTO calculatePlayerRatings(MatchPlayer player, List<MatchPlayer> opponents, double[] result) {
         // converting rating and rating deviation to glicko-2 scale
         System.out.println("Calculating ratings for player: " + player.getPlayerId());
+        System.out.print("Initial rating: " + player.getGlickoRating() + " Initial RD: " + player.getRatingDeviation() + " Initial Volatility: " + player.getVolatility());
 
         double R = (player.getGlickoRating() - 1500) / 173.7178;
         double RD = player.getRatingDeviation() / 173.7178;

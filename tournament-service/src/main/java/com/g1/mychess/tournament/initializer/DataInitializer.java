@@ -161,6 +161,8 @@ public class DataInitializer implements CommandLineRunner {
             tournamentPlayer.setTournament(tournament);
             tournamentPlayer.setSignUpDateTime(signUpDateTime);
             tournamentPlayer.setGlickoRating(1500); // Hardcoded Glicko rating
+            tournamentPlayer.setRatingDeviation(350);
+            tournamentPlayer.setVolatility(0.06);
             tournamentPlayer.setPoints(0.0);
             tournamentPlayer.setRoundsPlayed(0);
             tournamentPlayer.setStatus(TournamentPlayerStatus.ACTIVE);
