@@ -141,7 +141,7 @@ class TournamentDetails extends Component {
                             <td className="border px-4 py-2">{match.roundNumber}</td>
                             <td className="border px-4 py-2">{match.status}</td>
                             <td className="border px-4 py-2">
-                                <select
+                                {match.status !== 'COMPLETED' && <select
                                     onChange={(e) => this.handleWinnerChange(match.id, e.target.value)}
                                     className="border rounded p-1"
                                 >
@@ -149,7 +149,8 @@ class TournamentDetails extends Component {
                                     <option value="player1">Player 1 Wins</option>
                                     <option value="player2">Player 2 Wins</option>
                                     <option value="draw">Draw</option>
-                                </select>
+                                </select>}
+                                
                                 <Button 
                                     className="btn btn-success mt-2" 
                                     onClick={() => this.completeMatch(match.id)} 
