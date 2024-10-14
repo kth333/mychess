@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_BASE_URL = "http://54.179.149.124:8081/api/v1";
+const API_BASE_URL = "http://47.129.181.253:8081/api/v1";
 
 
 
