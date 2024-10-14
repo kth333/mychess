@@ -1,5 +1,6 @@
 package com.g1.mychess.tournament.service.impl;
 
+import com.g1.mychess.tournament.dto.MatchmakingDTO;
 import com.g1.mychess.tournament.dto.PlayerDTO;
 import com.g1.mychess.tournament.dto.TournamentDTO;
 import com.g1.mychess.tournament.dto.TournamentPlayerDTO;
@@ -95,9 +96,9 @@ public class TournamentServiceImpl implements TournamentService {
     }
 
     @Override
-    public ResponseEntity<TournamentDTO> findTournamentById(Long id) {
-        Tournament tournament = tournamentRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Tournament not found with tournament id: " + id));
+    public ResponseEntity<TournamentDTO> findTournamentById(Long tournamentId) {
+        Tournament tournament = tournamentRepository.findById(tournamentId)
+                .orElseThrow(() -> new IllegalArgumentException("Tournament not found with tournament id: " + tournamentId));
         return ResponseEntity.status(HttpStatus.OK).body(convertToDTO(tournament));
     }
 
@@ -204,27 +205,42 @@ public class TournamentServiceImpl implements TournamentService {
         Tournament tournament = tournamentRepository.findById(tournamentId)
                 .orElseThrow(() -> new TournamentNotFoundException("Tournament not found with id: " + tournamentId));
 
+        // Verify that the request comes from the admin
         String jwtToken = request.getHeader("Authorization").substring(7);
-
         Long adminId = jwtUtil.extractUserId(jwtToken);
-        if(tournament.getAdminId() != adminId) {
+        if (tournament.getAdminId() != adminId) {
             throw new UnauthorizedActionException("Only the tournament admin can start the tournament.");
         }
 
+        // Set the first round and update the tournament status
         tournament.setCurrentRound(1);
         tournament.setStatus(Tournament.TournamentStatus.ONGOING);
         tournamentRepository.save(tournament);
 
-        runMatchmaking(tournamentId, jwtToken);
+        Set<TournamentPlayerDTO> tournamentPlayerDTOs = tournament.getParticipants().stream()
+                .map(this::convertToTournamentPlayerDTO)  // Convert each player to TournamentPlayerDTO
+                .collect(Collectors.toSet());
+
+        // Prepare the MatchmakingRequestDTO with necessary tournament details
+        MatchmakingDTO matchmakingDTO = new MatchmakingDTO(
+                tournament.getId(),
+                tournament.getCurrentRound(),
+                tournament.getMaxRounds(),
+                tournamentPlayerDTOs
+        );
+
+        // Send the matchmaking request to the match service
+        runMatchmaking(matchmakingDTO, jwtToken);
 
         return ResponseEntity.status(HttpStatus.OK).body("Tournament started successfully.");
     }
 
-    private void runMatchmaking(Long tournamentId, String jwtToken) {
+    private void runMatchmaking(MatchmakingDTO matchmakingRequestDTO, String jwtToken) {
         webClientBuilder.build()
                 .post()
-                .uri(matchServiceUrl + "/api/v1/matches/admin/matchmaking/" + tournamentId)
+                .uri(matchServiceUrl + "/api/v1/matches/admin/matchmaking/" + matchmakingRequestDTO.getTournamentId())
                 .header(HttpHeaders.AUTHORIZATION, "Bearer " + jwtToken)
+                .bodyValue(matchmakingRequestDTO)
                 .retrieve()
                 .bodyToMono(Void.class)
                 .block();
@@ -236,36 +252,101 @@ public class TournamentServiceImpl implements TournamentService {
         Tournament tournament = tournamentRepository.findById(tournamentId)
                 .orElseThrow(() -> new TournamentNotFoundException("Tournament not found with id: " + tournamentId));
 
-        if (tournament.getCurrentRound() < tournament.getMaxRounds()) {
-            tournament.setCurrentRound(tournament.getCurrentRound() + 1);
+        if (tournament.getCurrentRound() >= tournament.getMaxRounds()) {
+            throw new IllegalStateException("Cannot start the next round. The tournament has reached the maximum number of rounds. Please finalize the tournament.");
         }
 
+        // Increment the round number
+        tournament.setCurrentRound(tournament.getCurrentRound() + 1);
         tournamentRepository.save(tournament);
 
+        // Convert participants to TournamentPlayerDTO
+        Set<TournamentPlayerDTO> tournamentPlayerDTOs = tournament.getParticipants().stream()
+                .map(this::convertToTournamentPlayerDTO)  // Convert each player to TournamentPlayerDTO
+                .collect(Collectors.toSet());
+
+        // Prepare the MatchmakingDTO with updated round and participants
+        MatchmakingDTO matchmakingDTO = new MatchmakingDTO(
+                tournament.getId(),
+                tournament.getCurrentRound(),
+                tournament.getMaxRounds(),
+                tournamentPlayerDTOs
+        );
+
         String jwtToken = request.getHeader("Authorization").substring(7);
-        runPrepareNextRoundInMatchService(tournamentId, jwtToken);
+        runPrepareNextRoundInMatchService(matchmakingDTO, jwtToken);
 
         return ResponseEntity.status(HttpStatus.OK).body("Next round prepared successfully.");
     }
 
-    private void runPrepareNextRoundInMatchService(Long tournamentId, String jwtToken) {
+    private void runPrepareNextRoundInMatchService(MatchmakingDTO matchmakingDTO, String jwtToken) {
         webClientBuilder.build()
                 .post()
-                .uri(matchServiceUrl + "/api/v1/matches/admin/prepare-next-round/" + tournamentId)
+                .uri(matchServiceUrl + "/api/v1/matches/admin/prepare-next-round/" + matchmakingDTO.getTournamentId())
                 .header(HttpHeaders.AUTHORIZATION, "Bearer " + jwtToken)
+                .bodyValue(matchmakingDTO)
                 .retrieve()
                 .bodyToMono(Void.class)
                 .block();
     }
 
+    @Override
+    @Transactional
+    public ResponseEntity<String> completeTournament(Long tournamentId, HttpServletRequest request) {
+        Tournament tournament = tournamentRepository.findById(tournamentId)
+                .orElseThrow(() -> new TournamentNotFoundException("Tournament not found with id: " + tournamentId));
+
+        if (tournament.getStatus() == Tournament.TournamentStatus.COMPLETED) {
+            throw new IllegalStateException("Tournament already completed.");
+        }
+
+        // Prepare MatchmakingDTO
+        Set<TournamentPlayerDTO> participants = tournament.getParticipants().stream()
+                .map(this::convertToTournamentPlayerDTO)
+                .collect(Collectors.toSet());
+
+        MatchmakingDTO matchmakingDTO = new MatchmakingDTO(
+                tournament.getId(),
+                tournament.getCurrentRound(),
+                tournament.getMaxRounds(),
+                participants
+        );
+
+        // Finalize the tournament in match service
+        String jwtToken = request.getHeader("Authorization").substring(7);
+        finalizeTournamentInMatchService(matchmakingDTO, jwtToken);
+        markTournamentAsCompleted(tournamentId);
+
+        return ResponseEntity.status(HttpStatus.OK).body("Tournament completed successfully.");
+    }
+
+    private void finalizeTournamentInMatchService(MatchmakingDTO matchmakingDTO, String jwtToken) {
+        webClientBuilder.build()
+                .post()
+                .uri(matchServiceUrl + "/api/v1/matches/admin/finalize/" + matchmakingDTO.getTournamentId())
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + jwtToken)
+                .bodyValue(matchmakingDTO)
+                .retrieve()
+                .bodyToMono(Void.class)
+                .block();
+    }
+
+    private void markTournamentAsCompleted(Long tournamentId) {
+        Tournament tournament = tournamentRepository.findById(tournamentId)
+                .orElseThrow(() -> new IllegalArgumentException("Tournament not found with tournament id: " + tournamentId));
+        tournament.setStatus(Tournament.TournamentStatus.COMPLETED);
+        tournamentRepository.save(tournament);
+    }
+
     private TournamentDTO convertToDTO(Tournament tournament) {
         Set<TournamentPlayerDTO> participantDTOs = tournament.getParticipants().stream()
                 .map(player -> new TournamentPlayerDTO(
-                        player.getId(),
                         player.getTournament().getId(),
                         player.getPlayerId(),
                         player.getSignUpDateTime(),
                         player.getGlickoRating(),
+                        player.getRatingDeviation(),
+                        player.getVolatility(),
                         player.getPoints(),
                         player.getRoundsPlayed(),
                         player.getStatus().name()
@@ -298,6 +379,20 @@ public class TournamentServiceImpl implements TournamentService {
                 tournament.getMaxRounds(),
                 participantDTOs,
                 tournament.getTimeControlSetting()
+        );
+    }
+
+    private TournamentPlayerDTO convertToTournamentPlayerDTO(TournamentPlayer tournamentPlayer) {
+        return new TournamentPlayerDTO(
+                tournamentPlayer.getTournament().getId(),
+                tournamentPlayer.getPlayerId(),
+                tournamentPlayer.getSignUpDateTime(),
+                tournamentPlayer.getGlickoRating(),
+                tournamentPlayer.getRatingDeviation(),
+                tournamentPlayer.getVolatility(),
+                tournamentPlayer.getPoints(),
+                tournamentPlayer.getRoundsPlayed(),
+                tournamentPlayer.getStatus().name()
         );
     }
 

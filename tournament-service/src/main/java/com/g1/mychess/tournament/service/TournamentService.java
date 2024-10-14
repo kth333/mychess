@@ -23,4 +23,7 @@ public interface TournamentService {
     ResponseEntity<String> startTournament(Long tournamentId, HttpServletRequest request);
 
     ResponseEntity<String> prepareNextRound(Long tournamentId, HttpServletRequest request);
+
+    ResponseEntity<String> completeTournament(Long tournamentId, HttpServletRequest request);
+
 }

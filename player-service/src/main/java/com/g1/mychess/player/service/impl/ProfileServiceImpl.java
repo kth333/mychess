@@ -24,7 +24,7 @@ public class ProfileServiceImpl implements ProfileService {
 
     @Override
     @Transactional
-    public void updatePlayerProfile(PlayerRatingUpdateDTO ratingUpdateDTO) {
+    public void updateProfileRating(PlayerRatingUpdateDTO ratingUpdateDTO) {
         Profile profile = profileRepository.findById(ratingUpdateDTO.getPlayerId())
                 .orElseThrow(() -> new IllegalArgumentException("Profile not found for player ID: " + ratingUpdateDTO.getPlayerId()));
 
@@ -32,23 +32,7 @@ public class ProfileServiceImpl implements ProfileService {
         profile.setRatingDeviation(ratingUpdateDTO.getRatingDeviation());
         profile.setVolatility(ratingUpdateDTO.getVolatility());
 
-        updateWinLossDrawCounts(profile, ratingUpdateDTO);
-
         profileRepository.save(profile);
-    }
-
-    private void updateWinLossDrawCounts(Profile profile, PlayerRatingUpdateDTO ratingUpdateDTO) {
-        switch (ratingUpdateDTO.getResult()) {
-            case "WIN":
-                profile.setTotalWins(profile.getTotalWins() + 1);
-                break;
-            case "LOSS":
-                profile.setTotalLosses(profile.getTotalLosses() + 1);
-                break;
-            case "DRAW":
-                profile.setTotalDraws(profile.getTotalDraws() + 1);
-                break;
-        }
     }
 
     @Override
