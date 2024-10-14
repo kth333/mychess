@@ -4,15 +4,19 @@ on:
   push:
     branches:
       - main
-      - frontend-test
   pull_request:
     branches:
       - main
 
 jobs:
-  # Job 1: Build the frontend
-  build-frontend:
+  build:
     runs-on: ubuntu-latest
+
+
+    env:
+      DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+      DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+
     steps:
       - name: Checkout Code
         uses: actions/checkout@v3
@@ -31,20 +35,10 @@ jobs:
         run: |
           CI=false npm run build
 
-      # Upload the built files as an artifact
-      - name: Upload Frontend Build Artifacts
-        uses: actions/upload-artifact@v3
-        with:
-          name: frontend-build
-          path: frontend/build
-
-  # Job 2: Build the backend services
-  build-backend:
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout Code
-        uses: actions/checkout@v3
+      # Uncomment if you have frontend tests
+      # - name: Run Frontend Tests
+      #   working-directory: frontend
+      #   run: npm test -- --watchAll=false
 
       - name: Set up JDK 17
         uses: actions/setup-java@v3
@@ -60,50 +54,6 @@ jobs:
       - name: Build and Test Spring Boot Services (All Microservices)
         run: ./mvnw clean package
 
-      # Upload the built files as an artifact
-      - name: Upload Backend Build Artifacts
-        uses: actions/upload-artifact@v3
-        with:
-          name: backend-build
-          path: |
-            auth-service/target/*.jar
-            admin-service/target/*.jar
-            player-service/target/*.jar
-            email-service/target/*.jar
-            tournament-service/target/*.jar
-            match-service/target/*.jar
-
-  # Job 3: Push Docker images for all services
-  push-docker-images:
-    needs: [build-frontend, build-backend] # Depends on both the build jobs
-    runs-on: ubuntu-latest
-
-    env:
-      DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
-      DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
-
-    steps:
-      - name: Checkout Code
-        uses: actions/checkout@v3
-
-      - name: Download Frontend Artifacts
-        uses: actions/download-artifact@v3
-        with:
-          name: frontend-build
-          path: ./frontend-build # Specify the directory to store the artifacts
-
-      - name: Download Backend Artifacts
-        uses: actions/download-artifact@v3
-        with:
-          name: backend-build
-          path: ./backend-build # Specify the directory to store the artifacts
-
-      - name: Log in to Docker Hub
-        uses: docker/login-action@v2
-        with:
-          username: ${{ secrets.DOCKER_USERNAME }}
-          password: ${{ secrets.DOCKER_PASSWORD }}
-
       - name: Install Docker Compose
         run: |
           sudo curl -L "https://github.com/docker/compose/releases/download/v2.29.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
@@ -118,46 +68,96 @@ jobs:
       - name: Build Docker Images
         run: docker-compose build
 
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
       - name: Push Docker Images
         run: docker-compose push
 
-  # # Job 4: Deploy Backend Services
-  # deploy-backend:
-  #   needs: push-docker-images # Deploy only after Docker images are pushed
-  #   runs-on: ubuntu-latest
 
-  #   steps:
-  #     - name: Deploy Backend Service 1
-  #       run: |
-  #         ssh -o StrictHostKeyChecking=no -i ${{ secrets.EC2_SSH_KEY }} ec2-user@<EC2_BACKEND_1_IP> "
-  #         docker pull <your-docker-repo>/<service-1-image>:latest &&
-  #         docker stop <service-1-container> || true &&
-  #         docker rm <service-1-container> || true &&
-  #         docker run -d --name <service-1-container> <your-docker-repo>/<service-1-image>:latest
-  #         "
+  # Job 4: Deploy Backend Services
+  deploy-backend:
+    needs: push-docker-images # Deploy only after Docker images are pushed
+    runs-on: ubuntu-latest
 
-  #     - name: Deploy Backend Service 2
-  #       run: |
-  #         ssh -o StrictHostKeyChecking=no -i ${{ secrets.EC2_SSH_KEY }} ec2-user@<EC2_BACKEND_2_IP> "
-  #         docker pull <your-docker-repo>/<service-2-image>:latest &&
-  #         docker stop <service-2-container> || true &&
-  #         docker rm <service-2-container> || true &&
-  #         docker run -d --name <service-2-container> <your-docker-repo>/<service-2-image>:latest
-  #         "
+    steps:
+      - name: Deploy Auth Service
+        run: |
+          echo "${{ secrets.EC2_SSH_KEY }}" > ec2_key.pem
+          chmod 600 ec2_key.pem
+          ssh -o StrictHostKeyChecking=no -i ec2_key.pem ec2-user@${{ secrets.EC2_AUTH_SERVICE_DNS }} "
+          docker pull ppv1/auth-service:latest &&
+          docker stop auth-service || true &&
+          docker rm auth-service || true &&
+          docker run -d --name auth-service -p 8080:8080 --env-file /home/ec2-user/.env ppv1/auth-service:latest --spring.profiles.active=docker
+          "
 
-  #     # Repeat for other backend services (3-6)
+      - name: Deploy Admin Service
+        run: |
+          echo "${{ secrets.EC2_SSH_KEY }}" > ec2_key.pem
+          chmod 600 ec2_key.pem
+          ssh -o StrictHostKeyChecking=no -i ec2_key.pem ec2-user@${{ secrets.EC2_ADMIN_SERVICE_DNS }} "
+          docker pull ppv1/admin-service:latest &&
+          docker stop admin-service || true &&
+          docker rm admin-service || true &&
+          docker run -d --name admin-service -p 8084:8084 --env-file /home/ec2-user/.env ppv1/admin-service:latest --spring.profiles.active=docker
+          "
+      - name: Deploy Player Service
+        run: |
+          echo "${{ secrets.EC2_SSH_KEY }}" > ec2_key.pem
+          chmod 600 ec2_key.pem
+          ssh -o StrictHostKeyChecking=no -i ec2_key.pem ec2-user@${{ secrets.EC2_PLAYER_SERVICE_DNS }} "
+          docker pull ppv1/player-service:latest &&
+          docker stop player-service || true &&
+          docker rm player-service || true &&
+          docker run -d --name player-service -p 8081:8081 --env-file /home/ec2-user/.env ppv1/player-service:latest --spring.profiles.active=docker
+          "
+      - name: Deploy Email Service
+        run: |
+          echo "${{ secrets.EC2_SSH_KEY }}" > ec2_key.pem
+          chmod 600 ec2_key.pem
+          ssh -o StrictHostKeyChecking=no -i ec2_key.pem ec2-user@${{ secrets.EC2_EMAIL_SERVICE_DNS }} "
+          docker pull ppv1/email-service:latest &&
+          docker stop email-service || true &&
+          docker rm email-service || true &&
+          docker run -d --name email-service -p 8085:8085 --env-file /home/ec2-user/.env ppv1/email-service:latest --spring.profiles.active=docker
+          "
+      - name: Deploy Tournament Service
+        run: |
+          echo "${{ secrets.EC2_SSH_KEY }}" > ec2_key.pem
+          chmod 600 ec2_key.pem
+          ssh -o StrictHostKeyChecking=no -i ec2_key.pem ec2-user@${{ secrets.EC2_TOURNAMENT_SERVICE_DNS }} "
+          docker pull ppv1/tournament-service:latest &&
+          docker stop tournament-service || true &&
+          docker rm tournament-service || true &&
+          docker run -d --name tournament-service -p 8083:8083 --env-file /home/ec2-user/.env ppv1/tournament-service:latest --spring.profiles.active=docker
+          "
 
-  # # Job 5: Deploy Frontend
-  # deploy-frontend:
-  #   needs: push-docker-images # Deploy only after Docker images are pushed
-  #   runs-on: ubuntu-latest
+      - name: Deploy Match Service
+        run: |
+          echo "${{ secrets.EC2_SSH_KEY }}" > ec2_key.pem
+          chmod 600 ec2_key.pem
+          ssh -o StrictHostKeyChecking=no -i ec2_key.pem ec2-user@${{ secrets.EC2_MATCH_SERVICE_DNS }} "
+          docker pull ppv1/match-service:latest &&
+          docker stop match-service || true &&
+          docker rm match-service || true &&
+          docker run -d --name match-service -p 8082:8082 --env-file /home/ec2-user/.env ppv1/match-service:latest --spring.profiles.active=docker
+          "
 
-  #   steps:
-  #     - name: Deploy Frontend
-  #       run: |
-  #         ssh -o StrictHostKeyChecking=no -i ${{ secrets.EC2_SSH_KEY }} ec2-user@<EC2_FRONTEND_IP> "
-  #         docker pull <your-docker-repo>/frontend-image:latest &&
-  #         docker stop frontend-container || true &&
-  #         docker rm frontend-container || true &&
-  #         docker run -d -p 80:80 --name frontend-container <your-docker-repo>/frontend-image:latest
-  #         "
+  # Job 5: Deploy Frontend
+  deploy-frontend:
+    needs: push-docker-images # Deploy only after Docker images are pushed
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Deploy Frontend
+        run: |
+          ssh -o StrictHostKeyChecking=no -i ${{ secrets.EC2_SSH_KEY }} ec2-user@${{ secrets.EC2_FRONTEND_DNS }} "
+          docker pull ppv1/frontend:latest &&
+          docker stop frontend || true &&
+          docker rm frontend || true &&
+          docker run -d --name frontend -p 80:80  ppv1/frontend:latest
+          "
