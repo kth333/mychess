@@ -86,9 +86,11 @@ jobs:
           echo "DOCKER_PASSWORD=${{ secrets.DOCKER_PASSWORD }}" >> .env
 
       - name: Build Docker Images
+        working-directory: ./
         run: docker-compose build
 
       - name: Push Docker Images
+        working-directory: ./
         run: docker-compose push
 
   # # Job 4: Deploy Backend Services
