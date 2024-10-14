@@ -100,10 +100,9 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Deploy Backend Services
+      - name: Deploy Auth Service
         if: ${{ inputs.skip_backend != 'true' }} # Skip backend deploy conditionally
         run: |
-          # Deploy Auth Service
           echo "${{ secrets.EC2_SSH_KEY }}" > ec2_key.pem
           chmod 600 ec2_key.pem
           ssh -o StrictHostKeyChecking=no -i ec2_key.pem ec2-user@${{ secrets.EC2_AUTH_SERVICE_DNS }} "
@@ -112,7 +111,7 @@ jobs:
           docker rm auth-service || true &&
           docker run -d --name auth-service -p 8080:8080 --env-file /home/ec2-user/.env ppv1/auth-service:latest --spring.profiles.active=docker
           "
-        - name: Deploy Admin Service
+      - name: Deploy Admin Service
         run: |
           echo "${{ secrets.EC2_SSH_KEY }}" > ec2_key.pem
           chmod 600 ec2_key.pem
