@@ -259,7 +259,7 @@ public class MatchServiceImpl implements MatchService {
         return ResponseEntity.ok("Match completed successfully.");
     }
 
-    public void calculatePlayerRatings(MatchPlayer player, List<MatchPlayer> opponents, double[] result) {
+    public static void calculatePlayerRatings(MatchPlayer player, List<MatchPlayer> opponents, double[] result) {
         // converting rating and rating deviation to glicko-2 scale
         double R = (player.getInitialRating() - 1500) / 173.7178;
         double RD = player.getInitialRatingDeviation() / 173.7178;
@@ -269,15 +269,18 @@ public class MatchServiceImpl implements MatchService {
 
         for (int j = 0; j < opponents.size(); j++) {
             opponents_rating[j] = (opponents.get(j).getInitialRating() - 1500) / 173.7178;
-            opponents_RD[j] = opponents.get(j).getInitialVolatility() / 173.7178;
+            opponents_RD[j] = opponents.get(j).getInitialRatingDeviation() / 173.7178;
+            System.out.println(opponents_rating[j] + " " + opponents_RD[j]);
         }
 
         double delta = calculate_delta(R, opponents_rating, opponents_RD, result);
+        System.out.println("delta = " + delta);
         double v = calculate_v(R, opponents_rating, opponents_RD);
+        System.out.println("v = " + v);
 
         double newVolatility = calculate_volatility(RD, player.getInitialVolatility(), v, delta * delta);
         double newRatingDeviation = calculateNewRatingDeviation(RD, newVolatility, v);
-        double newRating = calculateNewRating(R, RD, delta, v);
+        double newRating = calculateNewRating(R, newRatingDeviation, delta, v);
 
         player.setNewVolatility(newVolatility);
         player.setNewRatingDeviation(173.7178 * newRatingDeviation);
@@ -351,7 +354,7 @@ public class MatchServiceImpl implements MatchService {
             B = Math.log(delta_squared - (RD * RD) - v);
         } else {
             int k = 1;
-            while (Math.log(A - k * 0.5) < 0) { // tau is set at 0.5
+            while (calculate_function(A - k * 0.5, delta_squared, RD * RD, v, A) < 0) { // tau is set at 0.5
                 k++;
             }
             B = A - k * 0.5;
@@ -377,12 +380,12 @@ public class MatchServiceImpl implements MatchService {
         return Math.exp(A / 2);
     }
 
-    private double calculateNewRatingDeviation(double RD, double newVolatility, double v) {
+    private static double calculateNewRatingDeviation(double RD, double newVolatility, double v) {
         double pre_rating_RD = Math.sqrt(RD * RD + newVolatility * newVolatility);
-        return 1 / Math.sqrt((1 / pre_rating_RD * pre_rating_RD) + (1 / v));
+        return 1 / Math.sqrt((1 / (pre_rating_RD * pre_rating_RD)) + (1 / v));
     }
 
-    private double calculateNewRating(double R, double newRD, double delta, double v) {
+    private static double calculateNewRating(double R, double newRD, double delta, double v) {
         return R + newRD * newRD * delta / v;
     }
 
