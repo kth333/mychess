@@ -8,11 +8,16 @@ on:
   pull_request:
     branches:
       - main
+  workflow_dispatch:
+    inputs:
+      skip_backend:
+        description: 'Skip Backend Build and Deploy Steps'
+        required: false
+        default: 'false'
 
 jobs:
   build:
     runs-on: ubuntu-latest
-
 
     env:
       DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
@@ -53,6 +58,7 @@ jobs:
         run: chmod +x ./mvnw
 
       - name: Build and Test Spring Boot Services (All Microservices)
+        if: ${{ inputs.skip_backend != 'true' }} # Conditionally skip backend build
         run: ./mvnw clean package
 
       - name: Install Docker Compose
@@ -72,12 +78,21 @@ jobs:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
-      - name: Build Docker Images
-        run: docker-compose build
+      - name: Build Backend Docker Images
+        if: ${{ inputs.skip_backend != 'true' }} # Skip backend docker build conditionally
+        run: |
+          docker-compose build auth-service tournament-service match-service email-service player-service admin-service
       
-      - name: Push Docker Images
-        run: docker-compose push
+      - name: Push Backend Docker Images
+        if: ${{ inputs.skip_backend != 'true' }} # Skip backend docker push conditionally
+        run: |
+          docker-compose push auth-service tournament-service match-service email-service player-service admin-service
 
+      - name: Build Frontend Docker Image
+        run: docker-compose build frontend
+
+      - name: Push Frontend Docker Image
+        run: docker-compose push frontend
 
   # Job 4: Deploy Backend Services
   deploy-backend:
@@ -85,8 +100,10 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Deploy Auth Service
+      - name: Deploy Backend Services
+        if: ${{ inputs.skip_backend != 'true' }} # Skip backend deploy conditionally
         run: |
+          # Deploy Auth Service
           echo "${{ secrets.EC2_SSH_KEY }}" > ec2_key.pem
           chmod 600 ec2_key.pem
           ssh -o StrictHostKeyChecking=no -i ec2_key.pem ec2-user@${{ secrets.EC2_AUTH_SERVICE_DNS }} "
@@ -95,8 +112,7 @@ jobs:
           docker rm auth-service || true &&
           docker run -d --name auth-service -p 8080:8080 --env-file /home/ec2-user/.env ppv1/auth-service:latest --spring.profiles.active=docker
           "
-
-      - name: Deploy Admin Service
+        - name: Deploy Admin Service
         run: |
           echo "${{ secrets.EC2_SSH_KEY }}" > ec2_key.pem
           chmod 600 ec2_key.pem
@@ -147,6 +163,8 @@ jobs:
           docker rm match-service || true &&
           docker run -d --name match-service -p 8082:8082 --env-file /home/ec2-user/.env ppv1/match-service:latest --spring.profiles.active=docker
           "
+
+          
 
   # Job 5: Deploy Frontend
   deploy-frontend:
