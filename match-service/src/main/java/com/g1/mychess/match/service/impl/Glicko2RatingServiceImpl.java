@@ -21,7 +21,7 @@ public class Glicko2RatingServiceImpl implements Glicko2RatingService {
 
         for (int j = 0; j < opponents.size(); j++) {
             opponents_rating[j] = (opponents.get(j).getGlickoRating() - 1500) / 173.7178;
-            opponents_RD[j] = opponents.get(j).getVolatility() / 173.7178;
+            opponents_RD[j] = opponents.get(j).getRatingDeviation() / 173.7178;
         }
 
         double delta = calculate_delta(R, opponents_rating, opponents_RD, result);
@@ -29,7 +29,7 @@ public class Glicko2RatingServiceImpl implements Glicko2RatingService {
 
         double newVolatility = calculate_volatility(RD, player.getVolatility(), v, delta * delta);
         double newRatingDeviation = calculateNewRatingDeviation(RD, newVolatility, v);
-        double newRating = calculateNewRating(R, RD, delta, v);
+        double newRating = calculateNewRating(R, newRatingDeviation, delta, v);
 
         System.out.println("New rating calculated for playerId: " + player.getPlayerId() +
                 " New Rating: " + (173.7178 * newRating + 1500) +
@@ -97,7 +97,7 @@ public class Glicko2RatingServiceImpl implements Glicko2RatingService {
             B = Math.log(delta_squared - (RD * RD) - v);
         } else {
             int k = 1;
-            while (Math.log(A - k * 0.5) < 0) { // tau is set at 0.5
+            while (calculate_function(A - k * 0.5, delta_squared, RD * RD, v, A) < 0) { // tau is set at 0.5
                 k++;
             }
             B = A - k * 0.5;
@@ -125,7 +125,7 @@ public class Glicko2RatingServiceImpl implements Glicko2RatingService {
 
     private double calculateNewRatingDeviation(double RD, double newVolatility, double v) {
         double pre_rating_RD = Math.sqrt(RD * RD + newVolatility * newVolatility);
-        return 1 / Math.sqrt((1 / pre_rating_RD * pre_rating_RD) + (1 / v));
+        return 1 / Math.sqrt((1 / pre_rating_RD / pre_rating_RD) + (1 / v));
     }
 
     private double calculateNewRating(double R, double newRD, double delta, double v) {
