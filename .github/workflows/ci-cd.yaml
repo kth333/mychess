@@ -65,7 +65,13 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: backend-build
-          path: target/*.jar # Adjust this path based on where your JAR files are located
+          path: 
+          auth-service/target/*.jar
+          admin-service/target/*.jar
+          player-service/target/*.jar
+          email-service/target/*.jar
+          tournament-service/target/*.jar
+          match-service/target/*.jar
 
   # Job 3: Push Docker images for all services
   push-docker-images:
@@ -79,7 +85,7 @@ jobs:
     steps:
       - name: Checkout Code
         uses: actions/checkout@v3
-        
+
       - name: Download Frontend Artifacts
         uses: actions/download-artifact@v3
         with:
