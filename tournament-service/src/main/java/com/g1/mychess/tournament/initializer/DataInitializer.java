@@ -60,7 +60,7 @@ public class DataInitializer implements CommandLineRunner {
         tournament1.setCity("San Francisco");
         tournament1.setAddress("100 Chess Way");
         tournament1.setCurrentRound(0);
-        tournament1.setMaxRounds(5);
+        tournament1.setMaxRounds(3);
         tournament1.setParticipants(new HashSet<>());
 
         Tournament tournament2 = new Tournament();

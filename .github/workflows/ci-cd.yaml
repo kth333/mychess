@@ -81,6 +81,7 @@ jobs:
 
   # Job 4: Deploy Backend Services
   deploy-backend:
+    needs: build
     runs-on: ubuntu-latest
 
     steps:
@@ -149,12 +150,15 @@ jobs:
 
   # Job 5: Deploy Frontend
   deploy-frontend:
+    needs: build
     runs-on: ubuntu-latest
 
     steps:
       - name: Deploy Frontend
         run: |
-          ssh -o StrictHostKeyChecking=no -i ${{ secrets.EC2_SSH_KEY }} ec2-user@${{ secrets.EC2_FRONTEND_DNS }} "
+          echo "${{ secrets.EC2_SSH_KEY }}" > ec2_key.pem
+          chmod 600 ec2_key.pem
+          ssh -o StrictHostKeyChecking=no -i ec2_key.pem ec2-user@${{ secrets.EC2_FRONTEND_DNS }} "
           docker pull ppv1/frontend:latest &&
           docker stop frontend || true &&
           docker rm frontend || true &&
