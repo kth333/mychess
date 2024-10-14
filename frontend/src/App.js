@@ -1,5 +1,5 @@
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, BrowserRouter } from 'react-router-dom';
 import './App.css';
 import Login from "./components/Login";
 import Register from './components/Register';
@@ -14,27 +14,29 @@ import UpdateTournament from './components/tournaments/UpdateTournament';
 
 function App() {
   return (
-    <Router>
-      <div className="App">
-        <Routes>
-          <Route element={<Layout />}>
-            <Route exact index element={<Home />} />
-            <Route exact path="/login" element={<Login />} />
-            <Route exact path="/register" element={<Register />} />
-            <Route exact path="/tournaments" element={<Tournaments />} />
-            <Route exact path="/tournaments/:name" element={<TournamentDetails />} />
-            
-            <Route element={<ProtectedRoute />}>
-              <Route exact path="/create-tournament" element={<CreateTournament />} />
-              <Route exact path="/update-tournament/:name" element={<UpdateTournament />} />
-              <Route exact path="/profile" element={<Profile/>} />
+    <BrowserRouter>
+      <Router>
+        <div className="App">
+          <Routes>
+            <Route element={<Layout />}>
+              <Route exact index element={<Home />} />
+              <Route exact path="/login" element={<Login />} />
+              <Route exact path="/register" element={<Register />} />
+              <Route exact path="/tournaments" element={<Tournaments />} />
+              <Route exact path="/tournaments/:name" element={<TournamentDetails />} />
+              
+              <Route element={<ProtectedRoute />}>
+                <Route exact path="/create-tournament" element={<CreateTournament />} />
+                <Route exact path="/update-tournament/:name" element={<UpdateTournament />} />
+                <Route exact path="/profile" element={<Profile/>} />
+              </Route>
+
+
             </Route>
-
-
-          </Route>
-        </Routes>
-      </div>
-    </Router>
+          </Routes>
+        </div>
+      </Router>
+    </BrowserRouter>
   );
 }
 
