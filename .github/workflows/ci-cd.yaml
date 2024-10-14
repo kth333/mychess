@@ -81,7 +81,7 @@ jobs:
 
   # Job 4: Deploy Backend Services
   deploy-backend:
-    needs: push-docker-images # Deploy only after Docker images are pushed
+    needs: push-docker-images
     runs-on: ubuntu-latest
 
     steps:
