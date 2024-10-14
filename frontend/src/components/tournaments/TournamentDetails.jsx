@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { Card } from '../ui/card';
 import { Button } from '../ui/button';
-import { useParams } from 'react-router-dom';
+import { useParams, Link } from 'react-router-dom';
 import withNavigateandLocation from '../withNavigateandLocation';
 import TournamentService from '../../services/TournamentService';
 import MatchService from '../../services/MatchService'; // Import MatchService
@@ -258,9 +258,9 @@ class TournamentDetails extends Component {
                         </Button>
                     ) : (
                         <>
-                            <Button className="btn btn-primary mt-6">
-                                <a href={`/update-tournament/${tournament.name}`}>Update</a>
-                            </Button>
+                            <Link className="btn btn-primary mt-6" to={`/update-tournament/${tournament.name}`}>
+                                Update
+                            </Link>
                             <Button className="btn btn-primary mt-6" onClick={this.startTournament} disabled={status === 'ONGOING'}>
                                 Start tournament
                             </Button>
