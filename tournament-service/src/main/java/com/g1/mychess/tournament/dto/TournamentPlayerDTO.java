@@ -8,7 +8,7 @@ public class TournamentPlayerDTO {
     private Long tournamentId;
     private Long playerId;
     private LocalDateTime signUpDateTime;
-    private int glickoRating;
+    private double glickoRating;
     private double points;
     private int roundsPlayed;
     private String status;
@@ -16,7 +16,7 @@ public class TournamentPlayerDTO {
     // Constructors
     public TournamentPlayerDTO() {}
 
-    public TournamentPlayerDTO(Long id, Long tournamentId, Long playerId, LocalDateTime signUpDateTime, int glickoRating,
+    public TournamentPlayerDTO(Long id, Long tournamentId, Long playerId, LocalDateTime signUpDateTime, double glickoRating,
                                double points, int roundsPlayed, String status) {
         this.id = id;
         this.tournamentId = tournamentId;
@@ -61,11 +61,11 @@ public class TournamentPlayerDTO {
         this.signUpDateTime = signUpDateTime;
     }
 
-    public int getGlickoRating() {
+    public double getGlickoRating() {
         return glickoRating;
     }
 
-    public void setGlickoRating(int glickoRating) {
+    public void setGlickoRating(double glickoRating) {
         this.glickoRating = glickoRating;
     }
 

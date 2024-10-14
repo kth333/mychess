@@ -16,7 +16,7 @@ public class PlayerRatingHistory {
     private Player player;
 
     @Column(name = "glicko_rating", nullable = false)
-    private int glickoRating;
+    private double glickoRating;
 
     @Column(name = "rating_deviation", nullable = false)
     private double ratingDeviation;
@@ -30,7 +30,7 @@ public class PlayerRatingHistory {
     public PlayerRatingHistory(){
     }
 
-    public PlayerRatingHistory(Player player, int glickoRating, double ratingDeviation, double volatility, LocalDateTime now) {
+    public PlayerRatingHistory(Player player, double glickoRating, double ratingDeviation, double volatility, LocalDateTime now) {
         this.player = player;
         this.glickoRating = glickoRating;
         this.ratingDeviation = ratingDeviation;
@@ -56,11 +56,11 @@ public class PlayerRatingHistory {
         this.player = player;
     }
 
-    public int getGlickoRating() {
+    public double getGlickoRating() {
         return glickoRating;
     }
 
-    public void setGlickoRating(int glickoRating) {
+    public void setGlickoRating(double glickoRating) {
         this.glickoRating = glickoRating;
     }
 

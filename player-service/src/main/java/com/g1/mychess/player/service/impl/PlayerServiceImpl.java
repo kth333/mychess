@@ -129,7 +129,7 @@ public class PlayerServiceImpl implements PlayerService {
     }
 
     @Override
-    public void updatePlayerRating(Long playerId, int glickoRating, double ratingDeviation, double volatility) {
+    public void updatePlayerRating(Long playerId, double glickoRating, double ratingDeviation, double volatility) {
         Player player = playerRepository.findById(playerId)
                 .orElseThrow(() -> new PlayerNotFoundException("Player not found with id: " + playerId));
         Profile profile = player.getProfile();

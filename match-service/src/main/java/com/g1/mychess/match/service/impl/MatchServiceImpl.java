@@ -299,7 +299,7 @@ public class MatchServiceImpl implements MatchService {
     private void updatePlayerProfileRating(PlayerRatingUpdateDTO ratingUpdate) {
         webClientBuilder.build()
                 .post()
-                .uri(playerServiceUrl + "/api/v1/player/update-rating")
+                .uri(playerServiceUrl + "/api/v1/profile/update-rating")
                 .bodyValue(ratingUpdate)
                 .retrieve()
                 .bodyToMono(Void.class)

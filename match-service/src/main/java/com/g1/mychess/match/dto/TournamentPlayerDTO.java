@@ -7,7 +7,7 @@ public class TournamentPlayerDTO {
     private Long id;
     private Long playerId;
     private LocalDateTime signUpDateTime;
-    private int glickoRating;
+    private double glickoRating;
     private double points;
     private int roundsPlayed;
     private String status; // Use enum if needed
@@ -16,7 +16,7 @@ public class TournamentPlayerDTO {
 
     public TournamentPlayerDTO() {}
 
-    public TournamentPlayerDTO(Long id, Long playerId, LocalDateTime signUpDateTime, int glickoRating, double points, int roundsPlayed, String status) {
+    public TournamentPlayerDTO(Long id, Long playerId, LocalDateTime signUpDateTime, double glickoRating, double points, int roundsPlayed, String status) {
         this.id = id;
         this.playerId = playerId;
         this.signUpDateTime = signUpDateTime;
@@ -50,11 +50,11 @@ public class TournamentPlayerDTO {
         this.signUpDateTime = signUpDateTime;
     }
 
-    public int getGlickoRating() {
+    public double getGlickoRating() {
         return glickoRating;
     }
 
-    public void setGlickoRating(int glickoRating) {
+    public void setGlickoRating(double glickoRating) {
         this.glickoRating = glickoRating;
     }
 

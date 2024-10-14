@@ -39,9 +39,8 @@ public class ProfileController {
     }
 
     @PostMapping("/update-rating")
-    public ResponseEntity<Void> updatePlayerProfileAndHistory(@RequestBody PlayerRatingUpdateDTO ratingUpdateDTO) {
-        profileService.updatePlayerProfile(ratingUpdateDTO);
-        playerRatingHistoryService.updatePlayerRatingHistory(ratingUpdateDTO);
+    public ResponseEntity<Void> updateProfileRating(@RequestBody PlayerRatingUpdateDTO ratingUpdateDTO) {
+        profileService.updateProfileRating(ratingUpdateDTO);
         return ResponseEntity.status(HttpStatus.OK).build();
     }
 }
