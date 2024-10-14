@@ -31,10 +31,12 @@ jobs:
         run: |
           CI=false npm run build
 
-      # Uncomment if you have frontend tests
-      # - name: Run Frontend Tests
-      #   working-directory: frontend
-      #   run: npm test -- --watchAll=false
+      # Upload the built files as an artifact
+      - name: Upload Frontend Build Artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: frontend-build
+          path: frontend/build
 
   # Job 2: Build the backend services
   build-backend:
@@ -58,6 +60,13 @@ jobs:
       - name: Build and Test Spring Boot Services (All Microservices)
         run: ./mvnw clean package
 
+      # Upload the built files as an artifact
+      - name: Upload Backend Build Artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: backend-build
+          path: target/*.jar # Adjust this path based on where your JAR files are located
+
   # Job 3: Push Docker images for all services
   push-docker-images:
     needs: [build-frontend, build-backend] # Depends on both the build jobs
@@ -70,6 +79,18 @@ jobs:
     steps:
       - name: Checkout Code
         uses: actions/checkout@v3
+        
+      - name: Download Frontend Artifacts
+        uses: actions/download-artifact@v3
+        with:
+          name: frontend-build
+          path: ./frontend-build # Specify the directory to store the artifacts
+
+      - name: Download Backend Artifacts
+        uses: actions/download-artifact@v3
+        with:
+          name: backend-build
+          path: ./backend-build # Specify the directory to store the artifacts
 
       - name: Log in to Docker Hub
         uses: docker/login-action@v2
