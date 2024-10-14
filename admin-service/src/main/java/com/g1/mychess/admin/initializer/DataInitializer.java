@@ -33,8 +33,8 @@ public class DataInitializer implements CommandLineRunner {
 
     private void reCreateDatabase() {
         // Adjust the SQL command according to your database
-        String dropSQL = "DROP DATABASE tournament_service_db;";
-        String createSQL = "CREATE DATABASE tournament_service_db;";
+        String dropSQL = "DROP DATABASE admin_service_db;";
+        String createSQL = "CREATE DATABASE admin_service_db;";
         try {
             jdbcTemplate.execute(dropSQL);
             jdbcTemplate.execute(createSQL);
