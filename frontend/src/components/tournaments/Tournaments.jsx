@@ -98,16 +98,15 @@ class Tournaments extends Component {
                       <TrophyIcon className="mr-2 h-4 w-4 text-yellow-500" />
                       Rating Range: {tournament.minRating} - {tournament.maxRating}
                     </p>
-                    {!isAdmin ? (
-                      <button className="mt-4 btn btn-primary w-auto font-bold" variant="outline" asChild>
-                        <a href={`/tournaments/${tournament.name}`}>View Details</a>
-                      </button>
-                    ) : (
-                      <>
+                    {isAdmin ? (
                       <button className="mt-4 btn btn-primary w-auto font-bold" variant="outline" asChild>
                         <a href={`/tournaments/${tournament.name}`}>Manage</a>
                       </button>
-                    </>
+                    ) : (
+                      <button className="mt-4 btn btn-primary w-auto font-bold" variant="outline" asChild>
+                        <a href={`/tournaments/${tournament.name}`}>View Details</a>
+                      </button>
+                      
                       
                     )}
                     

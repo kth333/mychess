@@ -4,12 +4,15 @@ import { Button } from '../ui/button';
 import { useParams } from 'react-router-dom';
 import withNavigateandLocation from '../withNavigateandLocation';
 import TournamentService from '../../services/TournamentService';
+import MatchService from '../../services/MatchService'; // Import MatchService
 
 class TournamentDetails extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            tournament: null, // will store the tournament details
+            tournament: null,
+            matches: [], // Store the matches here
+            selectedWinners: {}, // Store selected winners for each match
         };
     }
 
@@ -17,26 +20,82 @@ class TournamentDetails extends Component {
         await this.fetchData();
     }
 
+    // Fetch tournament details
+    fetchData = async () => {
+        const { name } = this.props.params;
+        try {
+            const res = await TournamentService.getTournamentByName(name);
+            console.log("Tournament data:", res.data);
+            this.setState({ tournament: res.data }, this.fetchMatches);
+        } catch (error) {
+            console.error("Failed to fetch tournament", error);
+        }
+    };
+
+    // Fetch matches associated with the tournament
+    fetchMatches = async () => {
+        const { id } = this.state.tournament;
+        try {
+            const res = await MatchService.getAllMatchesById(id);
+            console.log("Matches data:", res.data);
+            this.setState({ matches: res.data });
+        } catch (error) {
+            console.error("Failed to fetch matches", error);
+        }
+    };
+
+    // Complete match by ID
+    completeMatch = async (matchId) => {
+        const { selectedWinners } = this.state;
+        const { winnerId, loserId, isDraw } = selectedWinners[matchId];
+
+        let match = {
+            winnerId: winnerId,
+            loserId: loserId,
+            isDraw: isDraw,
+        };
+
+        console.log("Completing match with data:", JSON.stringify(match));
+        try {
+            await MatchService.completeMatch(matchId, match); // Ensure you have a method to complete the match in your MatchService
+            console.log("Match completed successfully");
+            window.location.reload();
+        } catch (error) {
+            console.error("Failed to complete match", error);
+            alert("Failed to complete match\nReason: " + error.response.data);
+        }
+    };
+
+    // Handle winner selection
+    handleWinnerChange = (matchId, value) => {
+        const selectedWinners = { ...this.state.selectedWinners };
+        if (value === 'draw') {
+            selectedWinners[matchId] = { winnerId: null, loserId: null, isDraw: true };
+        } else {
+            const winnerId = value === 'player1' ? this.state.matches.find(m => m.id === matchId).participantIds[0] : this.state.matches.find(m => m.id === matchId).participantIds[1];
+            const loserId = value === 'player1' ? this.state.matches.find(m => m.id === matchId).participantIds[1] : this.state.matches.find(m => m.id === matchId).participantIds[0];
+            selectedWinners[matchId] = { winnerId, loserId, isDraw: false };
+        }
+        this.setState({ selectedWinners });
+    };
+
     signUp = async () => {
         const { id } = this.state.tournament;
         try {
-            await TournamentService.signUp(id).then((res) => {console.log("register success");});
-            
-            
+            await TournamentService.signUp(id);
+            console.log("Register success");
         } catch (error) {
             console.error("Failed to sign up for tournament", error);
             alert("Failed to sign up for tournament\nReason: " + error.response.data);
         }
-        // this.props.navigate('/profile');
     };
 
     startTournament = async () => {
         const { id } = this.state.tournament;
-        try{
-            await TournamentService.startTournament(id).then((res) => {
-                console.log("start success");
-                window.location.reload();
-            });
+        try {
+            await TournamentService.startTournament(id);
+            console.log("Start success");
+            // window.location.reload();
         } catch (error) {
             console.error("Failed to start tournament", error);
             alert("Failed to start tournament\nReason: " + error.response.data);
@@ -45,76 +104,108 @@ class TournamentDetails extends Component {
 
     startNextRound = async () => {
         const { id } = this.state.tournament;
-        try{
-            await TournamentService.startNextRound(id).then((res) => {console.log("next round success");});
-        } catch (error){
+        try {
+            await TournamentService.startNextRound(id);
+            console.log("Next round success");
+        } catch (error) {
             console.error("Failed to start next round", error);
             alert("Failed to start next round\nReason: " + error.response.data);
         }
     };
 
-    fetchData = async () => {
-        const { name } = this.props.params;
-    
-        try {
-          const res = await TournamentService.getTournamentByName(name);
-          console.log("Tournament data:", res.data);
-          this.setState({ tournament: res.data });
-        } catch (error) {
-          console.error("Failed to fetch tournament", error);
+    renderMatchesTable = () => {
+        const { matches } = this.state;
+
+        if (matches.length === 0) {
+            return <p>No matches available yet.</p>;
         }
+
+        return (
+            <table className="table-auto w-full border-collapse border border-gray-300 my-4">
+                <thead>
+                    <tr>
+                        <th className="border px-4 py-2">Match ID</th>
+                        <th className="border px-4 py-2">Player 1</th>
+                        <th className="border px-4 py-2">Player 2</th>
+                        <th className="border px-4 py-2">Round</th>
+                        <th className="border px-4 py-2">Status</th>
+                        <th className="border px-4 py-2">Action</th> {/* New column for actions */}
+                    </tr>
+                </thead>
+                <tbody>
+                    {matches.map((match) => (
+                        <tr key={match.id}>
+                            <td className="border px-4 py-2">{match.id}</td>
+                            <td className="border px-4 py-2">{match.participantIds[0]}</td>
+                            <td className="border px-4 py-2">{match.participantIds[1]}</td>
+                            <td className="border px-4 py-2">{match.roundNumber}</td>
+                            <td className="border px-4 py-2">{match.status}</td>
+                            <td className="border px-4 py-2">
+                                <select
+                                    onChange={(e) => this.handleWinnerChange(match.id, e.target.value)}
+                                    className="border rounded p-1"
+                                >
+                                    <option value="">Select Winner</option>
+                                    <option value="player1">Player 1 Wins</option>
+                                    <option value="player2">Player 2 Wins</option>
+                                    <option value="draw">Draw</option>
+                                </select>
+                                <Button 
+                                    className="btn btn-success mt-2" 
+                                    onClick={() => this.completeMatch(match.id)} 
+                                    disabled={match.status === 'COMPLETED'} // Disable if not ongoing
+                                >
+                                    Complete Match
+                                </Button>
+                            </td>
+                        </tr>
+                    ))}
+                </tbody>
+            </table>
+        );
     };
 
     render() {
         const { tournament } = this.state;
         const userRole = sessionStorage.getItem("role");
         const isPlayer = userRole === 'ROLE_PLAYER';
-        
 
         if (!tournament) {
-            return <p>Loading...</p>; // Display loading if tournament data is not yet fetched
+            return <p>Loading...</p>;
         }
 
-        const { 
+        const {
             adminId,
-            name, 
-            description, 
-            startDateTime, 
-            endDateTime, 
-            registrationStartDate, 
-            registrationEndDate, 
-            format, 
-            status, 
-            minRating, 
-            maxRating, 
-            affectsRating, 
-            minAge, 
-            maxAge, 
-            requiredGender, 
-            city, 
-            region, 
-            country, 
-            timeControl 
+            name,
+            description,
+            startDateTime,
+            endDateTime,
+            registrationStartDate,
+            registrationEndDate,
+            format,
+            status,
+            minRating,
+            maxRating,
+            affectsRating,
+            minAge,
+            maxAge,
+            requiredGender,
+            city,
+            region,
+            country,
+            timeControl,
         } = tournament;
 
         return (
             <div className="p-6 max-w-4xl mx-auto">
                 <Card className="p-4 bg-base-200">
-                    <h2 className="text-2xl font-bold text-primary">
-                        {name}
-                    </h2>
-                    <p className="my-2 text-accent">
-                        {description}
-                    </p>
-                    <p className="my-2 text-secondary">
-                        Host: admin{adminId}
-                    </p>
+                    <h2 className="text-2xl font-bold text-primary">{name}</h2>
+                    <p className="my-2 text-accent">{description}</p>
+                    <p className="my-2 text-secondary">Host: admin{adminId}</p>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 my-4">
                         <div>
-                            <h5 className="text-xl font-semibold text-primary">
-                                Tournament Details
-                            </h5>
+                            <h5 className="text-xl font-semibold text-primary">Tournament Details</h5>
                             <ul className="list-disc ml-6">
                                 <li>Start: {new Date(startDateTime).toLocaleString()}</li>
                                 <li>End: {new Date(endDateTime).toLocaleString()}</li>
@@ -124,9 +215,7 @@ class TournamentDetails extends Component {
                         </div>
 
                         <div>
-                            <h5 className="text-xl font-semibold text-primary">
-                                Requirements
-                            </h5>
+                            <h5 className="text-xl font-semibold text-primary">Requirements</h5>
                             <ul className="list-disc ml-6">
                                 <li>Min Rating: {minRating}</li>
                                 <li>Max Rating: {maxRating}</li>
@@ -140,9 +229,7 @@ class TournamentDetails extends Component {
                     </div>
 
                     <div className="my-4">
-                        <h5 className="text-xl font-semibold text-primary">
-                            Time Control
-                        </h5>
+                        <h5 className="text-xl font-semibold text-primary">Time Control</h5>
                         <p className="text-secondary">
                             Base Time: {timeControl.baseTimeMinutes} minutes, Increment: {timeControl.incrementSeconds} seconds, Type: {timeControl.timeControlType}
                         </p>
@@ -151,34 +238,31 @@ class TournamentDetails extends Component {
                         </p>
                     </div>
 
+                    {!isPlayer && this.renderMatchesTable()}
+
                     {isPlayer ? (
-                        <Button className="btn btn-primary mt-6" onClick={this.signUp} disabled={!isPlayer}>
+                        <Button className="btn btn-primary mt-6" onClick={this.signUp}>
                             Sign Up
                         </Button>
                     ) : (
-                      <>
-                      <Button className="btn btn-primary mt-6" >
-                        <a href={`/update-tournament/${tournament.name}`}>Update</a>
-                      </Button>
-                      <Button className="btn btn-primary mt-6" onClick={this.startTournament} disabled={status === "ONGOING"}>
-                        Start tournament
-                      </Button>
-                      <Button className="btn btn-primary mt-6" onClick={this.startNextRound}>
-                        Start next round
-                      </Button>
-
-                    </>
-                      
+                        <>
+                            <Button className="btn btn-primary mt-6">
+                                <a href={`/update-tournament/${tournament.name}`}>Update</a>
+                            </Button>
+                            <Button className="btn btn-primary mt-6" onClick={this.startTournament} disabled={status === 'ONGOING'}>
+                                Start tournament
+                            </Button>
+                            <Button className="btn btn-primary mt-6" onClick={this.startNextRound}>
+                                Start next round
+                            </Button>
+                        </>
                     )}
-
-                    
                 </Card>
             </div>
         );
     }
 }
 
-// Wrap the component with `withRouter` to access `this.props.params` in class components
 export default withNavigateandLocation((props) => (
     <TournamentDetails {...props} params={useParams()} />
 ));

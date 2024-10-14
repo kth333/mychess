@@ -1,5 +1,6 @@
 package com.g1.mychess.match.service.impl;
 
+import com.g1.mychess.match.dto.MatchDTO;
 import com.g1.mychess.match.dto.PlayerRatingUpdateDTO;
 import com.g1.mychess.match.dto.TournamentDTO;
 import com.g1.mychess.match.exception.TournamentNotFoundException;
@@ -415,17 +416,35 @@ public class MatchServiceImpl implements MatchService {
     }
 
     @Override
-    public List<Match> findAllMatchByTournament(Long tournamentId) {
-        return matchRepository.findByTournamentId(tournamentId)
+    @Transactional
+    public List<MatchDTO> findAllMatchByTournament(Long tournamentId) {
+        List<Match> matches = matchRepository.findByTournamentId(tournamentId)
                 .orElseThrow(() -> new TournamentNotFoundException("Tournament with id = " + tournamentId + " does not exist."));
+        return convertToDTOList(matches);
+    }
+
+    
+
+    // Convert a list of Match objects to a list of MatchDTOs
+    public List<MatchDTO> convertToDTOList(List<Match> matches) {
+        return matches.stream()
+                      .map(this::convertToDTO)
+                      .collect(Collectors.toList());
     }
 
     @Override
-    public List<Match> findAllMatchByTournamentRound(Long tournamentId, Integer roundNumber) {
+    @Transactional
+    public List<MatchDTO> findAllMatchByTournamentRound(Long tournamentId, Integer roundNumber) {
         matchRepository.findByTournamentId(tournamentId)
                 .orElseThrow(() -> new TournamentNotFoundException("Tournament with id = " + tournamentId + " does not exist."));
 
-        return matchRepository.findByTournamentIdAndRoundNumber(tournamentId, roundNumber)
+        List<Match> matches = matchRepository.findByTournamentIdAndRoundNumber(tournamentId, roundNumber)
                 .orElseThrow(() -> new TournamentRoundNotFoundException("Tournament with id = " + tournamentId + " does not have round = " + roundNumber));
+
+        return convertToDTOList(matches);
+    }
+
+    private MatchDTO convertToDTO(Match match) {
+        return MatchDTO.fromEntity(match);
     }
 }
