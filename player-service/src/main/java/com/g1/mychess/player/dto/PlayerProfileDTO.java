@@ -2,6 +2,7 @@ package com.g1.mychess.player.dto;
 
 import java.time.LocalDate;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.g1.mychess.player.model.CustomChessRank;
 
 public class PlayerProfileDTO {
@@ -22,6 +23,8 @@ public class PlayerProfileDTO {
     private int totalWins;
     private int totalLosses;
     private int totalDraws;
+
+    @JsonProperty("isPublic")
     private boolean isPublic;
     private int age;
 
