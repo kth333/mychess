@@ -14,7 +14,6 @@ import UpdateTournament from './components/tournaments/UpdateTournament';
 
 function App() {
   return (
-    <BrowserRouter>
       <Router>
         <div className="App">
           <Routes>
@@ -36,7 +35,6 @@ function App() {
           </Routes>
         </div>
       </Router>
-    </BrowserRouter>
   );
 }
 
