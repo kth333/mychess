@@ -1,6 +1,7 @@
 import React from 'react';
 import { Card, CardHeader, CardContent, CardFooter } from "./ui/card";
 import { Avatar } from './ui/avatar';
+import { Link } from 'react-router-dom';
 import { Button } from './ui/button';
 import withNavigateandLocation from './withNavigateandLocation';
 import PlayerService from '../services/PlayerService';
@@ -30,7 +31,7 @@ class Profile extends React.Component {
 
     render() {
         const {
-            fullName, bio, avatarUrl, gender, country, region, city, birthDate,
+            playerId, fullName, bio, avatarUrl, gender, country, region, city, birthDate,
             rank, glickoRating, ratingDeviation, volatility, totalWins, totalLosses, totalDraws, isPublic, age
         } = this.state.profile || {};
 
@@ -78,7 +79,7 @@ class Profile extends React.Component {
                     </CardContent>
 
                     <CardFooter className="flex justify-end">
-                        <Button className="btn btn-primary">Edit Profile</Button>
+                        <Link className="btn btn-accent" to={`/profile/update/${playerId}`}>Edit Profile</Link>
                     </CardFooter>
                 </Card>
             </div>
