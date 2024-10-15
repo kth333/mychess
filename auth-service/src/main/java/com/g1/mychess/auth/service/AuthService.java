@@ -5,6 +5,7 @@ import com.g1.mychess.auth.exception.*;
 import com.g1.mychess.auth.model.UserToken;
 import com.g1.mychess.auth.repository.UserTokenRepository;
 import com.g1.mychess.auth.util.JwtUtil;
+import com.g1.mychess.auth.util.UserDetailsFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
@@ -26,6 +27,7 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
     private final UserTokenRepository userTokenRepository;
     private final JwtUtil jwtUtil;
+    private final UserDetailsFactory userDetailsFactory;
 
     @Value("${player.service.url}")
     private String playerServiceUrl;
@@ -37,7 +39,8 @@ public class AuthService {
     private String emailServiceUrl;
 
     @Autowired
-    public AuthService(WebClient.Builder webClientBuilder, PasswordEncoder passwordEncoder, UserTokenRepository userTokenRepository, JwtUtil jwtUtil) {
+    public AuthService(UserDetailsFactory userDetailsFactory, WebClient.Builder webClientBuilder, PasswordEncoder passwordEncoder, UserTokenRepository userTokenRepository, JwtUtil jwtUtil) {
+        this.userDetailsFactory = userDetailsFactory;
         this.webClientBuilder = webClientBuilder;
         this.passwordEncoder = passwordEncoder;
         this.userTokenRepository = userTokenRepository;
@@ -157,13 +160,13 @@ public class AuthService {
     }
 
     // Refactored from login method
-    public UserDetails getUserDetails(UserDTO userDTO,String role) {
-        return new org.springframework.security.core.userdetails.User(
-                userDTO.getUsername(),
-                userDTO.getPassword(),
-                Collections.singleton(new org.springframework.security.core.authority.SimpleGrantedAuthority(role))
-        );
-    }
+//    public UserDetails getUserDetails(UserDTO userDTO,String role) {
+//        return new org.springframework.security.core.userdetails.User(
+//                userDTO.getUsername(),
+//                userDTO.getPassword(),
+//                Collections.singleton(new org.springframework.security.core.authority.SimpleGrantedAuthority(role))
+//        );
+//    }
 
     public String login(String username, String password, String role) {
         UserDTO userDTO = fetchUserDTO(username, role);
@@ -184,10 +187,12 @@ public class AuthService {
             throw new EmailNotVerifiedException("Please verify your email before logging in.");
         }
 
-        // Generate JWT token after successful authentication
-        UserDetails userDetails = getUserDetails(userDTO,role);
+        // converted userDetails constructor into Factory Design pattern to facilitate unit testing
+        UserDetails userDetails = userDetailsFactory.createUserDetails(userDTO, role);
 
+        // Generate JWT token after successful authentication
         return jwtUtil.generateToken(userDetails, userDTO.getUserId());
+
     }
 
     private String generateToken(Long userId, String userType, UserToken.TokenType tokenType, LocalDateTime expirationTime) {
