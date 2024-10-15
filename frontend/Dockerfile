@@ -1,11 +1,32 @@
-FROM node:latest
+# Use an official Node.js runtime as a parent image for the build stage
+FROM node:18 AS build
 
+# Set the working directory
 WORKDIR /app
 
-COPY . .
+# Copy package.json and package-lock.json
+COPY package*.json ./
 
-EXPOSE 3000
-
+# Install the app dependencies
 RUN npm install
 
-CMD ["npm", "start"]
+# Copy the app source code to the container
+COPY . .
+
+# Build the app for production
+RUN npm run build
+
+# Use an official NGINX image to serve the app
+FROM nginx:alpine
+
+# Copy the build folder from the previous stage to NGINX's public folder
+COPY --from=build /app/build /usr/share/nginx/html
+
+# Copy custom NGINX configuration
+COPY nginx.conf /etc/nginx/nginx.conf
+
+# Expose the port on which NGINX will run
+EXPOSE 80
+
+# Start NGINX
+CMD ["nginx", "-g", "daemon off;"]

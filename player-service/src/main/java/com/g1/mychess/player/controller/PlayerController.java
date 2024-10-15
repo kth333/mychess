@@ -73,4 +73,9 @@ public class PlayerController {
         AdminPlayerDTO adminPlayerDTO = playerService.getPlayerDetailsForAdmin(playerId);
         return ResponseEntity.ok(adminPlayerDTO);
     }
+
+    @GetMapping("/health")
+    public ResponseEntity<String> healthCheck() {
+        return ResponseEntity.ok("Service is up and running");
+    }
 }

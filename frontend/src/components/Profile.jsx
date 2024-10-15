@@ -42,7 +42,7 @@ class Profile extends React.Component {
                             <Avatar src={avatarUrl} alt={`${fullName}'s avatar`} size="large" className="w-24 h-24" />
                             <div>
                                 <h2 className="text-2xl font-semibold text-primary">{fullName}</h2>
-                                <p className="text-sm text-secondary">Rank: {rank ? rank.rankName : 'Unranked'}</p>
+                                <p className="text-sm text-secondary">Rank: {rank ? rank : 'Unranked'}</p>
                             </div>
                         </div>
                     </CardHeader>

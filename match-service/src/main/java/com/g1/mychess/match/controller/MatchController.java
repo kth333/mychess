@@ -56,4 +56,9 @@ public class MatchController {
         List<MatchDTO> matches = matchService.findAllMatchByTournamentRound(tournamentId, roundNumber);
         return ResponseEntity.ok(matches);
     }
+
+    @GetMapping("/health")
+    public ResponseEntity<String> healthCheck() {
+        return ResponseEntity.ok("Service is up and running");
+    }
 }

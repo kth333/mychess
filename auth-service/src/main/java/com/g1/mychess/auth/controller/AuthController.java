@@ -65,4 +65,9 @@ public class AuthController {
     public ResponseEntity<String> resetPassword(@RequestBody ResetPasswordRequestDTO resetPasswordRequest) {
         return authService.resetPassword(resetPasswordRequest.getResetToken(), resetPasswordRequest.getNewPassword());
     }
+
+    @GetMapping("/health")
+    public ResponseEntity<String> healthCheck() {
+        return ResponseEntity.ok("Service is up and running");
+    }
 }

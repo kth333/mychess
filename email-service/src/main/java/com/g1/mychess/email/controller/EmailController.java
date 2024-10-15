@@ -60,4 +60,9 @@ public class EmailController {
                     .body("Failed to send whitelist email.");
         }
     }
+
+    @GetMapping("/health")
+    public ResponseEntity<String> healthCheck() {
+        return ResponseEntity.ok("Service is up and running");
+    }
 }

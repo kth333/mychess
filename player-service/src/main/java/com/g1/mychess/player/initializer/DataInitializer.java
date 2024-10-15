@@ -24,29 +24,14 @@ public class DataInitializer implements CommandLineRunner {
     @Autowired
     private ProfileRepository profileRepository;
 
-    @Autowired
-    private JdbcTemplate jdbcTemplate;
-
     @Override
     public void run(String... args) {
-        dropDatabase();
         // Check if players already exist to avoid duplicate entries
         if (playerRepository.count() == 0) {
             initializePlayers();
             System.out.println("Player accounts initialized.");
         } else {
             System.out.println("Player accounts already exist in the database.");
-        }
-    }
-
-    private void dropDatabase() {
-        // Adjust the SQL command according to your database
-        String dropSQL = "DROP DATABASE PLAYER_SERVICE_DB";
-        try {
-            jdbcTemplate.execute(dropSQL);
-            System.out.println("Database dropped successfully.");
-        } catch (Exception e) {
-            System.err.println("Failed to drop database: " + e.getMessage());
         }
     }
 

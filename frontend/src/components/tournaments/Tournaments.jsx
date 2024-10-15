@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import { Link } from "react-router-dom";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../ui/card";
 import { CalendarIcon, TrophyIcon, UsersIcon } from "lucide-react";
 import withNavigateandLocation from '../withNavigateandLocation';
@@ -99,16 +100,15 @@ class Tournaments extends Component {
                       Rating Range: {tournament.minRating} - {tournament.maxRating}
                     </p>
                     {isAdmin ? (
-                      <button className="mt-4 btn btn-primary w-auto font-bold" variant="outline" asChild>
-                        <a href={`/tournaments/${tournament.name}`}>Manage</a>
-                      </button>
+                      <Link className="mt-4 btn btn-primary w-auto font-bold" to={`/tournaments/${tournament.name}`}>
+                        Manage
+                      </Link>
                     ) : (
-                      <button className="mt-4 btn btn-primary w-auto font-bold" variant="outline" asChild>
-                        <a href={`/tournaments/${tournament.name}`}>View Details</a>
-                      </button>
-                      
-                      
+                      <Link className="mt-4 btn btn-primary w-auto font-bold" to={`/tournaments/${tournament.name}`}>
+                        View Details
+                      </Link>
                     )}
+
                     
                   </CardContent>
                 </Card>

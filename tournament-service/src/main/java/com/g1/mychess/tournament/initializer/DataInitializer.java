@@ -25,12 +25,8 @@ public class DataInitializer implements CommandLineRunner {
     @Autowired
     private TournamentPlayerRepository tournamentPlayerRepository;
 
-    @Autowired
-    private JdbcTemplate jdbcTemplate;
-
     @Override
     public void run(String... args) {
-        dropDatabase();
         // Check if tournaments already exist to avoid duplicate entries
         if (tournamentRepository.count() == 0) {
             createTournaments();
@@ -39,17 +35,6 @@ public class DataInitializer implements CommandLineRunner {
             System.out.println("Tournaments already exist in the database.");
         }
 
-    }
-
-    private void dropDatabase() {
-        // Adjust the SQL command according to your database
-        String dropSQL = "DROP DATABASE TOURNAMENT_SERVICE_DB";
-        try {
-            jdbcTemplate.execute(dropSQL);
-            System.out.println("Database dropped successfully.");
-        } catch (Exception e) {
-            System.err.println("Failed to drop database: " + e.getMessage());
-        }
     }
 
     private void createTournaments() {

@@ -17,29 +17,13 @@ public class DataInitializer implements CommandLineRunner {
     @Autowired
     private UserTokenRepository userTokenRepository;
 
-    @Autowired
-    private JdbcTemplate jdbcTemplate;
-
     @Override
     public void run(String... args) {
-        dropDatabase();
         if(userTokenRepository.count() == 0){
             initializeUserTokens();
             System.out.println("User tokens initialized successfully!");
         } else {
             System.out.println("User tokens already exist in the database.");
-        }
-        
-    }
-
-    private void dropDatabase() {
-        // Adjust the SQL command according to your database
-        String dropSQL = "DROP DATABASE AUTH_SERVICE_DB";
-        try {
-            jdbcTemplate.execute(dropSQL);
-            System.out.println("Database dropped successfully.");
-        } catch (Exception e) {
-            System.err.println("Failed to drop database: " + e.getMessage());
         }
     }
 
