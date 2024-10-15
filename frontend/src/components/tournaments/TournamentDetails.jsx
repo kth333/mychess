@@ -57,9 +57,8 @@ class TournamentDetails extends Component {
 
         console.log("Completing match with data:", JSON.stringify(match));
         try {
-            await MatchService.completeMatch(matchId, match); // Ensure you have a method to complete the match in your MatchService
+            await MatchService.completeMatch(matchId, match).then(() => {this.fetchMatches();});
             console.log("Match completed successfully");
-            window.location.reload();
         } catch (error) {
             console.error("Failed to complete match", error);
             alert("Failed to complete match\nReason: " + error.response.data);
@@ -93,7 +92,7 @@ class TournamentDetails extends Component {
     startTournament = async () => {
         const { id } = this.state.tournament;
         try {
-            await TournamentService.startTournament(id);
+            await TournamentService.startTournament(id).then(() => {this.fetchMatches();});
             console.log("Start success");
             // window.location.reload();
         } catch (error) {
@@ -105,7 +104,7 @@ class TournamentDetails extends Component {
     startNextRound = async () => {
         const { id } = this.state.tournament;
         try {
-            await TournamentService.startNextRound(id);
+            await TournamentService.startNextRound(id).then(() => {this.fetchMatches();});
             console.log("Next round success");
         } catch (error) {
             console.error("Failed to start next round", error);

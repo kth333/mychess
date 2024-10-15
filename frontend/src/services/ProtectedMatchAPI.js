@@ -10,6 +10,23 @@ let ProtectedMatchAPI = axios.create({
   timeout: 100000,
 });
 
-ProtectedMatchAPI.defaults.headers.common['Authorization'] = `Bearer ${sessionStorage.getItem("token")}`;
+// Add a request interceptor to dynamically set the Authorization header before each request
+ProtectedMatchAPI.interceptors.request.use(
+  (config) => {
+    // Get the token from sessionStorage before each request
+    const token = sessionStorage.getItem("token");
+
+    // If token exists, set it in the Authorization header
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+
+    return config; // Return the updated config
+  },
+  (error) => {
+    // Handle any errors before the request is sent
+    return Promise.reject(error);
+  }
+);
 
 export { ProtectedMatchAPI };

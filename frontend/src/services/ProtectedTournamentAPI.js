@@ -10,17 +10,21 @@ let ProtectedTournamentAPI = axios.create({
   timeout: 100000,
 });
 
+// Add a request interceptor to dynamically set the Authorization header before each request
 ProtectedTournamentAPI.interceptors.request.use(
   (config) => {
+    // Get the token from sessionStorage before each request
     const token = sessionStorage.getItem("token");
+
+    // If token exists, set it in the Authorization header
     if (token) {
-      config.headers['Authorization'] = `Bearer ${token}`;
+      config.headers.Authorization = `Bearer ${token}`;
     }
-    console.log('Request Headers:', config.headers);
-    return config;
+
+    return config; // Return the updated config
   },
   (error) => {
-    console.error('Request Error:', error);
+    // Handle any errors before the request is sent
     return Promise.reject(error);
   }
 );
