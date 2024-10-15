@@ -1,6 +1,7 @@
 package com.g1.mychess.auth.service;
 
 import com.g1.mychess.auth.config.SecurityTestConfig;
+import com.g1.mychess.auth.util.UserDetailsFactory;
 import org.springframework.context.annotation.Import;
 
 
@@ -18,16 +19,20 @@ import org.mockito.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
 import java.time.LocalDate;
+import java.util.Collections;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-@Import({SecurityTestConfig.class})
+//@Import({SecurityTestConfig.class})
 public class AuthServiceTest {
 
     @Value("${player.service.url}")
@@ -50,6 +55,8 @@ public class AuthServiceTest {
     private UserTokenRepository verificationTokenRepository;
     @Mock
     private JwtUtil jwtUtil;
+    @Mock
+    private UserDetailsFactory userDetailsFactory;
 
     @Mock
     private WebClient webClient;
@@ -65,13 +72,19 @@ public class AuthServiceTest {
     public void setUp() {
         MockitoAnnotations.openMocks(this);
 
-        webClientBuilderMock = mock(WebClient.Builder.class);
-        passwordEncoderMock = mock(PasswordEncoder.class);
-        verificationTokenRepositoryMock = mock(UserTokenRepository.class);
-        jwtUtilMock = mock(JwtUtil.class);
+        webClientBuilder = mock(WebClient.Builder.class);
+        passwordEncoder = mock(PasswordEncoder.class);
+        verificationTokenRepository = mock(UserTokenRepository.class);
+        jwtUtil = mock(JwtUtil.class);
+        userDetailsFactory = mock(UserDetailsFactory.class);
 
         // Spy on authService using a constructor with arguments
-        authService = spy(new AuthService(webClientBuilderMock, passwordEncoderMock, verificationTokenRepositoryMock, jwtUtilMock));
+        authService = spy(new AuthService(userDetailsFactory, webClientBuilder, passwordEncoder, verificationTokenRepository, jwtUtil));
+
+        webClient = mock(WebClient.class);
+        requestHeadersUriSpec = mock(WebClient.RequestHeadersUriSpec.class);
+        requestHeadersSpec = mock(WebClient.RequestHeadersSpec.class);
+        responseSpec = mock(WebClient.ResponseSpec.class);
     }
 
     @Test
@@ -165,6 +178,7 @@ public class AuthServiceTest {
         String role = "ROLE_PLAYER";
 
         UserDTO userDTO = mock(UserDTO.class);
+        String encodedPassword = passwordEncoder.encode(password);
 
         when(webClientBuilder.build()).thenReturn(webClient);
         when(webClient.get()).thenReturn(requestHeadersUriSpec);
@@ -173,15 +187,18 @@ public class AuthServiceTest {
         when(responseSpec.bodyToMono(UserDTO.class)).thenReturn(Mono.just(userDTO));
 
         when(authService.fetchPlayerFromPlayerService(username)).thenReturn(userDTO);
-        when(passwordEncoder.matches(password, userDTO.getPassword())).thenReturn(true);
+        when(userDTO.getPassword()).thenReturn(encodedPassword); // Return encoded password from UserDTO
+        when(passwordEncoder.matches(password, encodedPassword)).thenReturn(true); // Match raw password with encoded password
 
         long userId = 1L;
         when(userDTO.getUserId()).thenReturn(userId);
         when(authService.isEmailVerified(userId, role)).thenReturn(true);
 
         UserDetails userDetails = mock(UserDetails.class);
+        when(userDetailsFactory.createUserDetails(userDTO, role)).thenReturn(userDetails);
         when(userDTO.getUsername()).thenReturn(username);
-        when(userDTO.getPassword()).thenReturn(password);
+
+        when(jwtUtil.generateToken(userDetails, userDTO.getUserId())).thenReturn("");
 
         String result = authService.login(username, password, role);
         assertNotNull(result);
@@ -189,6 +206,7 @@ public class AuthServiceTest {
         verify(authService).fetchPlayerFromPlayerService(username);
         verify(passwordEncoder).matches(password, userDTO.getPassword());
         verify(authService).isEmailVerified(userId, role);
+
 
     }
 
@@ -245,6 +263,99 @@ public class AuthServiceTest {
         verify(authService).isEmailVerified(userId, role);
     }
 
+    @Test
+    void Admin_Login_Success()throws Exception{
+        String username = "ValidUser";
+        String password = "Password123";
+        String role = "ROLE_ADMIN";
+
+        UserDTO userDTO = mock(UserDTO.class);
+        String encodedPassword = passwordEncoder.encode(password);
+
+        when(webClientBuilder.build()).thenReturn(webClient);
+        when(webClient.get()).thenReturn(requestHeadersUriSpec);
+        when(requestHeadersUriSpec.uri(adminServiceUrl + "/api/v1/admin/username/" + username)).thenReturn(requestHeadersSpec);
+        when(requestHeadersSpec.retrieve()).thenReturn(responseSpec);
+        when(responseSpec.bodyToMono(UserDTO.class)).thenReturn(Mono.just(userDTO));
+
+        when(authService.fetchAdminFromAdminService(username)).thenReturn(userDTO);
+        when(userDTO.getPassword()).thenReturn(encodedPassword); // Return encoded password from UserDTO
+        when(passwordEncoder.matches(password, encodedPassword)).thenReturn(true); // Match raw password with encoded password
+
+        long userId = 1L;
+        when(userDTO.getUserId()).thenReturn(userId);
+        when(authService.isEmailVerified(userId, role)).thenReturn(true);
+
+        UserDetails userDetails = mock(UserDetails.class);
+        when(userDetailsFactory.createUserDetails(userDTO, role)).thenReturn(userDetails);
+        when(userDTO.getUsername()).thenReturn(username);
+
+        when(jwtUtil.generateToken(userDetails, userDTO.getUserId())).thenReturn("");
+
+        String result = authService.login(username, password, role);
+        assertNotNull(result);
+
+        verify(authService).fetchAdminFromAdminService(username);
+        verify(passwordEncoder).matches(password, userDTO.getPassword());
+        verify(authService).isEmailVerified(userId, role);
+
+
+    }
+
+    @Test
+    void Admin_Login_Wrong_Credentials_Should_Throw_Exception()throws Exception{
+        String username = "";
+        String password = "";
+        String role = "ROLE_ADMIN";
+
+        UserDTO userDTO = mock(UserDTO.class);
+
+        when(webClientBuilder.build()).thenReturn(webClient);
+        when(webClient.get()).thenReturn(requestHeadersUriSpec);
+        when(requestHeadersUriSpec.uri(adminServiceUrl + "/api/v1/admin/username/" + username)).thenReturn(requestHeadersSpec);
+        when(requestHeadersSpec.retrieve()).thenReturn(responseSpec);
+        when(responseSpec.bodyToMono(UserDTO.class)).thenReturn(Mono.just(userDTO));
+
+        when(authService.fetchAdminFromAdminService(username)).thenReturn(userDTO);
+        when(passwordEncoder.matches(password, userDTO.getPassword())).thenReturn(false);
+
+        Exception expectedThrow = assertThrows(Exception.class,
+                ()->authService.login(username,password,role));
+
+        verify(authService).fetchAdminFromAdminService(username);
+        verify(passwordEncoder).matches(password, userDTO.getPassword());
+    }
+
+    @Test
+    void Admin_Login_UnverifiedEmail_Should_Throw_Exception()throws Exception{
+        String username = "ValidUser";
+        String password = "Password123";
+        String role = "ROLE_ADMIN";
+
+        UserDTO userDTO = mock(UserDTO.class);
+
+        when(webClientBuilder.build()).thenReturn(webClient);
+        when(webClient.get()).thenReturn(requestHeadersUriSpec);
+        when(requestHeadersUriSpec.uri(adminServiceUrl + "/api/v1/admin/username/" + username)).thenReturn(requestHeadersSpec);
+        when(requestHeadersSpec.retrieve()).thenReturn(responseSpec);
+        when(responseSpec.bodyToMono(UserDTO.class)).thenReturn(Mono.just(userDTO));
+
+        when(authService.fetchAdminFromAdminService(username)).thenReturn(userDTO);
+        when(passwordEncoder.matches(password, userDTO.getPassword())).thenReturn(true);
+
+        long userId = 1L;
+        when(userDTO.getUserId()).thenReturn(userId);
+        when(authService.isEmailVerified(userId, role)).thenReturn(false);
+
+        Exception expectedThrow = assertThrows(Exception.class,
+                ()->authService.login(username,password,role));
+
+        verify(authService).fetchAdminFromAdminService(username);
+        verify(passwordEncoder).matches(password, userDTO.getPassword());
+        verify(authService).isEmailVerified(userId, role);
+    }
+
+
 //    @Test
 //    void Player_Login_Null_UserDTO_should_Throw_Exception()throws Exception{
 //        String username = "ValidUser";
@@ -268,19 +379,11 @@ public class AuthServiceTest {
 //    }
 
 
-    // ToDO:
-    /* Login Method exit points (for Player and for Admin)
-    1 UserDTO null
-    2 PasswordEncoderMatches
-    3 isEmailVerified(userId, role)
-    4 Success
-     */
 
+    // ToDO:
     // GenerateToken
     // verifyEmail
     // isEmailVerified
-
-    // Anything containing Reactor WebClient method should be integration Tested
 
 }
 
