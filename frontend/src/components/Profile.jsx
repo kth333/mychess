@@ -1,15 +1,15 @@
 import React from 'react';
 import { Card, CardHeader, CardContent, CardFooter } from "./ui/card";
-import { Avatar } from './ui/avatar';
+import { AvatarImage } from './ui/avatar';
 import { Link } from 'react-router-dom';
 import { Button } from './ui/button';
 import withNavigateandLocation from './withNavigateandLocation';
 import PlayerService from '../services/PlayerService';
+import { Avatar } from '@radix-ui/react-avatar';
 
 class Profile extends React.Component {
     constructor(props) {
         super(props);
-        // Destructure the data passed to the component, assuming props contains the playerProfileDTO object.
         this.state = {
             profile: this.props.profile
         };
@@ -37,11 +37,13 @@ class Profile extends React.Component {
 
         return (
             <div className="container mx-auto p-4">
-                <Card className="bg-base-200 shadow-md">
+                <Card className="bg-secondary shadow-md">
                     <CardHeader>
                         <div className="flex items-center space-x-4">
-                            <Avatar src={avatarUrl} alt={`${fullName}'s avatar`} size="large" className="w-24 h-24" />
                             <div>
+                            <Avatar>
+                                <AvatarImage src={avatarUrl} alt={`${fullName}'s avatar`} size="large" className="w-36 h-36 rounded-full" />
+                            </Avatar>
                                 <h2 className="text-2xl font-semibold text-primary">{fullName}</h2>
                                 <p className="text-sm text-secondary">Rank: {rank ? rank : 'Unranked'}</p>
                             </div>
