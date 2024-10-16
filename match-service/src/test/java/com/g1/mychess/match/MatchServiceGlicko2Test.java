@@ -2,19 +2,26 @@ package com.g1.mychess.match;
 
 import com.g1.mychess.match.dto.*;
 import com.g1.mychess.match.model.MatchPlayer;
+import com.g1.mychess.match.repository.MatchPlayerRepository;
 import com.g1.mychess.match.service.impl.*;
 //import org.springframework.web.reactive.function.client.WebClient;
 
 import org.junit.jupiter.api.*;
 import static org.junit.jupiter.api.Assertions.*;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
+import org.springframework.boot.test.context.SpringBootTest;
 
 import java.util.*;
 
+@SpringBootTest
+@AutoConfigureTestDataBase(replace = AutoConfigureTestDatabase.Replace.ANY)
 public class MatchServiceGlicko2Test {
 
-//    unit testing
     private Glicko2RatingServiceImpl glicko2RatingService;
-
+    @Autowired
+    private MatchPlayerRepository matchPlayerRepository;
+//    unit testing
     @BeforeEach
     void setUp() {
         glicko2RatingService = new Glicko2RatingServiceImpl();
