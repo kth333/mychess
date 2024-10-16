@@ -6,6 +6,10 @@ class PlayerService {
         return ProtectedPlayerAPI.get("/profile/");
     }
 
+    async updateProfile(playerId, profile) {
+        return ProtectedPlayerAPI.put(`/profile/update/${playerId}`, profile);
+    }
+
 
 }
 
