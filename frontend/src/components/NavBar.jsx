@@ -65,6 +65,12 @@ class NavBar extends Component {
                   {role === 'ROLE_ADMIN' && (
                     <NavigationMenuItem>
                       <NavigationMenuLink asChild>
+                        <Link className="text-primary hover:bg-accent hover:text-accent-foreground rounded-md px-4 py-2" to="/whitelist">Whitelist</Link>
+                      </NavigationMenuLink>
+                      <NavigationMenuLink asChild>
+                        <Link className="text-primary hover:bg-accent hover:text-accent-foreground rounded-md px-4 py-2" to="/blacklist">Blacklist</Link>
+                      </NavigationMenuLink>
+                      <NavigationMenuLink asChild>
                         <Link className="text-primary hover:bg-accent hover:text-accent-foreground rounded-md px-4 py-2" to="/create-tournament">Create Tournament</Link>
                       </NavigationMenuLink>
                       <NavigationMenuLink asChild>
