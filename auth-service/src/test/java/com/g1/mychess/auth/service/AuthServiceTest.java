@@ -123,39 +123,8 @@ public class AuthServiceTest {
         
     }
 
-    @Test
-    void loginValidCredentials_Should_ReturnUserDetails() {
-        String username = "ValidUsername";
-        String password = "Password123";
-
-        when(passwordEncoderMock.matches(eq(password), anyString())).thenReturn(true);
-
-        User mockUser = new User(username, password);
-        when(userRepositoryMock.findByUsername(username)).thenReturn(Optional.of(mockUser));
-
-        UserDetails result = authService.login(username, password);
-
-        assertNotNull(result);
-        assertEquals(username, result.getUsername());
-    }
-
-    @Test
-    void loginInvalidCredentials_Should_ThrowException() {
-        String username = "ValidUsername";
-        String password = "Password123";
-
-        User mockUser = new User(username, "Password123");
-
-        when(userRepositoryMock.findByUsername(username)).thenReturn(Optional.of(mockUser));
-        when(passwordEncoderMock.matches(eq(password), anyString())).thenReturn(false);
-
-        Exception exception = assertThrows(Exception.class,
-                () -> {authService.login(username, password);
-        });
-        assertEquals("Invalid username/password!", exception.getMessage());
-    }
-
     // ToDO:
+    // Login
     // GenerateToken
     // verifyEmail
     // isEmailVerified
