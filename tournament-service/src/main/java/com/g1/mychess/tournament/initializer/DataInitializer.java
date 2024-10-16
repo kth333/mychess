@@ -55,7 +55,7 @@ public class DataInitializer implements CommandLineRunner {
         tournament1.setAffectsRating(true);
         tournament1.setMinAge(16);
         tournament1.setMaxAge(60);
-        tournament1.setRequiredGender("Any");
+        tournament1.setRequiredGender(null);
         tournament1.setCountry("USA");
         tournament1.setRegion("California");
         tournament1.setCity("San Francisco");
@@ -107,7 +107,7 @@ public class DataInitializer implements CommandLineRunner {
         tournament3.setAffectsRating(true);
         tournament3.setMinAge(18);
         tournament3.setMaxAge(70);
-        tournament3.setRequiredGender("Any");
+        tournament3.setRequiredGender(null);
         tournament3.setCountry("Australia");
         tournament3.setRegion("New South Wales");
         tournament3.setCity("Sydney");
@@ -133,7 +133,7 @@ public class DataInitializer implements CommandLineRunner {
         tournament4.setAffectsRating(true);
         tournament4.setMinAge(10);
         tournament4.setMaxAge(18);
-        tournament4.setRequiredGender("Any");
+        tournament4.setRequiredGender(null);
         tournament4.setCountry("India");
         tournament4.setRegion("Maharashtra");
         tournament4.setCity("Mumbai");
