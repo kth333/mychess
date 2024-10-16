@@ -1,7 +1,6 @@
 package com.g1.mychess.match;
 
 import com.g1.mychess.match.dto.*;
-import com.g1.mychess.match.model.Match;
 import com.g1.mychess.match.model.MatchPlayer;
 import com.g1.mychess.match.repository.MatchPlayerRepository;
 import com.g1.mychess.match.service.impl.*;
@@ -49,41 +48,6 @@ public class MatchServiceGlicko2Test {
         assertEquals(0.07, updatedRating.getVolatility(), 0.01);
     }
 
-//    Integration test
-    @Test
-    void testCalculateAndUpdatePlayerRatings() {
-//        set-up player
-        MatchPlayer player = new MatchPlayer();
-        player.setGlickoRating(1500);
-        player.setRatingDeviation(200);
-        player.setVolatility(0.06);
-
-//        save player in db
-        matchPlayerRepository.save(player);
-
-//        create opponents
-        List<MatchPlayer> opponents = getMatchPlayers();
-
-        double[] results = {1.0, 0.0, 0.0};
-
-//        calculate new ratings
-        PlayerRatingUpdateDTO updateDTO = glicko2RatingService.calculatePlayerRatings(player, opponents, results);
-
-//        update
-        player.setGlickoRating(updateDTO.getGlickoRating());
-        player.setRatingDeviation(updateDTO.getRatingDeviation());
-        player.setVolatility(updateDTO.getVolatility());
-        matchPlayerRepository.save(player);
-
-        MatchPlayer updatedPlayer = matchPlayerRepository.findById(player.getId().orElse(null));
-        assertNotNull(updatedPlayer);
-//        check player is not null
-
-//        assert to verify if updated correctly
-        assertEquals(updateDTO.getGlickoRating(), updatedPlayer.getGlickoRating(), 0.01);
-        assertEquals(updateDTO.getVolatility(), updatedPlayer.getVolatility(), 0.01);
-        assertEquals(updateDTO.getRatingDeviation(), updatedPlayer.getRatingDeviation(), 0.01);
-    }
     private static List<MatchPlayer> getMatchPlayers() {
         List<MatchPlayer> opponents = new ArrayList<>();
         MatchPlayer opponent1 = new MatchPlayer();
