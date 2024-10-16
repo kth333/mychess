@@ -8,11 +8,11 @@ import com.g1.mychess.player.repository.ProfileRepository;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 
@@ -38,10 +38,6 @@ public class DataInitializer implements CommandLineRunner {
     private void initializePlayers() {
         List<Player> players = new ArrayList<>();
         List<Profile> profiles = new ArrayList<>();
-        
-        // Define a list of possible genders
-        List<String> genders = Arrays.asList("MALE", "FEMALE", "OTHERS");
-        Random random = new Random();
 
         // Creating 8 players with profiles
         for (int i = 1; i <= 8; i++) {
@@ -58,14 +54,8 @@ public class DataInitializer implements CommandLineRunner {
             profile.setPlayer(player);
             profile.setFullName("Player " + i);
             profile.setBio("This is player " + i);
-            profile.setAvatarUrl("https://static.vecteezy.com/system/resources/previews/022/763/685/non_2x/the-figure-of-a-horse-in-chess-icon-vector.jpg");
-            
-            // Randomly select gender from the list
-            String gender = genders.get(random.nextInt(genders.size()));
-            profile.setGender(gender);
-            
+            profile.setAvatarUrl(null);
             profile.setCountry("Country " + i);
-            profile.setRegion("Region " + i);
             profile.setCity("City " + i);
             profile.setBirthDate(LocalDate.of(1990 + i, 1, 1)); // Vary birth dates
             profile.setRank(CustomChessRank.INTERMEDIATE); // Assuming PLAYER rank for all initially
@@ -75,19 +65,18 @@ public class DataInitializer implements CommandLineRunner {
             profile.setTotalWins(0);
             profile.setTotalLosses(0);
             profile.setTotalDraws(0);
-            profile.setLastActive(LocalDate.now());
+            profile.setLastActive(LocalDate.now()); 
             profile.setPublic(true); // Setting all profiles to public for now
 
             player.setProfile(profile);
             players.add(player);
             profiles.add(profile);
 
-            System.out.println("Player initialized with username: " + player.getUsername() + ", Gender: " + gender);
+            System.out.println("Player initialized with username: " + player.getUsername());
         }
 
         // Save all players and their profiles to the database
         profileRepository.saveAll(profiles);
         playerRepository.saveAll(players);
     }
-
 }

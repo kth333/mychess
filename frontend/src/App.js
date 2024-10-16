@@ -11,7 +11,6 @@ import Profile from './components/Profile';
 import TournamentDetails from './components/tournaments/TournamentDetails';
 import ProtectedRoute from './components/ProtectedRoute';
 import UpdateTournament from './components/tournaments/UpdateTournament';
-import UpdateProfile from './components/UpdateProfile';
 
 function App() {
   return (
@@ -29,7 +28,6 @@ function App() {
                 <Route exact path="/create-tournament" element={<CreateTournament />} />
                 <Route exact path="/update-tournament/:name" element={<UpdateTournament />} />
                 <Route exact path="/profile" element={<Profile/>} />
-                <Route exact path="/profile/update/:id" element={<UpdateProfile/>} />
               </Route>
 
 

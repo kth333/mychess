@@ -184,29 +184,25 @@ public class MatchServiceImpl implements MatchService {
 
         Set<MatchPlayer> participants = match.getParticipants();
 
+        MatchPlayer winner = participants.stream()
+                .filter(mp -> mp.getPlayerId().equals(winnerPlayerId))
+                .findFirst()
+                .orElseThrow(() -> new IllegalArgumentException("Winner not found in match participants"));
+
+        MatchPlayer loser = participants.stream()
+                .filter(mp -> mp.getPlayerId().equals(loserPlayerId))
+                .findFirst()
+                .orElseThrow(() -> new IllegalArgumentException("Loser not found in match participants"));
+
         if (isDraw) {
-            participants.forEach(p -> {
-                p.setResult(MatchPlayer.Result.DRAW);
-                p.setPoints(p.getPoints() + 0.5);
-            });
+            winner.setResult(MatchPlayer.Result.DRAW);
+            loser.setResult(MatchPlayer.Result.DRAW);
+            winner.setPoints(winner.getPoints() + 0.5);
+            loser.setPoints(loser.getPoints() + 0.5);
         } else {
-            if (winnerPlayerId == null || loserPlayerId == null) {
-                throw new IllegalArgumentException("Winner and loser must be provided if not draw");
-            }
-
-            MatchPlayer winner = participants.stream()
-                    .filter(mp -> mp.getPlayerId().equals(winnerPlayerId))
-                    .findFirst()
-                    .orElseThrow(() -> new IllegalArgumentException("Winner not found in match participants"));
-
-            MatchPlayer loser = participants.stream()
-                    .filter(mp -> mp.getPlayerId().equals(loserPlayerId))
-                    .findFirst()
-                    .orElseThrow(() -> new IllegalArgumentException("Loser not found in match participants"));
-
             winner.setResult(MatchPlayer.Result.WIN);
-            winner.setPoints(winner.getPoints() + 1);
             loser.setResult(MatchPlayer.Result.LOSS);
+            winner.setPoints(winner.getPoints() + 1);
         }
 
         match.setStatus(Match.MatchStatus.COMPLETED);

@@ -27,7 +27,6 @@ class NavBar extends Component {
       isLoggedIn: false,
       role: null,
     });
-    
   };
 
   render() {
@@ -86,9 +85,9 @@ class NavBar extends Component {
                   )}
                   <NavigationMenuItem>
                     <NavigationMenuLink asChild>
-                      <Link variant="ghost" className="text-primary hover:bg-accent hover:text-accent-foreground" onClick={this.handleSignOut} to="/">
+                      <Button variant="ghost" className="text-primary hover:bg-accent hover:text-accent-foreground" onClick={this.handleSignOut}>
                         Sign Out
-                      </Link>
+                      </Button>
                     </NavigationMenuLink>
                   </NavigationMenuItem>
                 </>

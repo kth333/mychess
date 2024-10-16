@@ -13,8 +13,6 @@ class TournamentDetails extends Component {
             tournament: null,
             matches: [], // Store the matches here
             selectedWinners: {}, // Store selected winners for each match
-            filteredMatches: [], // Store filtered matches
-            searchRound: '', // Store the search round number
         };
     }
 
@@ -40,7 +38,7 @@ class TournamentDetails extends Component {
         try {
             const res = await MatchService.getAllMatchesById(id);
             console.log("Matches data:", res.data);
-            this.setState({ matches: res.data, filteredMatches: res.data });
+            this.setState({ matches: res.data });
         } catch (error) {
             console.error("Failed to fetch matches", error);
         }
@@ -59,8 +57,9 @@ class TournamentDetails extends Component {
 
         console.log("Completing match with data:", JSON.stringify(match));
         try {
-            await MatchService.completeMatch(matchId, match).then(() => {this.fetchMatches();});
+            await MatchService.completeMatch(matchId, match); // Ensure you have a method to complete the match in your MatchService
             console.log("Match completed successfully");
+            window.location.reload();
         } catch (error) {
             console.error("Failed to complete match", error);
             alert("Failed to complete match\nReason: " + error.response.data);
@@ -94,7 +93,7 @@ class TournamentDetails extends Component {
     startTournament = async () => {
         const { id } = this.state.tournament;
         try {
-            await TournamentService.startTournament(id).then(() => {this.fetchMatches();});
+            await TournamentService.startTournament(id);
             console.log("Start success");
             // window.location.reload();
         } catch (error) {
@@ -106,7 +105,7 @@ class TournamentDetails extends Component {
     startNextRound = async () => {
         const { id } = this.state.tournament;
         try {
-            await TournamentService.startNextRound(id).then(() => {this.fetchMatches();});
+            await TournamentService.startNextRound(id);
             console.log("Next round success");
         } catch (error) {
             console.error("Failed to start next round", error);
@@ -117,10 +116,7 @@ class TournamentDetails extends Component {
     completeTournament = async () => {
         const { id } = this.state.tournament;
         try {
-            await TournamentService.completeTournament(id).then(() => {
-                alert("Tournament completed successfully");
-                this.props.navigate('/'); // Redirect to home page
-            });
+            await TournamentService.completeTournament(id);
             console.log("Complete tournament success");
         } catch (error) {
             console.error("Failed to complete tournament", error);
@@ -128,25 +124,10 @@ class TournamentDetails extends Component {
         }
     };
 
-    // Handle search input change
-    handleSearchChange = (event) => {
-        const searchRound = event.target.value;
-        this.setState({ searchRound }, this.filterMatches);
-    };
-
-    // Filter matches based on round number
-    filterMatches = () => {
-        const { matches, searchRound } = this.state;
-        const filteredMatches = matches.filter((match) => {
-            return match.roundNumber.toString().includes(searchRound);
-        });
-        this.setState({ filteredMatches });
-    };
-
     renderMatchesTable = () => {
-        const { filteredMatches } = this.state;
+        const { matches } = this.state;
 
-        if (filteredMatches.length === 0) {
+        if (matches.length === 0) {
             return <p>No matches available yet.</p>;
         }
 
@@ -163,7 +144,7 @@ class TournamentDetails extends Component {
                     </tr>
                 </thead>
                 <tbody>
-                    {filteredMatches.map((match) => (
+                    {matches.map((match) => (
                         <tr key={match.id}>
                             <td className="border px-4 py-2">{match.id}</td>
                             <td className="border px-4 py-2">{match.participantIds[0]}</td>
@@ -197,7 +178,7 @@ class TournamentDetails extends Component {
     };
 
     render() {
-        const { tournament, searchRound } = this.state;
+        const { tournament } = this.state;
         const userRole = sessionStorage.getItem("role");
         const isPlayer = userRole === 'ROLE_PLAYER';
 
@@ -229,7 +210,7 @@ class TournamentDetails extends Component {
 
         return (
             <div className="p-6 max-w-4xl mx-auto">
-                <Card className="p-4 bg-primary">
+                <Card className="p-4 bg-base-200">
                     <h2 className="text-2xl font-bold text-primary">{name}</h2>
                     <p className="my-2 text-accent">{description}</p>
                     <p className="my-2 text-secondary">Host: admin{adminId}</p>
@@ -269,14 +250,6 @@ class TournamentDetails extends Component {
                         </p>
                     </div>
 
-                    <input
-                        type="text"
-                        placeholder="Enter round number"
-                        value={searchRound}
-                        onChange={this.handleSearchChange}
-                        className="input input-bordered input-accent mb-4 w-full"
-                    />
-
                     {!isPlayer && this.renderMatchesTable()}
 
                     {isPlayer ? (
@@ -288,13 +261,13 @@ class TournamentDetails extends Component {
                             <Link className="btn btn-primary mt-6" to={`/update-tournament/${tournament.name}`}>
                                 Update
                             </Link>
-                            <Button className="btn btn-primary mt-6" onClick={this.startTournament} disabled={tournament.currentRound !== 0}>
+                            <Button className="btn btn-primary mt-6" onClick={this.startTournament} disabled={status === 'ONGOING'}>
                                 Start tournament
                             </Button>
-                            <Button className="btn btn-primary mt-6" onClick={this.startNextRound} disabled={tournament.currentRound === tournament.maxRounds}>
+                            <Button className="btn btn-primary mt-6" onClick={this.startNextRound}>
                                 Start next round
                             </Button>
-                            <Button className="btn btn-primary mt-6" onClick={this.completeTournament} disabled={status === 'COMPLETED'}>
+                            <Button className="btn btn-primary mt-6" onClick={this.completeTournament}>
                                 Complete tournament
                             </Button>
                         </>
