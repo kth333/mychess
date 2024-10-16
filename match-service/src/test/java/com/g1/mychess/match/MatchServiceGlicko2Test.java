@@ -27,21 +27,6 @@ public class MatchServiceGlicko2Test {
         player.setRatingDeviation(200);
         player.setVolatility(0.06);
 
-        List<MatchPlayer> opponents = getMatchPlayers();
-
-        double[] results = {1.0, 0.0, 0.0}; // Player wins against opponent1, loses to others
-
-        // Calculate the new ratings
-        PlayerRatingUpdateDTO updatedRating = glicko2RatingService.calculatePlayerRatings(player, opponents, results);
-
-        // Assert the expected results
-        // Replace the following expected values with the actual expected output based on your calculations
-        assertEquals(1520, updatedRating.getGlickoRating(), 0.01);
-        assertEquals(180, updatedRating.getRatingDeviation(), 0.01);
-        assertEquals(0.07, updatedRating.getVolatility(), 0.01);
-    }
-
-    private static List<MatchPlayer> getMatchPlayers() {
         List<MatchPlayer> opponents = new ArrayList<>();
         MatchPlayer opponent1 = new MatchPlayer();
         opponent1.setGlickoRating(1400);
@@ -57,7 +42,17 @@ public class MatchServiceGlicko2Test {
         opponent3.setGlickoRating(1700);
         opponent3.setRatingDeviation(300);
         opponents.add(opponent3);
-        return opponents;
+
+        double[] results = {1.0, 0.0, 0.0}; // Player wins against opponent1, loses to others
+
+        // Calculate the new ratings
+        PlayerRatingUpdateDTO updatedRating = glicko2RatingService.calculatePlayerRatings(player, opponents, results);
+
+        // Assert the expected results
+        // Replace the following expected values with the actual expected output based on your calculations
+        assertEquals(1520, updatedRating.getGlickoRating(), 0.01);
+        assertEquals(180, updatedRating.getRatingDeviation(), 0.01);
+        assertEquals(0.07, updatedRating.getVolatility(), 0.01);
     }
 
 //    public static void main(String[] args) {
