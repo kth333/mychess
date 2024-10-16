@@ -235,6 +235,44 @@ public class TournamentServiceImpl implements TournamentService {
         return ResponseEntity.status(HttpStatus.OK).body("Tournament started successfully.");
     }
 
+    @Override
+    @Transactional
+    public ResponseEntity<String> removePlayerFromTournament(Long tournamentId, Long playerId, HttpServletRequest request) {
+        Tournament tournament = tournamentRepository.findById(tournamentId)
+                .orElseThrow(() -> new TournamentNotFoundException("Tournament not found with id: " + tournamentId));
+
+        String jwtToken = request.getHeader("Authorization").substring(7);
+        Long adminId = jwtUtil.extractUserId(jwtToken);
+
+        if (!tournament.getAdminId().equals(adminId)) {
+            throw new UnauthorizedActionException("Only the tournament admin can remove a player.");
+        }
+
+        TournamentPlayer tournamentPlayer = tournamentPlayerRepository.findByTournamentIdAndPlayerId(tournamentId, playerId)
+                .orElseThrow(() -> new PlayerNotSignedUpException("Player is not signed up for this tournament."));
+
+        tournamentPlayerRepository.delete(tournamentPlayer);
+
+        return ResponseEntity.status(HttpStatus.OK).body("Player removed from tournament successfully.");
+    }
+
+    @Override
+    @Transactional
+    public ResponseEntity<String> leaveTournament(Long tournamentId, HttpServletRequest request) {
+        Tournament tournament = tournamentRepository.findById(tournamentId)
+                .orElseThrow(() -> new TournamentNotFoundException("Tournament not found with id: " + tournamentId));
+
+        String jwtToken = request.getHeader("Authorization").substring(7);
+        Long playerId = jwtUtil.extractUserId(jwtToken);
+
+        TournamentPlayer tournamentPlayer = tournamentPlayerRepository.findByTournamentIdAndPlayerId(tournamentId, playerId)
+                .orElseThrow(() -> new PlayerNotSignedUpException("Player is not signed up for this tournament."));
+
+        tournamentPlayerRepository.delete(tournamentPlayer);
+
+        return ResponseEntity.status(HttpStatus.OK).body("You have left the tournament successfully.");
+    }
+
     private void runMatchmaking(MatchmakingDTO matchmakingRequestDTO, String jwtToken) {
         webClientBuilder.build()
                 .post()

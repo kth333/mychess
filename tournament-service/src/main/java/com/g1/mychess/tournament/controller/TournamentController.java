@@ -4,16 +4,8 @@ import jakarta.servlet.http.HttpServletRequest;
 import java.util.List;
 
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.*;
 import com.g1.mychess.tournament.service.*;
-import org.springframework.web.bind.annotation.RestController;
 import com.g1.mychess.tournament.dto.*;
 import com.g1.mychess.tournament.util.JwtUtil;
 
@@ -51,6 +43,16 @@ public class TournamentController {
     @PutMapping("/admin/update")
     public ResponseEntity<TournamentDTO> updateTournament(@RequestBody TournamentDTO tournamentDTO, HttpServletRequest request) {
         return tournamentService.updateTournament(tournamentDTO, request);
+    }
+
+    @DeleteMapping("/player/leave/{tournamentId}")
+    public ResponseEntity<String> leaveTournament(@PathVariable Long tournamentId, HttpServletRequest request) {
+        return tournamentService.leaveTournament(tournamentId, request);
+    }
+
+    @DeleteMapping("/admin/remove/{tournamentId}/{playerId}")
+    public ResponseEntity<String> removePlayerFromTournament(@PathVariable Long tournamentId, @PathVariable Long playerId, HttpServletRequest request) {
+        return tournamentService.removePlayerFromTournament(tournamentId, playerId, request);
     }
 
     @PostMapping("/admin/start/{tournamentId}")
