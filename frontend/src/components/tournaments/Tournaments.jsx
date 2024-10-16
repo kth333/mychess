@@ -82,36 +82,44 @@ class Tournaments extends Component {
           <section className="py-16 px-6">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {paginatedTournaments.map((tournament) => (
-                <Card key={tournament.id}>
-                  <CardHeader>
-                    <CardTitle>{tournament.name}</CardTitle>
-                    <CardDescription>
+                <Card key={tournament.id} className="h-full flex flex-col">
+                <CardHeader>
+                  <CardTitle>{tournament.name}</CardTitle>
+                </CardHeader>
+              
+                {/* Use flex-grow to push the bottom section down */}
+                <CardContent className="flex flex-col flex-grow">
+                  <div className="flex-grow"></div> {/* Spacer to push bottom content down */}
+              
+                  {/* Grouped participants, rating, and button at the bottom */}
+                  <div className="space-y-4">
+                    <p className="flex items-center">
                       <CalendarIcon className="inline-block mr-2 h-4 w-4" />
                       {new Date(tournament.startDateTime).toLocaleDateString()} - {new Date(tournament.endDateTime).toLocaleDateString()}
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent>
+                    </p>
                     <p className="flex items-center">
                       <UsersIcon className="mr-2 h-4 w-4" />
                       {tournament.participants.length} participants
                     </p>
-                    <p className="flex items-center mt-2">
+                    <p className="flex items-center">
                       <TrophyIcon className="mr-2 h-4 w-4 text-yellow-500" />
                       Rating Range: {tournament.minRating} - {tournament.maxRating}
                     </p>
-                    {isAdmin ? (
-                      <Link className="mt-4 btn btn-primary w-auto font-bold" to={`/tournaments/${tournament.name}`}>
-                        Manage
-                      </Link>
-                    ) : (
-                      <Link className="mt-4 btn btn-primary w-auto font-bold" to={`/tournaments/${tournament.name}`}>
-                        View Details
-                      </Link>
-                    )}
-
-                    
-                  </CardContent>
-                </Card>
+              
+                    <div>
+                      {isAdmin ? (
+                        <Link className="btn btn-primary w-full font-bold" to={`/tournaments/${tournament.name}`}>
+                          Manage
+                        </Link>
+                      ) : (
+                        <Link className="btn btn-primary w-full font-bold" to={`/tournaments/${tournament.name}`}>
+                          View Details
+                        </Link>
+                      )}
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
               ))}
             </div>
             <Pagination
