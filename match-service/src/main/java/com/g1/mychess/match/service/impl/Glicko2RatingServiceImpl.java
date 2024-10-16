@@ -3,6 +3,7 @@ package com.g1.mychess.match.service.impl;
 import com.g1.mychess.match.dto.PlayerRatingUpdateDTO;
 import com.g1.mychess.match.model.MatchPlayer;
 import com.g1.mychess.match.service.Glicko2RatingService;
+import com.g1.mychess.match.exception.InvalidRatingException;
 import org.springframework.stereotype.Service;
 import java.util.List;
 
@@ -13,38 +14,44 @@ public class Glicko2RatingServiceImpl implements Glicko2RatingService {
 
     public PlayerRatingUpdateDTO calculatePlayerRatings(MatchPlayer player, List<MatchPlayer> opponents, double[] result) {
         // converting rating and rating deviation to glicko-2 scale
-        System.out.println("Calculating ratings for player: " + player.getPlayerId());
-        System.out.print("Initial rating: " + player.getGlickoRating() + " Initial RD: " + player.getRatingDeviation() + " Initial Volatility: " + player.getVolatility());
+        try {
+            System.out.println("Calculating ratings for player: " + player.getPlayerId());
+            System.out.print("Initial rating: " + player.getGlickoRating() + " Initial RD: " + player.getRatingDeviation() + " Initial Volatility: " + player.getVolatility());
 
-        double R = (player.getGlickoRating() - 1500) / SCALE_FACTOR;
-        double RD = player.getRatingDeviation() / SCALE_FACTOR;
+            double R = (player.getGlickoRating() - 1500) / SCALE_FACTOR;
+            double RD = player.getRatingDeviation() / SCALE_FACTOR;
 
-        double[] opponents_rating = new double[opponents.size()];
-        double[] opponents_RD = new double[opponents.size()];
+            double[] opponents_rating = new double[opponents.size()];
+            double[] opponents_RD = new double[opponents.size()];
 
-        for (int j = 0; j < opponents.size(); j++) {
-            opponents_rating[j] = (opponents.get(j).getGlickoRating() - 1500) / SCALE_FACTOR;
-            opponents_RD[j] = opponents.get(j).getRatingDeviation() / SCALE_FACTOR;
+            for (int j = 0; j < opponents.size(); j++) {
+                opponents_rating[j] = (opponents.get(j).getGlickoRating() - 1500) / SCALE_FACTOR;
+                opponents_RD[j] = opponents.get(j).getRatingDeviation() / SCALE_FACTOR;
+            }
+
+            double delta = calculate_delta(R, opponents_rating, opponents_RD, result);
+            double v = calculate_v(R, opponents_rating, opponents_RD);
+
+            double newVolatility = calculate_volatility(RD, player.getVolatility(), v, delta * delta);
+            double newRatingDeviation = calculateNewRatingDeviation(RD, newVolatility, v);
+            double newRating = calculateNewRating(R, newRatingDeviation, delta, v);
+
+            System.out.println("New rating calculated for playerId: " + player.getPlayerId() +
+                    " New Rating: " + (SCALE_FACTOR * newRating + SCALE_FACTOR) +
+                    " New Rating Deviation: " + (SCALE_FACTOR * newRatingDeviation) +
+                    " New Volatility: " + newVolatility);
+
+            return new PlayerRatingUpdateDTO(
+                    player.getPlayerId(),
+                    SCALE_FACTOR * newRating + 1500,            // Convert back to original scale
+                    SCALE_FACTOR * newRatingDeviation,          // Convert back to original scale
+                    newVolatility
+            );
+        } catch (InvalidRatingException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new IllegalArgumentException("An error occured while calculating the player ratings.", e);
         }
-
-        double delta = calculate_delta(R, opponents_rating, opponents_RD, result);
-        double v = calculate_v(R, opponents_rating, opponents_RD);
-
-        double newVolatility = calculate_volatility(RD, player.getVolatility(), v, delta * delta);
-        double newRatingDeviation = calculateNewRatingDeviation(RD, newVolatility, v);
-        double newRating = calculateNewRating(R, newRatingDeviation, delta, v);
-
-        System.out.println("New rating calculated for playerId: " + player.getPlayerId() +
-                " New Rating: " + (SCALE_FACTOR * newRating + SCALE_FACTOR) +
-                " New Rating Deviation: " + (SCALE_FACTOR * newRatingDeviation) +
-                " New Volatility: " + newVolatility);
-
-        return new PlayerRatingUpdateDTO(
-                player.getPlayerId(),
-                SCALE_FACTOR * newRating + 1500,            // Convert back to original scale
-                SCALE_FACTOR * newRatingDeviation,          // Convert back to original scale
-                newVolatility
-        );
     }
 
     public static double calculate_g(double RD) {
