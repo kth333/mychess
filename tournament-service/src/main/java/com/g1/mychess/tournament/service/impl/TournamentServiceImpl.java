@@ -241,6 +241,10 @@ public class TournamentServiceImpl implements TournamentService {
         Tournament tournament = tournamentRepository.findById(tournamentId)
                 .orElseThrow(() -> new TournamentNotFoundException("Tournament not found with id: " + tournamentId));
 
+        if (tournament.getStatus() == Tournament.TournamentStatus.COMPLETED) {
+            throw new IllegalStateException("Tournament already completed.");
+        }
+
         String jwtToken = request.getHeader("Authorization").substring(7);
         Long adminId = jwtUtil.extractUserId(jwtToken);
 
@@ -261,6 +265,10 @@ public class TournamentServiceImpl implements TournamentService {
     public ResponseEntity<String> leaveTournament(Long tournamentId, HttpServletRequest request) {
         Tournament tournament = tournamentRepository.findById(tournamentId)
                 .orElseThrow(() -> new TournamentNotFoundException("Tournament not found with id: " + tournamentId));
+
+        if (tournament.getStatus() == Tournament.TournamentStatus.COMPLETED) {
+            throw new IllegalStateException("Tournament already completed.");
+        }
 
         String jwtToken = request.getHeader("Authorization").substring(7);
         Long playerId = jwtUtil.extractUserId(jwtToken);
