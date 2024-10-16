@@ -4,6 +4,7 @@ import { Button } from "./ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./ui/card";
 import { CalendarIcon, TrophyIcon, UsersIcon } from "lucide-react";
 import withNavigateandLocation from './withNavigateandLocation';
+import TournamentRoulette from './tournaments/TournamentRoulette';
 
 class Home extends Component {
   constructor(props) {
@@ -68,6 +69,7 @@ class Home extends Component {
               Explore Tournaments
             </Link>
           </section>
+          <TournamentRoulette className="w-full"/>
 
           <section className="py-16 px-6">
             <h2 className="text-3xl font-bold text-center mb-12">Upcoming Tournaments</h2>
