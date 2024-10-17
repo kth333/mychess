@@ -66,6 +66,7 @@ class UpdateProfile extends Component {
         if (res.data) {
           console.log('Profile updated successfully');
         }
+        this.props.navigate('/profile');
       });
     } catch (error) {
       console.error('Error updating profile:', error.response ? error.response.data : error.message);

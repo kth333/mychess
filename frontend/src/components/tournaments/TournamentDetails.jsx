@@ -129,7 +129,7 @@ class TournamentDetails extends Component {
         try {
             await TournamentService.completeTournament(id).then(() => {
                 alert("Tournament completed successfully");
-                this.props.navigate('/'); // Redirect to home page
+                this.fetchData(); // Refresh tournament data after completion
             });
             console.log("Complete tournament success");
         } catch (error) {
