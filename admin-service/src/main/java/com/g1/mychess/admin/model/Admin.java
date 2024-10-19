@@ -3,6 +3,8 @@ package com.g1.mychess.admin.model;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
 
+@Entity
+@Table(name = "admins")
 public class Admin {
 
     @Id
