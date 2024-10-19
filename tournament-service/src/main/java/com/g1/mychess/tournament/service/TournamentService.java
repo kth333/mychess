@@ -20,10 +20,13 @@ public interface TournamentService {
 
     ResponseEntity<String> signUpToTournament(Long tournamentId, Long playerId);
 
+    ResponseEntity<String> leaveTournament(Long tournamentId, HttpServletRequest request);
+
+    ResponseEntity<String> removePlayerFromTournament(Long tournamentId, Long playerId, HttpServletRequest request);
+
     ResponseEntity<String> startTournament(Long tournamentId, HttpServletRequest request);
 
     ResponseEntity<String> prepareNextRound(Long tournamentId, HttpServletRequest request);
 
     ResponseEntity<String> completeTournament(Long tournamentId, HttpServletRequest request);
-
 }

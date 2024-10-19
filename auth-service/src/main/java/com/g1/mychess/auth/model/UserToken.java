@@ -2,25 +2,33 @@ package com.g1.mychess.auth.model;
 
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
+import jakarta.validation.constraints.*;
 
 @Entity
 @Table(name = "user_tokens")
 public class UserToken {
 
     @Id
+    @NotBlank(message = "Token cannot be blank")
+    @Size(max = 255, message = "Token cannot exceed 255 characters")
     @Column(name = "token", nullable = false, unique = true)
     private String token;
 
+    @NotNull(message = "Expiration time cannot be null")
     @Column(name = "expiration_time", nullable = false)
     private LocalDateTime expirationTime;
 
     @Enumerated(EnumType.STRING)
+    @NotNull(message = "Token type cannot be null")
     @Column(name = "token_type", nullable = false)
     private TokenType tokenType;
 
+    @NotNull(message = "User ID cannot be null")
     @Column(name = "user_id", nullable = false)
     private Long userId;
 
+    @NotBlank(message = "User type cannot be blank")
+    @Size(max = 100, message = "User type cannot exceed 100 characters")
     @Column(name = "user_type", nullable = false)
     private String userType;
 

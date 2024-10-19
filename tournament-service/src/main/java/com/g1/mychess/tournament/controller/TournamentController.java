@@ -3,17 +3,10 @@ package com.g1.mychess.tournament.controller;
 import jakarta.servlet.http.HttpServletRequest;
 import java.util.List;
 
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.*;
 import com.g1.mychess.tournament.service.*;
-import org.springframework.web.bind.annotation.RestController;
 import com.g1.mychess.tournament.dto.*;
 import com.g1.mychess.tournament.util.JwtUtil;
 
@@ -29,17 +22,17 @@ public class TournamentController {
     }
 
     @PostMapping("/admin/create")
-    public ResponseEntity<TournamentDTO> createTournament(@RequestBody TournamentDTO tournamentDTO, HttpServletRequest request) {
+    public ResponseEntity<TournamentDTO> createTournament(@Valid @RequestBody TournamentDTO tournamentDTO, HttpServletRequest request) {
         return tournamentService.createTournament(tournamentDTO, request);
     }
 
     @GetMapping("/public/get/{tournamentName}")
-    public ResponseEntity<TournamentDTO> getTournamentByName(@PathVariable String tournamentName) {
+    public ResponseEntity<TournamentDTO> getTournamentByName(@Valid @PathVariable String tournamentName) {
         return tournamentService.findTournamentByName(tournamentName);
     }
 
     @GetMapping("/public/{id}")
-    public ResponseEntity<TournamentDTO> getTournamentById(@PathVariable Long id) {
+    public ResponseEntity<TournamentDTO> getTournamentById(@Valid @PathVariable Long id) {
         return tournamentService.findTournamentById(id);
     }
 
@@ -49,27 +42,37 @@ public class TournamentController {
     }
 
     @PutMapping("/admin/update")
-    public ResponseEntity<TournamentDTO> updateTournament(@RequestBody TournamentDTO tournamentDTO, HttpServletRequest request) {
+    public ResponseEntity<TournamentDTO> updateTournament(@Valid @RequestBody TournamentDTO tournamentDTO, HttpServletRequest request) {
         return tournamentService.updateTournament(tournamentDTO, request);
     }
 
+    @DeleteMapping("/player/leave/{tournamentId}")
+    public ResponseEntity<String> leaveTournament(@Valid @PathVariable Long tournamentId, HttpServletRequest request) {
+        return tournamentService.leaveTournament(tournamentId, request);
+    }
+
+    @DeleteMapping("/admin/remove/{tournamentId}/{playerId}")
+    public ResponseEntity<String> removePlayerFromTournament(@Valid @PathVariable Long tournamentId, @Valid @PathVariable Long playerId, HttpServletRequest request) {
+        return tournamentService.removePlayerFromTournament(tournamentId, playerId, request);
+    }
+
     @PostMapping("/admin/start/{tournamentId}")
-    public ResponseEntity<String> startTournament(@PathVariable Long tournamentId, HttpServletRequest request) {
+    public ResponseEntity<String> startTournament(@Valid @PathVariable Long tournamentId, HttpServletRequest request) {
         return tournamentService.startTournament(tournamentId, request);
     }
 
     @PostMapping("/admin/next-round/{tournamentId}")
-    public ResponseEntity<String> prepareNextRound(@PathVariable Long tournamentId, HttpServletRequest request) {
+    public ResponseEntity<String> prepareNextRound(@Valid @PathVariable Long tournamentId, HttpServletRequest request) {
         return tournamentService.prepareNextRound(tournamentId, request);
     }
 
     @PostMapping("/admin/complete/{tournamentId}")
-    public ResponseEntity<String> completeTournament(@PathVariable Long tournamentId, HttpServletRequest request) {
+    public ResponseEntity<String> completeTournament(@Valid @PathVariable Long tournamentId, HttpServletRequest request) {
         return tournamentService.completeTournament(tournamentId, request);
     }
 
     @PostMapping("/player/signup/{tournamentId}")
-    public ResponseEntity<String> signUpToTournament(@PathVariable Long tournamentId, @RequestHeader(value = "Authorization", required = true) String authorizationHeader) {
+    public ResponseEntity<String> signUpToTournament(@Valid @PathVariable Long tournamentId, @Valid @RequestHeader(value = "Authorization", required = true) String authorizationHeader) {
         String token = null;
         if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
             token = authorizationHeader.substring(7); // Remove "Bearer " prefix

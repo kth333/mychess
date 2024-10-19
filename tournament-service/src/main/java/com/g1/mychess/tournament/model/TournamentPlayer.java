@@ -1,6 +1,8 @@
 package com.g1.mychess.tournament.model;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotNull;
 
 import java.time.LocalDateTime;
 
@@ -14,31 +16,40 @@ public class TournamentPlayer {
 
     @ManyToOne
     @JoinColumn(name = "tournament_id", nullable = false)
+    @NotNull
     private Tournament tournament;
 
     @Column(name = "player_id", nullable = false)
+    @NotNull
     private Long playerId;
 
     @Column(name = "sign_up_date_time", nullable = false)
+    @NotNull
     private LocalDateTime signUpDateTime;
 
     @Column(name = "glicko_rating", nullable = false)
+    @Min(0)
     private double glickoRating;
 
     @Column(name = "rating_deviation", nullable = false)
+    @Min(0)
     private double ratingDeviation;
 
     @Column(name = "volatility", nullable = false)
+    @Min(0)
     private double volatility;
 
     @Column(name = "points")
+    @Min(0)
     private double points = 0.0;
 
     @Column(name = "rounds_played")
+    @Min(0)
     private int roundsPlayed = 0;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false)
+    @NotNull
     private TournamentPlayerStatus status;
 
     public enum TournamentPlayerStatus {
@@ -51,6 +62,7 @@ public class TournamentPlayer {
         WITHDRAWN,      // Voluntarily withdrew or retired from the tournament
         FINALIST        // Reached the final round
     }
+
 
     // Getters and Setters
 

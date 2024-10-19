@@ -90,12 +90,22 @@ class TournamentDetails extends Component {
         }
     };
 
+    leaveTournament = async () => {
+        const { id } = this.state.tournament;
+        try {
+            await TournamentService.leaveTournament(id);
+            console.log("Leave success");
+        } catch (error) {
+            console.error("Failed to leave tournament", error);
+            alert("Failed to leave tournament\nReason: " + error.response.data);
+        }
+    };
+
     startTournament = async () => {
         const { id } = this.state.tournament;
         try {
             await TournamentService.startTournament(id);
             console.log("Start success");
-            // window.location.reload();
         } catch (error) {
             console.error("Failed to start tournament", error);
             alert("Failed to start tournament\nReason: " + error.response.data);
@@ -116,12 +126,43 @@ class TournamentDetails extends Component {
     completeTournament = async () => {
         const { id } = this.state.tournament;
         try {
-            await TournamentService.completeTournament(id);
+            await TournamentService.completeTournament(id).then(() => {
+                alert("Tournament completed successfully");
+                this.fetchData(); // Refresh tournament data after completion
+            });
             console.log("Complete tournament success");
         } catch (error) {
             console.error("Failed to complete tournament", error);
             alert("Failed to complete tournament\nReason: " + error.response.data);
         }
+    };
+
+    // Remove player from tournament
+    removePlayerFromTournament = async (playerId) => {
+        const { id } = this.state.tournament;
+        try {
+            await TournamentService.removePlayerFromTournament(id, playerId);
+            console.log(`Player ${playerId} removed successfully`);
+            this.fetchMatches(); // Refresh matches after removing a player
+        } catch (error) {
+            console.error(`Failed to remove player ${playerId} from tournament`, error);
+            alert("Failed to remove player from tournament\nReason: " + error.response.data);
+        }
+    };
+
+    // Handle search input change
+    handleSearchChange = (event) => {
+        const searchRound = event.target.value;
+        this.setState({ searchRound }, this.filterMatches);
+    };
+
+    // Filter matches based on round number
+    filterMatches = () => {
+        const { matches, searchRound } = this.state;
+        const filteredMatches = matches.filter((match) => {
+            return match.roundNumber.toString().includes(searchRound);
+        });
+        this.setState({ filteredMatches });
     };
 
     renderMatchesTable = () => {
@@ -147,8 +188,20 @@ class TournamentDetails extends Component {
                     {matches.map((match) => (
                         <tr key={match.id}>
                             <td className="border px-4 py-2">{match.id}</td>
-                            <td className="border px-4 py-2">{match.participantIds[0]}</td>
-                            <td className="border px-4 py-2">{match.participantIds[1]}</td>
+                            <td className="border px-4 py-2">{match.participantIds[0]}
+                                <Button 
+                                    className="btn btn-success mt-2" 
+                                    onClick={() => this.removePlayerFromTournament(match.participantIds[0])}>
+                                    Remove
+                                </Button>   
+                            </td>
+                            <td className="border px-4 py-2">{match.participantIds[1]}
+                                <Button 
+                                    className="btn btn-success mt-2" 
+                                    onClick={() => this.removePlayerFromTournament(match.participantIds[1])}>
+                                    Remove
+                                </Button>
+                            </td>
                             <td className="border px-4 py-2">{match.roundNumber}</td>
                             <td className="border px-4 py-2">{match.status}</td>
                             <td className="border px-4 py-2">
@@ -253,9 +306,14 @@ class TournamentDetails extends Component {
                     {!isPlayer && this.renderMatchesTable()}
 
                     {isPlayer ? (
+                        <div>
                         <Button className="btn btn-primary mt-6" onClick={this.signUp}>
                             Sign Up
                         </Button>
+                        <Button className="btn btn-primary mt-6" onClick={this.leaveTournament}>
+                            Leave
+                        </Button>
+                        </div>
                     ) : (
                         <>
                             <Link className="btn btn-primary mt-6" to={`/update-tournament/${tournament.name}`}>
