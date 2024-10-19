@@ -1,6 +1,8 @@
 package com.g1.mychess.player.model;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.*;
+
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -10,35 +12,48 @@ import java.util.List;
 public class Profile {
 
     @Id
+    @NotNull
     @Column(name = "player_id")
     private Long playerId;
 
     @OneToOne
     @MapsId
+    @NotNull
     @JoinColumn(name = "player_id")
     private Player player;
 
+    @NotNull
+    @Size(min = 2, max = 100, message = "Full name must be between 2 and 100 characters.")
     @Column(name = "full_name")
     private String fullName;
 
+    @Size(max = 500, message = "Bio must be less than 500 characters.")
     @Column(name = "bio")
     private String bio;
 
+    @Pattern(regexp = "(https?|ftp)://.*", message = "Avatar URL must be a valid URL.")
     @Column(name = "avatar_url")
     private String avatarUrl;
 
     @Column(name = "gender")
     private String gender;
 
+    @NotNull
     @Column(name = "country")
     private String country;
 
+    @NotNull
+    @Size(max = 100, message = "Region must be less than 100 characters.")
     @Column(name = "region")
     private String region;
 
+    @NotNull
+    @Size(max = 100, message = "City must be less than 100 characters.")
     @Column(name = "city")
     private String city;
 
+    @NotNull
+    @Past(message = "Birth date must be in the past.")
     @Column(name = "birth_date")
     private LocalDate birthDate;
 
@@ -47,23 +62,31 @@ public class Profile {
     private CustomChessRank rank;
 
     @Column(name = "glicko_rating", nullable = false)
+    @Min(value = 0, message = "Glicko rating must be non-negative.")
     private double glickoRating = 1500;
 
     @Column(name = "rating_deviation", nullable = false)
+    @Min(value = 30, message = "Rating deviation must be at least 30.")
     private double ratingDeviation = 350.0;
 
     @Column(name = "volatility", nullable = false)
+    @Min(value = 0, message = "Volatility must be non-negative.")
+    @Max(value = 1, message = "Volatility must not exceed 1.")
     private double volatility = 0.06;
 
     @Column(name = "total_wins")
+    @Min(value = 0, message = "Total wins must be non-negative.")
     private int totalWins;
 
     @Column(name = "total_losses")
+    @Min(value = 0, message = "Total losses must be non-negative.")
     private int totalLosses;
 
     @Column(name = "total_draws")
+    @Min(value = 0, message = "Total draws must be non-negative.")
     private int totalDraws;
 
+    @NotNull
     @Column(name = "last_active")
     private LocalDate lastActive;
 

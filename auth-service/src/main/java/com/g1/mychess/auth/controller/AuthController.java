@@ -6,7 +6,7 @@ import com.g1.mychess.auth.util.JwtUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import jakarta.validation.Valid;
+import jakarta.validation.*;
 
 import org.springframework.web.reactive.function.client.WebClient;
 
@@ -18,9 +18,7 @@ import java.util.Map;
 public class AuthController {
 
     private final AuthService authService;
-
     private final WebClient.Builder webClientBuilder;
-
     private final JwtUtil jwtUtil;
 
     @Autowired
@@ -36,13 +34,13 @@ public class AuthController {
     }
 
     @GetMapping("/verify-email")
-    public ResponseEntity<String> verifyEmail(@RequestParam("token") String token) {
+    public ResponseEntity<String> verifyEmail(@RequestParam("token") @Valid String token) {
         authService.verifyEmail(token);
         return ResponseEntity.ok("Email successfully verified!");
     }
 
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody LoginRequestDTO loginRequestDTO) {
+    public ResponseEntity<?> login(@RequestBody @Valid LoginRequestDTO loginRequestDTO) {
         String token = authService.login(loginRequestDTO.getUsername(), loginRequestDTO.getPassword(), loginRequestDTO.getRole());
 
         Map<String, String> response = new HashMap<>();
@@ -52,17 +50,17 @@ public class AuthController {
     }
 
     @PostMapping("/resend-verification-email")
-    public ResponseEntity<String> resendVerificationEmail(@RequestBody String email) {
+    public ResponseEntity<String> resendVerificationEmail(@RequestBody @Valid String email) {
         return authService.resendVerificationEmail(email);
     }
 
     @PostMapping("/request-password-reset")
-    public ResponseEntity<String> requestPasswordReset(@RequestBody String email) {
+    public ResponseEntity<String> requestPasswordReset(@RequestBody @Valid String email) {
         return authService.requestPasswordReset(email);
     }
 
     @PostMapping("/reset-password")
-    public ResponseEntity<String> resetPassword(@RequestBody ResetPasswordRequestDTO resetPasswordRequest) {
+    public ResponseEntity<String> resetPassword(@RequestBody @Valid ResetPasswordRequestDTO resetPasswordRequest) {
         return authService.resetPassword(resetPasswordRequest.getResetToken(), resetPasswordRequest.getNewPassword());
     }
 

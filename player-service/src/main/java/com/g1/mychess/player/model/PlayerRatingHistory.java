@@ -1,6 +1,8 @@
 package com.g1.mychess.player.model;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
+
 import java.time.LocalDateTime;
 
 @Entity
@@ -8,9 +10,11 @@ import java.time.LocalDateTime;
 public class PlayerRatingHistory {
 
     @Id
+    @NotNull
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @NotNull
     @ManyToOne  // A player can have many historical ratings
     @JoinColumn(name = "player_id", nullable = false)
     private Player player;
@@ -24,6 +28,7 @@ public class PlayerRatingHistory {
     @Column(name = "volatility", nullable = false)
     private double volatility;
 
+    @NotNull
     @Column(name = "date", nullable = false)
     private LocalDateTime date;  // Date when this rating was recorded
 

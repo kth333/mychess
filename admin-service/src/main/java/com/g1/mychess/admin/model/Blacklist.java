@@ -2,33 +2,42 @@ package com.g1.mychess.admin.model;
 
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
+import jakarta.validation.constraints.*;
 
 @Entity
 @Table(name = "blacklists")
 public class Blacklist {
 
     @Id
+    @NotNull
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @NotNull(message = "Player ID cannot be null")
     @Column(name = "player_id", nullable = false)
     private Long playerId;
 
     @Column(name = "admin_id")
+    @NotNull
     private Long adminId;
 
+    @Size(max = 255, message = "Reason cannot exceed 255 characters")
     @Column(name = "reason")
     private String reason;
 
+    @NotNull(message = "Blacklisted time cannot be null")
     @Column(name = "blacklisted_at", nullable = false)
     private LocalDateTime blacklistedAt;
 
     @Column(name = "whitelisted_at")
+    @NotNull
     private LocalDateTime whitelistedAt;
 
+    @NotNull(message = "Ban duration cannot be null")
     @Column(name = "ban_duration", nullable = false)
     private Long banDuration;
 
+    @NotNull(message = "Active status cannot be null")
     @Column(name = "is_active", nullable = false)
     private boolean isActive;
 

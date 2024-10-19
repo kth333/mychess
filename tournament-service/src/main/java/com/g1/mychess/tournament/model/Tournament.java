@@ -1,6 +1,10 @@
 package com.g1.mychess.tournament.model;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
+
 import java.time.LocalDateTime;
 import java.util.Set;
 
@@ -9,36 +13,48 @@ import java.util.Set;
 public class Tournament {
 
     @Id
+    @NotNull
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "tournament_id")
     private Long id;
 
     @Column(name = "admin_id", nullable = false)
+    @NotNull
     private Long adminId;
 
-    @Column(name = "name", nullable = false)
+    @Column(name = "name", nullable = false, unique = true)
+    @NotNull
+    @Size(min = 1, max = 100, message = "Tournament name cannot exceed 100 characters.")
     private String name;
 
     @Column(name = "description", nullable = false)
+    @NotNull
+    @Size(max = 500, message = "Tournament description cannot exceed 500 characters.")
     private String description;
 
     @Column(name = "max_players")
+    @Min(value = 2, message = "At least 2 players are required to start the tournament.")
     private Integer maxPlayers;
 
     @Column(name = "start_date_time", nullable = false)
+    @NotNull
     private LocalDateTime startDateTime;
 
     @Column(name = "end_date_time")
+    @NotNull
     private LocalDateTime endDateTime;
 
     @Column(name = "registration_start_date", nullable = false)
+    @NotNull
     private LocalDateTime registrationStartDate;
 
     @Column(name = "registration_end_date", nullable = false)
+    @NotNull
     private LocalDateTime registrationEndDate;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "format", nullable = false)
+    @NotNull
     private TournamentFormat format;
 
     @Embedded
@@ -46,42 +62,57 @@ public class Tournament {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false)
+    @NotNull
     private TournamentStatus status;
 
     @Column(name = "min_rating")
+    @Min(value = 0, message = "Minimum rating cannot go lower than 0.")
     private Integer minRating;
 
     @Column(name = "max_rating")
+    @Min(value = 0, message = "Maximum rating cannot go lower than 0.")
     private Integer maxRating;
 
     @Column(name = "affects_rating", nullable = false)
     private boolean affectsRating;
 
     @Column(name = "min_age")
+    @Min(value = 0, message = "Minimum age cannot go lower than 0.")
+    @NotNull
     private Integer minAge;
 
     @Column(name = "max_age")
+    @Min(value = 0, message = "Maximum age cannot go lower than 0.")
+    @NotNull
     private Integer maxAge;
 
     @Column(name = "required_gender")
     private String requiredGender;
 
     @Column(name = "country")
+    @NotNull
     private String country;
 
     @Column(name = "region")
+    @NotNull
     private String region;
 
     @Column(name = "city")
+    @Size(max = 50)
     private String city;
 
     @Column(name = "address", nullable = false)
+    @NotNull
+    @Size(max = 255)  // Assuming max length for address is 255 characters
     private String address;
 
     @Column(name = "current_round")
+    @Min(1)
     private int currentRound;
 
     @Column(name = "max_rounds", nullable = false)
+    @NotNull
+    @Min(1)
     private int maxRounds;
 
     @OneToMany(mappedBy = "tournament", cascade = CascadeType.ALL, orphanRemoval = true)

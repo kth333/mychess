@@ -1,6 +1,9 @@
 package com.g1.mychess.player.model;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotNull;
+
 import java.time.LocalDate;
 import java.util.List;
 
@@ -9,34 +12,44 @@ import java.util.List;
 public class Player {
 
     @Id
+    @NotNull
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "player_id")
     private Long playerId;
 
+    @NotNull
     @Column(name = "role")
     private String role = "ROLE_PLAYER";
 
     @Column(name = "is_blacklisted", nullable = false)
     private boolean isBlacklisted = false;
 
+    @NotNull
     @Column(name = "username", nullable = false, unique = true, length = 16)
     private String username;
 
+    @NotNull
     @Column(name = "password", nullable = false)
     private String password;
 
+    @NotNull
+    @Email(message = "Email should be valid.")
     @Column(name = "email", nullable = false, unique = true)
     private String email;
 
+    @NotNull
     @OneToOne(mappedBy = "player", cascade = CascadeType.ALL, orphanRemoval = true)
     private Profile profile;
 
+    @NotNull
     @Column(name = "joined_date")
     private LocalDate joinedDate;
 
+    @NotNull
     @Column(name = "tournament_count")
     private Integer tournamentCount;
 
+    @NotNull
     @Column(name = "last_active")
     private LocalDate lastActive;
 
