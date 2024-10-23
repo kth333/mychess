@@ -1,13 +1,12 @@
 package com.g1.mychess.auth.service;
 
-import com.g1.mychess.auth.config.SecurityTestConfig;
-import com.g1.mychess.auth.util.UserDetailsFactory;
-import org.springframework.context.annotation.Import;
-
-
-import com.g1.mychess.auth.dto.RegisterRequestDTO;
-import com.g1.mychess.auth.dto.UserDTO;
+import com.g1.mychess.auth.dto.*;
+import com.g1.mychess.auth.exception.UserTokenException;
+import com.g1.mychess.auth.model.UserToken;
 import com.g1.mychess.auth.repository.UserTokenRepository;
+import com.g1.mychess.auth.util.UserDetailsFactory;
+
+
 import com.g1.mychess.auth.service.impl.AuthServiceImpl;
 import com.g1.mychess.auth.util.JwtUtil;
 
@@ -20,14 +19,18 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Collections;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -45,14 +48,14 @@ public class AuthServiceTest {
     private String emailServiceUrl;
 
     @InjectMocks
-    private AuthServiceImpl authService;  // Use AuthServiceImpl instead of AuthService
+    private AuthServiceImpl authServiceImpl;
 
     @Mock
     private WebClient.Builder webClientBuilder;
     @Mock
     private PasswordEncoder passwordEncoder;
     @Mock
-    private UserTokenRepository verificationTokenRepository;
+    private UserTokenRepository userTokenRepository;
     @Mock
     private JwtUtil jwtUtil;
     @Mock
@@ -65,8 +68,21 @@ public class AuthServiceTest {
     @Mock
     private WebClient.RequestHeadersSpec requestHeadersSpec;
     @Mock
-    private JwtUtil jwtUtilMock;
+    private WebClient.ResponseSpec responseSpec;
+    @Mock
+    private WebClient.RequestBodyUriSpec requestBodyUriSpec;
+    @Mock
+    private WebClient.RequestBodySpec requestBodySpec;
 
+    /*      << Methods that should be tested >>
+    * registerUser(RegisterRequestDTO registerRequestDTO)       left with sucess case.
+    * login(String username, String password, String role)      done
+    * resetPassword(String resetToken, String newPassword)      done
+    * verifyEmail(String token)                                 done
+    * isEmailVerified(Long userId, String userType)             done
+    * isValidPassword(String password)                          done
+    * isValidEmail(String email)                                done
+    */
 
     @BeforeEach
     public void setUp() {
@@ -74,18 +90,120 @@ public class AuthServiceTest {
 
         webClientBuilder = mock(WebClient.Builder.class);
         passwordEncoder = mock(PasswordEncoder.class);
-        verificationTokenRepository = mock(UserTokenRepository.class);
+        userTokenRepository = mock(UserTokenRepository.class);
         jwtUtil = mock(JwtUtil.class);
-        userDetailsFactory = mock(UserDetailsFactory.class);
+//        userDetailsFactory = mock(UserDetailsFactory.class);
 
         // Spy on authService using a constructor with arguments
-        authService = spy(new AuthService(userDetailsFactory, webClientBuilder, passwordEncoder, verificationTokenRepository, jwtUtil));
+        authServiceImpl = spy(new AuthServiceImpl(webClientBuilder, passwordEncoder, userTokenRepository, jwtUtil));
 
         webClient = mock(WebClient.class);
         requestHeadersUriSpec = mock(WebClient.RequestHeadersUriSpec.class);
         requestHeadersSpec = mock(WebClient.RequestHeadersSpec.class);
         responseSpec = mock(WebClient.ResponseSpec.class);
+        requestBodySpec = mock(WebClient.RequestBodySpec.class);
+        requestBodyUriSpec = mock(WebClient.RequestBodyUriSpec.class);
     }
+
+    @Test
+    public void resetPassword_NewPassword_Is_Invalid_should_throw_Exception() {
+        String resetToken = "validToken";
+        String newPassword = "badPassword";
+
+        when(authServiceImpl.isValidPassword(newPassword)).thenReturn(false);
+
+        Exception expectedThrow = assertThrows(Exception.class,
+                () -> authServiceImpl.resetPassword(resetToken, newPassword));
+        assertEquals("Password does not meet the requirements.", expectedThrow.getMessage());
+    }
+
+    @Test
+    public void resetPassword_badToken_should_throw_Exception() {
+        String resetToken = "badToken";
+        String newPassword = "newPassword";
+
+        when(authServiceImpl.isValidPassword(newPassword)).thenReturn(true);
+
+        when(userTokenRepository.findByTokenAndTokenType(resetToken, UserToken.TokenType.PASSWORD_RESET)).thenReturn(Optional.empty());
+
+        Exception expectedThrow = assertThrows(Exception.class,
+                () -> authServiceImpl.resetPassword(resetToken, newPassword));
+        assertEquals("Invalid reset token.", expectedThrow.getMessage());
+    }
+
+    @Test
+    public void resetPassword_usedToken_should_throw_Exception() {
+        String resetToken = "usedToken";
+        String newPassword = "newPassword";
+
+        UserToken userToken = mock(UserToken.class);
+        when(authServiceImpl.isValidPassword(newPassword)).thenReturn(true);
+        when(userTokenRepository.findByTokenAndTokenType(resetToken, UserToken.TokenType.PASSWORD_RESET)).thenReturn(Optional.ofNullable(userToken));
+        when(userToken.isUsed()).thenReturn(true);
+
+        Exception expectedThrow = assertThrows(Exception.class,
+                () -> authServiceImpl.resetPassword(resetToken, newPassword));
+        assertEquals("Reset token already used.", expectedThrow.getMessage());
+    }
+
+    @Test
+    public void resetPassword_expiredToken_should_throw_Exception() {
+        String resetToken = "expiredToken";
+        String newPassword = "newPassword";
+
+        LocalDateTime expiredTime = LocalDateTime.now().minusMinutes(1);
+
+        UserToken userToken = mock(UserToken.class);
+        when(authServiceImpl.isValidPassword(newPassword)).thenReturn(true);
+        when(userTokenRepository.findByTokenAndTokenType(resetToken, UserToken.TokenType.PASSWORD_RESET)).thenReturn(Optional.ofNullable(userToken));
+        when(userToken.isUsed()).thenReturn(false);
+        when(userToken.getExpirationTime()).thenReturn(expiredTime);
+
+        Exception expectedThrow = assertThrows(Exception.class,
+                () -> authServiceImpl.resetPassword(resetToken, newPassword));
+        assertEquals("Token has expired. Please request password reset again.", expectedThrow.getMessage());
+    }
+
+    @Test
+    public void resetPassword_Success(){
+        String resetToken = "resetToken";
+        String newPassword = "newPassword";
+        Long userID = 1L;
+        String encodedPassword = "encodedPassword";
+        UserDTO userDTO = mock(UserDTO.class);
+
+        LocalDateTime expiredTime = LocalDateTime.now().plusHours(1);
+
+        UserToken userToken = mock(UserToken.class);
+        when(authServiceImpl.isValidPassword(newPassword)).thenReturn(true);
+        when(userTokenRepository.findByTokenAndTokenType(resetToken, UserToken.TokenType.PASSWORD_RESET)).thenReturn(Optional.ofNullable(userToken));
+        when(userToken.isUsed()).thenReturn(false);
+        when(userToken.getExpirationTime()).thenReturn(expiredTime);
+
+        // stubs for fetchPlayerFromPlayerServiceById()
+        when(webClientBuilder.build()).thenReturn(webClient);
+        when(webClient.get()).thenReturn(requestHeadersUriSpec);
+        when(requestHeadersUriSpec.uri(playerServiceUrl + "/api/v1/player/playerId/" + userID)).thenReturn(requestBodySpec);
+        when(requestBodySpec.retrieve()).thenReturn(responseSpec);
+        when(responseSpec.bodyToMono(UserDTO.class)).thenReturn(Mono.just(userDTO));
+
+        when(userToken.getUserId()).thenReturn(userID);
+
+        UpdatePasswordRequestDTO updatePasswordRequestDTO = new UpdatePasswordRequestDTO(userID, encodedPassword);
+        // stubs for updatePasswordInPlayerService()
+        when(webClient.put()).thenReturn(requestBodyUriSpec);
+        when(requestBodyUriSpec.uri(playerServiceUrl + "/api/v1/player/update-password")).thenReturn(requestBodySpec);
+        when(requestBodySpec.bodyValue(updatePasswordRequestDTO)).thenReturn(requestHeadersUriSpec);
+        when(requestHeadersUriSpec.retrieve()).thenReturn(responseSpec);
+        when(responseSpec.bodyToMono(Void.class)).thenReturn(Mono.empty());
+
+        ResponseEntity<String> response = authServiceImpl.resetPassword(resetToken, newPassword);
+
+        verify(userTokenRepository).save(userToken); // Ensure the token is marked as used
+        verify(passwordEncoder).encode(newPassword); // Ensure the password encoding is called
+        assertEquals("Password has been reset successfully.", response.getBody());
+    }
+
 
     @Test
     void isValidPassword_GoodPassword() {
@@ -94,7 +212,7 @@ public class AuthServiceTest {
         RegisterRequestDTO goodPasswordRequestDTO = new RegisterRequestDTO("ValidUsername", "VeryStrong1337", "ValidEmail@domain.com", "Male", "Durkadurkastan", "Capital", "Bakalakadaka", localDate);
 
         // Act
-        boolean actualResult = authService.isValidPassword(goodPasswordRequestDTO.getPassword());
+        boolean actualResult = authServiceImpl.isValidPassword(goodPasswordRequestDTO.getPassword());
 
         // Assert
         assertTrue(actualResult);
@@ -105,7 +223,7 @@ public class AuthServiceTest {
         LocalDate localDate = LocalDate.now().minusYears(20);
         RegisterRequestDTO shortPasswordRequestDTO = new RegisterRequestDTO("ValidUsername", "Pass01", "ValidEmail@domain.com", "Male", "Durkadurkastan", "Capital", "Bakalakadaka", localDate);
 
-        boolean actualResult = authService.isValidPassword(shortPasswordRequestDTO.getPassword());
+        boolean actualResult = authServiceImpl.isValidPassword(shortPasswordRequestDTO.getPassword());
 
         assertFalse(actualResult);
     }
@@ -115,7 +233,7 @@ public class AuthServiceTest {
         LocalDate localDate = LocalDate.now().minusYears(20);
         RegisterRequestDTO noNumberPasswordRequestDTO = new RegisterRequestDTO("ValidUsername", "PasswordWithoutNumber", "ValidEmail@domain.com", "Male", "Durkadurkastan", "Capital", "Bakalakadaka", localDate);
 
-        boolean actualResult = authService.isValidPassword(noNumberPasswordRequestDTO.getPassword());
+        boolean actualResult = authServiceImpl.isValidPassword(noNumberPasswordRequestDTO.getPassword());
 
         assertFalse(actualResult);
     }
@@ -125,7 +243,7 @@ public class AuthServiceTest {
         LocalDate localDate = LocalDate.now().minusYears(20);
         RegisterRequestDTO goodEmailRequestDTO = new RegisterRequestDTO("ValidUsername", "Password123", "ValidEmail@domain.com", "Male", "Durkadurkastan", "Capital", "Bakalakadaka", localDate);
 
-        boolean actualResult = authService.isValidEmail(goodEmailRequestDTO.getEmail());
+        boolean actualResult = authServiceImpl.isValidEmail(goodEmailRequestDTO.getEmail());
 
         assertTrue(actualResult);
     }
@@ -135,7 +253,7 @@ public class AuthServiceTest {
         LocalDate localDate = LocalDate.now().minusYears(20);
         RegisterRequestDTO badLocalPartEmailRequestDTO = new RegisterRequestDTO("ValidUsername", "Password123", "Bad!@#$%^&*()_email@example.com", "Male", "Durkadurkastan", "Capital", "Bakalakadaka", localDate);
 
-        boolean actualResult = authService.isValidEmail(badLocalPartEmailRequestDTO.getEmail());
+        boolean actualResult = authServiceImpl.isValidEmail(badLocalPartEmailRequestDTO.getEmail());
 
         assertFalse(actualResult);
     }
@@ -145,9 +263,47 @@ public class AuthServiceTest {
         LocalDate localDate = LocalDate.now().minusYears(20);
         RegisterRequestDTO badDomainPartEmailRequestDTO = new RegisterRequestDTO("ValidUsername", "Password123", "Invalid.domain@com", "Male", "Durkadurkastan", "Capital", "Bakalakadaka", localDate);
 
-        boolean actualResult = authService.isValidEmail(badDomainPartEmailRequestDTO.getEmail());
+        boolean actualResult = authServiceImpl.isValidEmail(badDomainPartEmailRequestDTO.getEmail());
 
         assertFalse(actualResult);
+    }
+
+    @Test
+    void testIsEmailVerified_success() {
+
+        UserToken userToken = mock(UserToken.class);
+        Long userID = 1L;
+        String userType = "ROLE_PLAYER";
+
+        when(userTokenRepository.findByUserIdAndUserTypeAndTokenTypeAndUsed(
+                userID,
+                userType,
+                UserToken.TokenType.EMAIL_VERIFICATION,
+                true
+        )).thenReturn(Optional.of(userToken));
+
+        boolean result = authServiceImpl.isEmailVerified(userID, userType);
+
+        assertTrue(result);
+    }
+
+    @Test
+    void testIsEmailVerified_fail() {
+
+        UserToken userToken = mock(UserToken.class);
+        Long userID = 1L;
+        String userType = "ROLE_PLAYER";
+
+        when(userTokenRepository.findByUserIdAndUserTypeAndTokenTypeAndUsed(
+                userID,
+                userType,
+                UserToken.TokenType.EMAIL_VERIFICATION,
+                false
+        )).thenReturn(Optional.empty());
+
+        boolean result = authServiceImpl.isEmailVerified(userID, userType);
+
+        assertFalse(result);
     }
 
     @Test
@@ -156,7 +312,7 @@ public class AuthServiceTest {
         RegisterRequestDTO badPasswordRequestDTO = new RegisterRequestDTO("ValidUsername", "bad", "ValidEmail@domain.com", "Male", "Durkadurkastan", "Capital", "Bakalakadaka", localDate);
 
         Exception expectedThrow = assertThrows(Exception.class,
-                () -> authService.registerUser(badPasswordRequestDTO));
+                () -> authServiceImpl.registerUser(badPasswordRequestDTO));
 
         
     }
@@ -167,47 +323,77 @@ public class AuthServiceTest {
         RegisterRequestDTO badEmailRequestDTO = new RegisterRequestDTO("ValidUsername", "Password123", "BAD@(!_EMAIL.domain@com", "Male", "Durkadurkastan", "Capital", "Bakalakadaka", localDate);
 
         Exception expectedThrow = assertThrows(Exception.class,
-                () -> authService.registerUser(badEmailRequestDTO));
+                () -> authServiceImpl.registerUser(badEmailRequestDTO));
         
     }
 
+//    @Test
+//    void registerUser_Success()throws Exception{
+//        LocalDate localDate = LocalDate.now().minusYears(20);
+//        String encodedPassword = "EncodedPassword";
+//        RegisterRequestDTO requestDTO = new RegisterRequestDTO("ValidUsername", "Password123", "ValidEmail@domain.com", "Male", "Durkadurkastan", "Capital", "Bakalakadaka", localDate);
+//        // stub for password check
+//        when(passwordEncoder.encode(requestDTO.getPassword())).thenReturn(encodedPassword);
+//
+//        ResponseEntity<PlayerCreationResponseDTO> responseEntity = mock(ResponseEntity.class);
+//
+//        when(webClientBuilder.build()).thenReturn(webClient);
+//        when(webClient.post()).thenReturn(requestBodyUriSpec);
+//        when(requestBodyUriSpec.uri(playerServiceUrl + "/api/v1/player/create")).thenReturn(requestBodySpec);
+//        when(requestBodySpec.bodyValue(requestDTO)).thenReturn(requestHeadersSpec);
+//        when(requestHeadersSpec.retrieve()).thenReturn(responseSpec);
+//        PlayerCreationResponseDTO playerCreationResponseDTO = mock(PlayerCreationResponseDTO.class);
+////        when(responseSpec.toEntity(PlayerCreationResponseDTO.class)).thenReturn(playerCreationResponseDTO);
+//        when(responseSpec.toEntity(PlayerCreationResponseDTO.class)).thenReturn(Mono.just(responseEntity));
+//
+//        when(responseEntity.getStatusCode().is2xxSuccessful()).thenReturn(true);
+//        when(responseEntity.getBody()).thenReturn(playerCreationResponseDTO);
+//        when(playerCreationResponseDTO != null).thenReturn(true);
+//        when(playerCreationResponseDTO.getPlayerId()!=null).thenReturn(true);
+
+//        when(authServiceImpl.generateToken(responseBody.getPlayerId(), "ROLE_PLAYER", UserToken.TokenType.EMAIL_VERIFICATION, LocalDateTime.now().plusDays(1));)
+        // Stub sendVerificationEmail methods
+        //
+
+//    }
+
+
     @Test
-    void Player_Login_Success()throws Exception{
+    void player_Login_Success()throws Exception{
         String username = "ValidUser";
         String password = "Password123";
         String role = "ROLE_PLAYER";
-
         UserDTO userDTO = mock(UserDTO.class);
-        String encodedPassword = passwordEncoder.encode(password);
-
+        String encodedPassword = "EncodedPassword";
+        String mockedToken = "mockedToken";
+        SimpleGrantedAuthority authority = new SimpleGrantedAuthority(role);
+        // stub the fetch
         when(webClientBuilder.build()).thenReturn(webClient);
         when(webClient.get()).thenReturn(requestHeadersUriSpec);
         when(requestHeadersUriSpec.uri(playerServiceUrl + "/api/v1/player/username/" + username)).thenReturn(requestHeadersSpec);
         when(requestHeadersSpec.retrieve()).thenReturn(responseSpec);
         when(responseSpec.bodyToMono(UserDTO.class)).thenReturn(Mono.just(userDTO));
-
-        when(authService.fetchPlayerFromPlayerService(username)).thenReturn(userDTO);
+        // stub the password matching
         when(userDTO.getPassword()).thenReturn(encodedPassword); // Return encoded password from UserDTO
         when(passwordEncoder.matches(password, encodedPassword)).thenReturn(true); // Match raw password with encoded password
-
+        // stub email verification check
         long userId = 1L;
         when(userDTO.getUserId()).thenReturn(userId);
-        when(authService.isEmailVerified(userId, role)).thenReturn(true);
-
+        when(authServiceImpl.isEmailVerified(userId, role)).thenReturn(true);
+        // stub creation of user details
         UserDetails userDetails = mock(UserDetails.class);
-        when(userDetailsFactory.createUserDetails(userDTO, role)).thenReturn(userDetails);
         when(userDTO.getUsername()).thenReturn(username);
+        when(authServiceImpl.getUserDetails(role,userDTO)).thenReturn(userDetails);
 
-        when(jwtUtil.generateToken(userDetails, userDTO.getUserId())).thenReturn("");
+        when(jwtUtil.generateToken(userDetails, userDTO.getUserId())).thenReturn(mockedToken);
+        when(userDTO.getPassword()).thenReturn(encodedPassword); // Return encoded password from UserDTO
 
-        String result = authService.login(username, password, role);
-        assertNotNull(result);
+        String result = authServiceImpl.login(username, password, role);
+        assertEquals(mockedToken, result);
 
-        verify(authService).fetchPlayerFromPlayerService(username);
         verify(passwordEncoder).matches(password, userDTO.getPassword());
-        verify(authService).isEmailVerified(userId, role);
-
-
+        verify(authServiceImpl).isEmailVerified(userId, role);
+        verify(authServiceImpl.getUserDetails(role, userDTO));
     }
 
     @Test
@@ -224,16 +410,15 @@ public class AuthServiceTest {
         when(requestHeadersSpec.retrieve()).thenReturn(responseSpec);
         when(responseSpec.bodyToMono(UserDTO.class)).thenReturn(Mono.just(userDTO));
 
-        when(authService.fetchPlayerFromPlayerService(username)).thenReturn(userDTO);
+//        when(authServiceImpl.fetchPlayerFromPlayerService(username)).thenReturn(userDTO);
         when(passwordEncoder.matches(password, userDTO.getPassword())).thenReturn(false);
 
         Exception expectedThrow = assertThrows(Exception.class,
-                ()->authService.login(username,password,role));
+                ()->authServiceImpl.login(username,password,role));
 
-        verify(authService).fetchPlayerFromPlayerService(username);
+//        verify(authServiceImpl).fetchPlayerFromPlayerService(username);
         verify(passwordEncoder).matches(password, userDTO.getPassword());
     }
-
     @Test
     void Player_Login_UnverifiedEmail_Should_Throw_Exception()throws Exception{
         String username = "ValidUser";
@@ -248,58 +433,54 @@ public class AuthServiceTest {
         when(requestHeadersSpec.retrieve()).thenReturn(responseSpec);
         when(responseSpec.bodyToMono(UserDTO.class)).thenReturn(Mono.just(userDTO));
 
-        when(authService.fetchPlayerFromPlayerService(username)).thenReturn(userDTO);
+//        when(authServiceImpl.fetchPlayerFromPlayerService(username)).thenReturn(userDTO);
         when(passwordEncoder.matches(password, userDTO.getPassword())).thenReturn(true);
 
         long userId = 1L;
         when(userDTO.getUserId()).thenReturn(userId);
-        when(authService.isEmailVerified(userId, role)).thenReturn(false);
+        when(authServiceImpl.isEmailVerified(userId, role)).thenReturn(false);
 
         Exception expectedThrow = assertThrows(Exception.class,
-                ()->authService.login(username,password,role));
+                ()->authServiceImpl.login(username,password,role));
 
-        verify(authService).fetchPlayerFromPlayerService(username);
+//        verify(authServiceImpl).fetchPlayerFromPlayerService(username);
         verify(passwordEncoder).matches(password, userDTO.getPassword());
-        verify(authService).isEmailVerified(userId, role);
+        verify(authServiceImpl).isEmailVerified(userId, role);
     }
+
 
     @Test
     void Admin_Login_Success()throws Exception{
         String username = "ValidUser";
         String password = "Password123";
         String role = "ROLE_ADMIN";
+        String mockedToken = "mockedToken";
 
         UserDTO userDTO = mock(UserDTO.class);
-        String encodedPassword = passwordEncoder.encode(password);
-
+        String encodedPassword = "EncodedPassword";
+        // stub for fetch
         when(webClientBuilder.build()).thenReturn(webClient);
         when(webClient.get()).thenReturn(requestHeadersUriSpec);
         when(requestHeadersUriSpec.uri(adminServiceUrl + "/api/v1/admin/username/" + username)).thenReturn(requestHeadersSpec);
         when(requestHeadersSpec.retrieve()).thenReturn(responseSpec);
         when(responseSpec.bodyToMono(UserDTO.class)).thenReturn(Mono.just(userDTO));
 
-        when(authService.fetchAdminFromAdminService(username)).thenReturn(userDTO);
         when(userDTO.getPassword()).thenReturn(encodedPassword); // Return encoded password from UserDTO
         when(passwordEncoder.matches(password, encodedPassword)).thenReturn(true); // Match raw password with encoded password
 
         long userId = 1L;
         when(userDTO.getUserId()).thenReturn(userId);
-        when(authService.isEmailVerified(userId, role)).thenReturn(true);
+        when(authServiceImpl.isEmailVerified(userId, role)).thenReturn(true);
 
         UserDetails userDetails = mock(UserDetails.class);
-        when(userDetailsFactory.createUserDetails(userDTO, role)).thenReturn(userDetails);
+        when(userDTO.getPassword()).thenReturn(encodedPassword);
         when(userDTO.getUsername()).thenReturn(username);
+        when(jwtUtil.generateToken(userDetails, userDTO.getUserId())).thenReturn(mockedToken);
 
-        when(jwtUtil.generateToken(userDetails, userDTO.getUserId())).thenReturn("");
+        String result = authServiceImpl.login(username, password, role);
 
-        String result = authService.login(username, password, role);
-        assertNotNull(result);
-
-        verify(authService).fetchAdminFromAdminService(username);
         verify(passwordEncoder).matches(password, userDTO.getPassword());
-        verify(authService).isEmailVerified(userId, role);
-
-
+        verify(authServiceImpl).isEmailVerified(userId, role);
     }
 
     @Test
@@ -316,13 +497,13 @@ public class AuthServiceTest {
         when(requestHeadersSpec.retrieve()).thenReturn(responseSpec);
         when(responseSpec.bodyToMono(UserDTO.class)).thenReturn(Mono.just(userDTO));
 
-        when(authService.fetchAdminFromAdminService(username)).thenReturn(userDTO);
+//        when(authServiceImpl.fetchAdminFromAdminService(username)).thenReturn(userDTO);
         when(passwordEncoder.matches(password, userDTO.getPassword())).thenReturn(false);
 
         Exception expectedThrow = assertThrows(Exception.class,
-                ()->authService.login(username,password,role));
+                ()->authServiceImpl.login(username,password,role));
 
-        verify(authService).fetchAdminFromAdminService(username);
+//        verify(authServiceImpl).fetchAdminFromAdminService(username);
         verify(passwordEncoder).matches(password, userDTO.getPassword());
     }
 
@@ -340,50 +521,122 @@ public class AuthServiceTest {
         when(requestHeadersSpec.retrieve()).thenReturn(responseSpec);
         when(responseSpec.bodyToMono(UserDTO.class)).thenReturn(Mono.just(userDTO));
 
-        when(authService.fetchAdminFromAdminService(username)).thenReturn(userDTO);
+//        when(authServiceImpl.fetchAdminFromAdminService(username)).thenReturn(userDTO);
         when(passwordEncoder.matches(password, userDTO.getPassword())).thenReturn(true);
 
         long userId = 1L;
         when(userDTO.getUserId()).thenReturn(userId);
-        when(authService.isEmailVerified(userId, role)).thenReturn(false);
+        when(authServiceImpl.isEmailVerified(userId, role)).thenReturn(false);
 
         Exception expectedThrow = assertThrows(Exception.class,
-                ()->authService.login(username,password,role));
+                ()->authServiceImpl.login(username,password,role));
 
-        verify(authService).fetchAdminFromAdminService(username);
+//        verify(authServiceImpl).fetchAdminFromAdminService(username);
         verify(passwordEncoder).matches(password, userDTO.getPassword());
-        verify(authService).isEmailVerified(userId, role);
+        verify(authServiceImpl).isEmailVerified(userId, role);
     }
 
 
-//    @Test
-//    void Player_Login_Null_UserDTO_should_Throw_Exception()throws Exception{
-//        String username = "ValidUser";
-//        String password = "Password123";
-//        String role = "ROLE_PLAYER";
+    @Test
+    void testVerifyEmail_invalidToken() {
+        String token = "invalidToken";
+        when(userTokenRepository.findByTokenAndTokenType(token, UserToken.TokenType.EMAIL_VERIFICATION))
+                .thenReturn(Optional.empty());
+
+        UserTokenException exception = assertThrows(UserTokenException.class, () -> authServiceImpl.verifyEmail(token));
+
+        assertEquals("Token is invalid.", exception.getMessage());
+    }
+
+    @Test
+    void testVerifyEmail_alreadyUsedToken() {
+        String token = "usedToken";
+        UserToken userToken = new UserToken();
+        userToken.setUsed(true);
+
+        when(userTokenRepository.findByTokenAndTokenType(token, UserToken.TokenType.EMAIL_VERIFICATION))
+                .thenReturn(Optional.of(userToken));
+
+        UserTokenException exception = assertThrows(UserTokenException.class, () -> authServiceImpl.verifyEmail(token));
+        assertEquals("Your email is already verified. You can proceed to log in.", exception.getMessage());
+    }
+
+    @Test
+    void testVerifyEmail_expiredToken() {
+        String token = "expiredToken";
+        UserToken userToken = new UserToken();
+        userToken.setUsed(false);
+        userToken.setExpirationTime(LocalDateTime.now().minusMinutes(1)); // Token just expired
+        when(userTokenRepository.findByTokenAndTokenType(token, UserToken.TokenType.EMAIL_VERIFICATION))
+                .thenReturn(Optional.of(userToken));
+
+        UserTokenException exception = assertThrows(UserTokenException.class, () -> authServiceImpl.verifyEmail(token));
+        assertEquals("Token is expired. Please request a new verification email.", exception.getMessage());
+    }
+
+    @Test
+    void testVerifyEmail_successfulVerification() {
+        String token = "validToken";
+        UserToken userToken = new UserToken();
+        userToken.setUsed(false);
+        userToken.setExpirationTime(LocalDateTime.now().plusDays(1)); // Token is still valid
+        when(userTokenRepository.findByTokenAndTokenType(token, UserToken.TokenType.EMAIL_VERIFICATION))
+                .thenReturn(Optional.of(userToken));
+
+        authServiceImpl.verifyEmail(token);
+
+        assertTrue(userToken.isUsed());
+        verify(userTokenRepository).save(userToken); // Ensure that the token was saved with 'used' set to true
+    }
+
 //
+//    @Test
+//    void requestPasswordReset_Success() {
+//        long userId = 1L;
+//        String username = "username";
+//        String email = "email@domain.com";
+//        String role = "ROLE_PLAYER";
+//        String verificationToken = "VerificationToken";
 //        UserDTO userDTO = mock(UserDTO.class);
+//        UserToken userToken = mock(UserToken.class);
+//        UserToken.TokenType tokenType = mock(UserToken.TokenType.class);
+//
+//        LocalDateTime expirationTime = LocalDateTime.now().plusDays(1);
 //
 //        when(webClientBuilder.build()).thenReturn(webClient);
 //        when(webClient.get()).thenReturn(requestHeadersUriSpec);
-//        when(requestHeadersUriSpec.uri(playerServiceUrl + "/api/v1/player/username/" + username)).thenReturn(requestHeadersSpec);
+//        when(requestHeadersUriSpec.uri(anyString())).thenReturn(requestHeadersSpec);
 //        when(requestHeadersSpec.retrieve()).thenReturn(responseSpec);
-//        /* Mono cannot return null */
-//        when(responseSpec.bodyToMono(UserDTO.class)).thenReturn(Mono.just(null));
+//        when(responseSpec.bodyToMono(UserDTO.class)).thenReturn(Mono.just(userDTO));
 //
-//        Exception expectedThrow = assertThrows(Exception.class,
-//                ()->authService.login(username,password,role));
+//        when(userDTO == null).thenReturn(false);
+//        when(userDTO.getUserId()).thenReturn(1L);
+//        when(userDTO.getRole()).thenReturn(role);
+//        when(authServiceImpl.isEmailVerified(userId, role)).thenReturn(false);
+//        // generateToken(userId, userDTO.getRole(), UserToken.TokenType.EMAIL_VERIFICATION, LocalDateTime.now().plusDays(1));
+//        when(UserToken.TokenType.EMAIL_VERIFICATION).thenReturn(mock(UserToken.TokenType.class));
+//        when(userTokenRepository.findByUserIdAndUserTypeAndTokenType(userId, role, tokenType)).thenReturn(Optional.of(userToken));
 //
-//        verify(authService).fetchPlayerFromPlayerService(username);
-//        verify(passwordEncoder,never()).matches(password, userDTO.getPassword());
+//        // Create the EmailRequestDTO object
+//        EmailRequestDTO emailRequestDTO = new EmailRequestDTO();
+//        emailRequestDTO.setTo(email);
+//        emailRequestDTO.setUsername(username);
+//        emailRequestDTO.setUserToken(verificationToken);
+//
+//        // stub for sendVerificationEmail();
+//        when(webClientBuilder.build()).thenReturn(webClient);
+//        when(webClient.post()).thenReturn(requestBodyUriSpec);
+//        when(requestBodyUriSpec.uri(emailServiceUrl + "/api/v1/email/send-verification")).thenReturn(requestBodySpec);
+//        when(requestBodySpec.bodyValue(emailRequestDTO)).thenReturn(requestHeadersSpec);
+//        when(requestHeadersSpec.retrieve()).thenReturn(responseSpec);
+//        when(responseSpec.bodyToMono(String.class)).thenReturn(Mono.just("Email sent successfully!"));
+//
+//        ResponseEntity<String> result = authServiceImpl.requestPasswordReset(email);
+//
+//        assertEquals(HttpStatus.OK, result.getStatusCode());
 //    }
 
+    }
 
 
-    // ToDO:
-    // GenerateToken
-    // verifyEmail
-    // isEmailVerified
-
-}
 

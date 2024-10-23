@@ -317,6 +317,42 @@ public class AuthServiceImpl implements AuthService {
             throw new UserNotFoundException("User not found.");
         }
 
+        if (!passwordEncoder.matches(password, userDTO.getPassword())) {
+            throw new InvalidCredentialsException("Invalid username or password.");
+        }
+
+        Long userId = userDTO.getUserId();
+
+        if (!isEmailVerified(userId, role)) {
+            throw new EmailNotVerifiedException("Please verify your email before logging in.");
+        }
+
+        // refactored. Pls dont undo... will break test.
+        UserDetails userDetails = getUserDetails(role, userDTO);
+
+        // debugging
+        String result = jwtUtil.generateToken(userDetails, userDTO.getUserId());
+        System.out.println("Result: " + result);
+
+        return jwtUtil.generateToken(userDetails, userDTO.getUserId());
+    }
+
+    public UserDetails getUserDetails(String role, UserDTO userDTO) {
+        // debugging
+        System.out.println("Username: " + userDTO.getUsername());
+        System.out.println("Password: " + userDTO.getPassword());
+
+        UserDetails userDetails = new org.springframework.security.core.userdetails.User(
+                userDTO.getUsername(),
+                userDTO.getPassword(),
+                Collections.singleton(new org.springframework.security.core.authority.SimpleGrantedAuthority(role))
+        );
+        return userDetails;
+    }
+
+    @Override
+    public ResponseEntity<String> resendVerificationEmail(String email) {
+        UserDTO userDTO = fetchPlayerFromPlayerServiceByEmail(email);
         return userDTO;
     }
 
