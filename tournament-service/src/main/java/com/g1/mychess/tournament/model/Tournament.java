@@ -8,8 +8,17 @@ import jakarta.validation.constraints.Size;
 import java.time.LocalDateTime;
 import java.util.Set;
 
+import org.springframework.web.bind.annotation.SessionAttributes;
+
+//import lombok.Getter;
+//import lombok.Setter;
+
 @Entity
 @Table(name = "tournaments")
+//@Getter 
+//@Setter  //would cut out boilerplate Getter/Setter methods. not sure if it'll compile yet so im not touching this 
+
+
 public class Tournament {
 
     @Id
