@@ -1,6 +1,7 @@
 package com.g1.mychess.player.controller;
 
 import com.g1.mychess.player.dto.PlayerProfileDTO;
+import com.g1.mychess.player.dto.PlayerProfileUpdateDTO;
 import com.g1.mychess.player.dto.PlayerRatingUpdateDTO;
 import com.g1.mychess.player.service.PlayerRatingHistoryService;
 import com.g1.mychess.player.service.ProfileService;
@@ -49,5 +50,4 @@ public class ProfileController {
     public ResponseEntity<String> updatePlayerProfile(@Valid @PathVariable Long playerId, @RequestBody PlayerProfileUpdateDTO profileUpdateDTO) {
         return profileService.updatePlayerProfile(playerId, profileUpdateDTO);
     }
-
 }

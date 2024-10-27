@@ -1,6 +1,6 @@
 import React from 'react';
 import { Card, CardHeader, CardContent, CardFooter } from "./ui/card";
-import { Avatar } from './ui/avatar';
+import { AvatarImage } from './ui/avatar';
 import { Button } from './ui/button';
 import withNavigateandLocation from './withNavigateandLocation';
 import PlayerService from '../services/PlayerService';

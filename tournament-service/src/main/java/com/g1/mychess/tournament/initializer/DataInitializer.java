@@ -39,6 +39,7 @@ public class DataInitializer implements CommandLineRunner {
 
     private void createTournaments() {
         Tournament tournament1 = new Tournament();
+        tournament1.setId((long) 1);
         tournament1.setAdminId(1L);
         tournament1.setName("Kings and Queens Championship 2025");
         tournament1.setDescription("A tournament celebrating diversity in chess");
@@ -65,6 +66,7 @@ public class DataInitializer implements CommandLineRunner {
         tournament1.setParticipants(new HashSet<>());
 
         Tournament tournament2 = new Tournament();
+        tournament2.setId((long) 2);
         tournament2.setAdminId(2L);
         tournament2.setName("Women Grand Prix 2025");
         tournament2.setDescription("An exclusive tournament for female chess players");
@@ -91,6 +93,7 @@ public class DataInitializer implements CommandLineRunner {
         tournament2.setParticipants(new HashSet<>());
 
         Tournament tournament3 = new Tournament();
+        tournament3.setId((long) 3);
         tournament3.setAdminId(3L);
         tournament3.setName("Mixed Doubles Chess Open 2025");
         tournament3.setDescription("A unique tournament featuring mixed-gender teams");
@@ -117,6 +120,7 @@ public class DataInitializer implements CommandLineRunner {
         tournament3.setParticipants(new HashSet<>());
 
         Tournament tournament4 = new Tournament();
+        tournament4.setId((long) 4);
         tournament4.setAdminId(1L);
         tournament4.setName("Youth Chess Challenge 2025");
         tournament4.setDescription("A tournament for young aspiring chess players");
