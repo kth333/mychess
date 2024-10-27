@@ -3,12 +3,15 @@ package com.g1.mychess.tournament.controller;
 import jakarta.servlet.http.HttpServletRequest;
 import java.util.List;
 
+import org.springframework.data.web.PageableDefault;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import com.g1.mychess.tournament.service.*;
 import com.g1.mychess.tournament.dto.*;
 import com.g1.mychess.tournament.util.JwtUtil;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 @RestController
 @RequestMapping("/api/v1/tournaments")
@@ -37,8 +40,8 @@ public class TournamentController {
     }
 
     @GetMapping("/public/all")
-    public ResponseEntity<List<TournamentDTO>> getAllTournaments() {
-        return tournamentService.getAllTournaments();
+    public ResponseEntity<Page<TournamentDTO>> getAllTournaments(@PageableDefault(size = 9) Pageable pageable) {
+        return tournamentService.getAllTournaments(pageable);
     }
 
     @PutMapping("/admin/update")

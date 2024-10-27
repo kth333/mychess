@@ -10,8 +10,9 @@ class TournamentService {
       return await ProtectedTournamentAPI.put("/tournaments/admin/update", tournament);
     }
 
-    async getAllTournaments() {
-      return await TournamentAPI.get("/tournaments/public/all");
+    async getAllTournaments(page) {
+        console.log("/tournaments/public/all?page=" + page);
+      return await TournamentAPI.get("/tournaments/public/all?page=" + page);
     }
 
     async getTournamentByName(tournamentName) {

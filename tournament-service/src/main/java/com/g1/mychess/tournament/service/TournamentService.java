@@ -3,6 +3,8 @@ package com.g1.mychess.tournament.service;
 import com.g1.mychess.tournament.dto.TournamentDTO;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.ResponseEntity;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 
@@ -14,7 +16,7 @@ public interface TournamentService {
 
     ResponseEntity<TournamentDTO> findTournamentById(Long id);
 
-    ResponseEntity<List<TournamentDTO>> getAllTournaments();
+    ResponseEntity<Page<TournamentDTO>> getAllTournaments(Pageable pageable);
 
     ResponseEntity<TournamentDTO> updateTournament(TournamentDTO tournamentDTO, HttpServletRequest request);
 

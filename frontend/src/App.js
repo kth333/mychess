@@ -24,7 +24,7 @@ function App() {
               <Route exact index element={<Home />} />
               <Route exact path="/login" element={<Login />} />
               <Route exact path="/register" element={<Register />} />
-              <Route exact path="/tournaments" element={<Tournaments />} />
+              <Route exact path="/tournaments/page/:pageNumber" element={<Tournaments />} />
               <Route exact path="/tournaments/:name" element={<TournamentDetails />} />
               
               <Route element={<ProtectedRoute />}>
