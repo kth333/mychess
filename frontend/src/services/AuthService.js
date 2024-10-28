@@ -9,6 +9,10 @@ class AuthService {
       return await AuthAPI.post("/auth/register", userData);
     }
 
+    async requestPasswordReset(email){
+        return await AuthAPI.post("/auth/request-password-reset", email);
+    }
+
 }
 
 export default new AuthService();

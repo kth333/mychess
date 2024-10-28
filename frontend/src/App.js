@@ -14,6 +14,7 @@ import UpdateTournament from './components/tournaments/UpdateTournament';
 import UpdateProfile from './components/UpdateProfile';
 import Blacklist from './components/Blacklist';
 import Whitelist from './components/Whitelist';
+import ResetPassword from "./components/ResetPassword";
 
 function App() {
   return (
@@ -26,6 +27,7 @@ function App() {
               <Route exact path="/register" element={<Register />} />
               <Route exact path="/tournaments/page/:pageNumber" element={<Tournaments />} />
               <Route exact path="/tournaments/:name" element={<TournamentDetails />} />
+              <Route exact path="/reset-password" element={<ResetPassword/>} />
               
               <Route element={<ProtectedRoute />}>
                 <Route exact path="/create-tournament" element={<CreateTournament />} />
