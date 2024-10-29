@@ -22,7 +22,6 @@ import org.springframework.web.bind.annotation.SessionAttributes;
 public class Tournament {
 
     @Id
-    @NotNull
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "tournament_id")
     private Long id;

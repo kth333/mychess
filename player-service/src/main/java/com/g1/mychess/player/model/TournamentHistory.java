@@ -10,7 +10,6 @@ import java.time.LocalDateTime;
 public class TournamentHistory {
 
     @Id
-    @NotNull
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 

@@ -15,6 +15,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Service
@@ -47,9 +48,11 @@ public class PlayerServiceImpl implements PlayerService {
         }
 
         Player newPlayer = createNewPlayer(registerRequestDTO);
-        Profile profile = createNewProfile(newPlayer, registerRequestDTO);
+        Profile profile = createNewProfile(registerRequestDTO);
 
         newPlayer.setProfile(profile);
+        profile.setPlayer(newPlayer);
+
         playerRepository.save(newPlayer);
 
         return ResponseEntity.ok(new PlayerCreationResponseDTO(newPlayer.getPlayerId(), "Player and Profile created successfully"));
@@ -68,19 +71,19 @@ public class PlayerServiceImpl implements PlayerService {
         player.setUsername(registerRequestDTO.getUsername());
         player.setPassword(registerRequestDTO.getPassword());
         player.setEmail(registerRequestDTO.getEmail());
-        playerRepository.save(player);
+        player.setJoinedDate(LocalDate.now());
+        player.setTournamentCount(0);
         return player;
     }
 
-    private Profile createNewProfile(Player player, RegisterRequestDTO registerRequestDTO) {
+    private Profile createNewProfile(RegisterRequestDTO registerRequestDTO) {
         Profile profile = new Profile();
-        profile.setPlayer(player);
         profile.setGender(registerRequestDTO.getGender());
         profile.setCountry(registerRequestDTO.getCountry());
         profile.setRegion(registerRequestDTO.getRegion());
         profile.setCity(registerRequestDTO.getCity());
         profile.setBirthDate(registerRequestDTO.getBirthDate());
-        profileRepository.save(profile);
+        profile.setLastActive(LocalDate.now());
         return profile;
     }
 

@@ -9,7 +9,6 @@ public class Admin {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @NotNull
     @Column(name = "admin_id")
     private Long adminId;
 

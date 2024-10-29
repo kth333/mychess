@@ -1,12 +1,12 @@
-// EmailContentBuilder.java
 package com.g1.mychess.email.util;
 
 public class EmailContentBuilder {
 
-    public static String buildVerificationEmailContent(String username, String verificationToken, String verificationUrl) {
+    public static String buildVerificationEmailContent(String username, String verificationToken, String baseUrl) {
+        String verificationUrl = baseUrl + "/api/v1/auth/verify-email?token=" + verificationToken;
         return "Dear " + username + ",\n\n"
                 + "Please verify your email address by clicking on the link below:\n"
-                + verificationUrl + verificationToken + "\n\n"
+                + verificationUrl + "\n\n"
                 + "Thank you for using MyChess!";
     }
 

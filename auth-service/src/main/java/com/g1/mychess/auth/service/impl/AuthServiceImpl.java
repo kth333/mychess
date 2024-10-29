@@ -1,4 +1,3 @@
-// AuthServiceImpl.java
 package com.g1.mychess.auth.service.impl;
 
 import com.g1.mychess.auth.client.AdminServiceClient;

@@ -6,15 +6,14 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
-import org.springframework.util.StringUtils;
 
 @Service
 public class EmailServiceImpl implements EmailService {
 
     private final JavaMailSender mailSender;
 
-    @Value("${mychess.verification.url}")
-    private String verificationUrl;
+    @Value("${auth.service.url}")
+    private String authServiceUrl;
 
     public EmailServiceImpl(JavaMailSender mailSender) {
         this.mailSender = mailSender;
@@ -23,7 +22,7 @@ public class EmailServiceImpl implements EmailService {
     @Override
     public void sendVerificationEmail(String to, String username, String verificationToken) {
         String subject = "Email Verification - MyChess";
-        String content = EmailContentBuilder.buildVerificationEmailContent(username, verificationToken, getVerificationUrl());
+        String content = EmailContentBuilder.buildVerificationEmailContent(username, verificationToken, authServiceUrl);
         sendEmail(to, subject, content);
     }
 
@@ -47,9 +46,5 @@ public class EmailServiceImpl implements EmailService {
         message.setSubject(subject);
         message.setText(content);
         mailSender.send(message);
-    }
-
-    private String getVerificationUrl() {
-        return StringUtils.hasText(verificationUrl) ? verificationUrl : "http://localhost:8080/api/v1/auth/verify-email?token=";
     }
 }
