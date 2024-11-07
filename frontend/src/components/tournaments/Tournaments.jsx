@@ -3,7 +3,7 @@ import { Link, useParams } from "react-router-dom";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../ui/card";
 import { CalendarIcon, TrophyIcon, UsersIcon } from "lucide-react";
 import withNavigateandLocation from '../withNavigateandLocation';
-import Pagination from "../ui/Pagination";  // Import the Pagination component
+import Pagination from "../ui/Pagination"  // Import the Pagination component
 import TournamentService from '../../services/TournamentService';
 
 class Tournaments extends Component {
@@ -23,19 +23,7 @@ class Tournaments extends Component {
 
   componentDidMount() {
     this.fetchData();
-    window.addEventListener('mousemove', this.handleMouseMove);
   }
-
-  componentWillUnmount() {
-    window.removeEventListener('mousemove', this.handleMouseMove);
-  }
-
-  handleMouseMove = (event) => {
-    this.setState({
-      mouseX: event.clientX,
-      mouseY: event.clientY,
-    });
-  };
 
   fetchData = async () => {
     const currentPage = this.props.params.pageNumber || 1;

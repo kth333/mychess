@@ -10,7 +10,6 @@ import com.g1.mychess.player.repository.PlayerRepository;
 import com.g1.mychess.player.repository.ProfileRepository;
 import com.g1.mychess.player.service.ProfileService;
 import jakarta.transaction.Transactional;
-
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
@@ -85,7 +84,4 @@ public class ProfileServiceImpl implements ProfileService {
 
         return ResponseEntity.ok("Profile updated successfully");
     }
-
-    
-
 }

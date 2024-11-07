@@ -8,8 +8,17 @@ import jakarta.validation.constraints.Size;
 import java.time.LocalDateTime;
 import java.util.Set;
 
+import org.springframework.web.bind.annotation.SessionAttributes;
+
+//import lombok.Getter;
+//import lombok.Setter;
+
 @Entity
 @Table(name = "tournaments")
+//@Getter 
+//@Setter  //would cut out boilerplate Getter/Setter methods. not sure if it'll compile yet so im not touching this 
+
+
 public class Tournament {
 
     @Id
@@ -78,12 +87,10 @@ public class Tournament {
 
     @Column(name = "min_age")
     @Min(value = 0, message = "Minimum age cannot go lower than 0.")
-    @NotNull
     private Integer minAge;
 
     @Column(name = "max_age")
     @Min(value = 0, message = "Maximum age cannot go lower than 0.")
-    @NotNull
     private Integer maxAge;
 
     @Column(name = "required_gender")
@@ -107,7 +114,7 @@ public class Tournament {
     private String address;
 
     @Column(name = "current_round")
-    @Min(1)
+    @Min(0)
     private int currentRound;
 
     @Column(name = "max_rounds", nullable = false)

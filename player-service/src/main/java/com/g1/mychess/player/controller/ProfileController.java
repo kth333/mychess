@@ -50,5 +50,4 @@ public class ProfileController {
     public ResponseEntity<String> updatePlayerProfile(@Valid @PathVariable Long playerId, @RequestBody PlayerProfileUpdateDTO profileUpdateDTO) {
         return profileService.updatePlayerProfile(playerId, profileUpdateDTO);
     }
-
 }

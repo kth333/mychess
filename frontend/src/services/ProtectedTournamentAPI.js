@@ -1,7 +1,6 @@
 import axios from 'axios';
 
-const API_BASE_URL = "http://52.77.229.96:8083/api/v1";
-// const API_BASE_URL = "http://localhost:8083/api/v1";
+const API_BASE_URL = "http://localhost:8083/api/v1";
 
 
 
@@ -10,21 +9,17 @@ let ProtectedTournamentAPI = axios.create({
   timeout: 100000,
 });
 
-// Add a request interceptor to dynamically set the Authorization header before each request
 ProtectedTournamentAPI.interceptors.request.use(
   (config) => {
-    // Get the token from sessionStorage before each request
     const token = sessionStorage.getItem("token");
-
-    // If token exists, set it in the Authorization header
     if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
+      config.headers['Authorization'] = `Bearer ${token}`;
     }
-
-    return config; // Return the updated config
+    console.log('Request Headers:', config.headers);
+    return config;
   },
   (error) => {
-    // Handle any errors before the request is sent
+    console.error('Request Error:', error);
     return Promise.reject(error);
   }
 );
