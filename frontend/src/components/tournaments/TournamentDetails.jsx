@@ -13,6 +13,8 @@ class TournamentDetails extends Component {
             tournament: null,
             matches: [], // Store the matches here
             selectedWinners: {}, // Store selected winners for each match
+            filteredMatches: [], // Store filtered matches
+            searchRound: '', // Store the search round number
         };
     }
 
@@ -38,7 +40,7 @@ class TournamentDetails extends Component {
         try {
             const res = await MatchService.getAllMatchesById(id);
             console.log("Matches data:", res.data);
-            this.setState({ matches: res.data });
+            this.setState({ matches: res.data, filteredMatches: res.data });
         } catch (error) {
             console.error("Failed to fetch matches", error);
         }
@@ -57,9 +59,8 @@ class TournamentDetails extends Component {
 
         console.log("Completing match with data:", JSON.stringify(match));
         try {
-            await MatchService.completeMatch(matchId, match); // Ensure you have a method to complete the match in your MatchService
+            await MatchService.completeMatch(matchId, match).then(() => {this.fetchMatches();});
             console.log("Match completed successfully");
-            window.location.reload();
         } catch (error) {
             console.error("Failed to complete match", error);
             alert("Failed to complete match\nReason: " + error.response.data);
@@ -104,7 +105,7 @@ class TournamentDetails extends Component {
     startTournament = async () => {
         const { id } = this.state.tournament;
         try {
-            await TournamentService.startTournament(id);
+            await TournamentService.startTournament(id).then(() => {this.fetchMatches();});
             console.log("Start success");
         } catch (error) {
             console.error("Failed to start tournament", error);
@@ -115,7 +116,7 @@ class TournamentDetails extends Component {
     startNextRound = async () => {
         const { id } = this.state.tournament;
         try {
-            await TournamentService.startNextRound(id);
+            await TournamentService.startNextRound(id).then(() => {this.fetchMatches();});
             console.log("Next round success");
         } catch (error) {
             console.error("Failed to start next round", error);
@@ -168,7 +169,19 @@ class TournamentDetails extends Component {
     renderMatchesTable = () => {
         const { matches } = this.state;
 
-        if (matches.length === 0) {
+    // Filter matches based on round number
+    filterMatches = () => {
+        const { matches, searchRound } = this.state;
+        const filteredMatches = matches.filter((match) => {
+            return match.roundNumber.toString().includes(searchRound);
+        });
+        this.setState({ filteredMatches });
+    };
+
+    renderMatchesTable = () => {
+        const { filteredMatches } = this.state;
+
+        if (filteredMatches.length === 0) {
             return <p>No matches available yet.</p>;
         }
 
@@ -185,7 +198,7 @@ class TournamentDetails extends Component {
                     </tr>
                 </thead>
                 <tbody>
-                    {matches.map((match) => (
+                    {filteredMatches.map((match) => (
                         <tr key={match.id}>
                             <td className="border px-4 py-2">{match.id}</td>
                             <td className="border px-4 py-2">{match.participantIds[0]}
@@ -231,7 +244,7 @@ class TournamentDetails extends Component {
     };
 
     render() {
-        const { tournament } = this.state;
+        const { tournament, searchRound } = this.state;
         const userRole = sessionStorage.getItem("role");
         const isPlayer = userRole === 'ROLE_PLAYER';
 
@@ -263,7 +276,7 @@ class TournamentDetails extends Component {
 
         return (
             <div className="p-6 max-w-4xl mx-auto">
-                <Card className="p-4 bg-base-200">
+                <Card className="p-4 bg-primary">
                     <h2 className="text-2xl font-bold text-primary">{name}</h2>
                     <p className="my-2 text-accent">{description}</p>
                     <p className="my-2 text-secondary">Host: admin{adminId}</p>
@@ -303,6 +316,14 @@ class TournamentDetails extends Component {
                         </p>
                     </div>
 
+                    <input
+                        type="text"
+                        placeholder="Enter round number"
+                        value={searchRound}
+                        onChange={this.handleSearchChange}
+                        className="input input-bordered input-accent mb-4 w-full"
+                    />
+
                     {!isPlayer && this.renderMatchesTable()}
 
                     {isPlayer ? (
@@ -319,13 +340,13 @@ class TournamentDetails extends Component {
                             <Link className="btn btn-primary mt-6" to={`/update-tournament/${tournament.name}`}>
                                 Update
                             </Link>
-                            <Button className="btn btn-primary mt-6" onClick={this.startTournament} disabled={status === 'ONGOING'}>
+                            <Button className="btn btn-primary mt-6" onClick={this.startTournament} disabled={tournament.currentRound !== 0}>
                                 Start tournament
                             </Button>
-                            <Button className="btn btn-primary mt-6" onClick={this.startNextRound}>
+                            <Button className="btn btn-primary mt-6" onClick={this.startNextRound} disabled={tournament.currentRound === tournament.maxRounds}>
                                 Start next round
                             </Button>
-                            <Button className="btn btn-primary mt-6" onClick={this.completeTournament}>
+                            <Button className="btn btn-primary mt-6" onClick={this.completeTournament} disabled={status === 'COMPLETED'}>
                                 Complete tournament
                             </Button>
                         </>

@@ -1,8 +1,11 @@
 package com.g1.mychess.match.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 public class MatchResultDTO {
     private Long winnerId;
     private Long loserId;
+    @JsonProperty("isDraw")
     private boolean isDraw;
 
     // Constructors, getters, and setters
