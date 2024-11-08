@@ -81,7 +81,7 @@ public class TournamentServiceImpl implements TournamentService {
         tournament.setAddress(tournamentDTO.getAddress());
         tournament.setMaxRounds(tournamentDTO.getMaxRounds());
         tournament.setParticipants(new HashSet<>());
-        tournament.setTimeControlSetting(tournamentDTO.getTimeControl());
+        tournament.setTimeControlSetting(tournamentDTO.getTimeControlSetting());
         tournament.setCurrentRound(0);
 
         Tournament savedTournament = tournamentRepository.save(tournament);
@@ -144,6 +144,7 @@ public class TournamentServiceImpl implements TournamentService {
         tournament.setCity(tournamentDTO.getCity());
         tournament.setAddress(tournamentDTO.getAddress());
         tournament.setMaxRounds(tournamentDTO.getMaxRounds());
+        tournament.setTimeControlSetting(tournamentDTO.getTimeControlSetting());
 
         Tournament updatedTournament = tournamentRepository.save(tournament);
         TournamentDTO updatedTournamentDTO = TournamentMapper.toDTO(updatedTournament);

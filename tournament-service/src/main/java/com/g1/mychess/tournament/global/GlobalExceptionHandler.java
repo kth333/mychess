@@ -27,9 +27,9 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());
     }
 
-    // Handle RequirementNotMetException
-    @ExceptionHandler(RequirementNotMetException.class)
-    public ResponseEntity<String> handleRequirementNotMetException(RequirementNotMetException ex) {
+    // Handle PlayerIneligibleException
+    @ExceptionHandler(PlayerIneligibleException.class)
+    public ResponseEntity<String> handleRequirementNotMetException(PlayerIneligibleException ex) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ex.getMessage());
     }
 

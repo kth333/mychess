@@ -6,6 +6,7 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
 import java.time.LocalDateTime;
+import java.util.HashSet;
 import java.util.Set;
 
 import org.springframework.web.bind.annotation.SessionAttributes;
@@ -122,7 +123,7 @@ public class Tournament {
     private int maxRounds;
 
     @OneToMany(mappedBy = "tournament", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<TournamentPlayer> participants;
+    private Set<TournamentPlayer> participants = new HashSet<>();
 
     public TimeControlSetting.TimeControlType getTimeControlType() {
         return timeControlSetting.getTimeControlType();
