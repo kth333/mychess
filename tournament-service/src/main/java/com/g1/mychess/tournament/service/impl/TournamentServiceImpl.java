@@ -119,8 +119,8 @@ public class TournamentServiceImpl implements TournamentService {
         Tournament tournament = tournamentRepository.findById(tournamentDTO.getId())
                 .orElseThrow(() -> new IllegalArgumentException("Tournament not found with ID: " + tournamentDTO.getId()));
 
-        Long adminId = authenticationService.getUserIdFromRequest(request);
-        if (!tournament.getAdminId().equals(adminId)) {
+        Long userId = authenticationService.getUserIdFromRequest(request);
+        if (!(tournament.getAdminId() == userId)) {
             throw new UnauthorizedActionException("Only the tournament admin can update the tournament.");
         }
 
