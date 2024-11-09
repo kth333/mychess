@@ -161,7 +161,7 @@ public class AuthServiceImpl implements AuthService {
 
         String hashedPassword = passwordEncoder.encode(newPassword);
 
-        updatePassword(userDTO.getUserId(), hashedPassword, userDTO.getRole());
+        updatePassword(userDTO.getUserId(), hashedPassword);
 
         tokenService.markTokenAsUsed(token);
 
@@ -225,14 +225,8 @@ public class AuthServiceImpl implements AuthService {
         return userDTO;
     }
 
-    private void updatePassword(Long userId, String hashedPassword, String role) {
-        if ("ROLE_PLAYER".equals(role)) {
-            playerServiceClient.updatePassword(userId, hashedPassword);
-        } /* else if ("ROLE_ADMIN".equals(role)) {
-            adminServiceClient.updatePassword(userId, hashedPassword);
-        } */ else {
-            throw new InvalidRoleException("Invalid role provided.");
-        }
+    private void updatePassword(Long playerId, String hashedPassword) {
+        playerServiceClient.updatePassword(playerId, hashedPassword);
     }
 
     private void sendVerificationEmail(String email, String username, String verificationToken) {

@@ -1,20 +1,20 @@
 package com.g1.mychess.auth.dto;
 
 public class UpdatePasswordRequestDTO {
-    private Long userId;
+    private Long playerId;
     private String newPassword;
 
-    public UpdatePasswordRequestDTO(Long userId, String newPassword) {
-        this.userId = userId;
+    public UpdatePasswordRequestDTO(Long playerId, String newPassword) {
+        this.playerId = playerId;
         this.newPassword = newPassword;
     }
 
-    public Long getUserId() {
-        return userId;
+    public Long getplayerId() {
+        return playerId;
     }
 
-    public void setUserId(Long userId) {
-        this.userId = userId;
+    public void setplayerId(Long playerId) {
+        this.playerId = playerId;
     }
 
     public String getNewPassword() {
