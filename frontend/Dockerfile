@@ -19,6 +19,9 @@ RUN npm run build
 # Use an official NGINX image to serve the app
 FROM nginx:alpine
 
+# Remove default NGINX configuration file that conflicts
+RUN rm /etc/nginx/conf.d/default.conf
+
 # Copy the build folder from the previous stage to NGINX's public folder
 COPY --from=build /app/build /usr/share/nginx/html
 

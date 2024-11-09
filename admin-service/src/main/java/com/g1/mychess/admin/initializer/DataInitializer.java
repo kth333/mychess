@@ -17,9 +17,9 @@ public class DataInitializer implements CommandLineRunner {
     public void run(String... args) throws Exception {
         // Check if admins already exist to avoid duplicate entries
         if (adminRepository.count() == 0) {
-            createAdmin((long) 1,"admin1", "admin1@example.com");
-            createAdmin((long) 2,"admin2", "admin2@example.com");
-            createAdmin((long) 3,"admin3", "admin3@example.com");
+            createAdmin("admin1", "admin1@example.com");
+            createAdmin("admin2", "admin2@example.com");
+            createAdmin("admin3", "admin3@example.com");
 
             System.out.println("Admin accounts initialized.");
         } else {
@@ -27,9 +27,8 @@ public class DataInitializer implements CommandLineRunner {
         }
     }
 
-    private void createAdmin(Long adminId, String username, String email) {
+    private void createAdmin(String username, String email) {
         Admin admin = new Admin();
-        admin.setAdminId(adminId);
         admin.setUsername(username); // Set the username
         admin.setEmail(email); // Set the email
         admin.setPassword("$2a$10$/1b1aYbc9OGxNxDsuf4DJOe9QlW33cl7NAn0B.Rtd0gpthO6f2bnq"); // Set the hashed password

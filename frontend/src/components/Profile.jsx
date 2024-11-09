@@ -1,6 +1,7 @@
 import React from 'react';
 import { Card, CardHeader, CardContent, CardFooter } from "./ui/card";
 import { AvatarImage } from './ui/avatar';
+import { Link } from 'react-router-dom';
 import { Button } from './ui/button';
 import withNavigateandLocation from './withNavigateandLocation';
 import PlayerService from '../services/PlayerService';
@@ -12,7 +13,6 @@ import { testData } from './test/data';
 class Profile extends React.Component {
     constructor(props) {
         super(props);
-        // Destructure the data passed to the component, assuming props contains the playerProfileDTO object.
         this.state = {
             profile: this.props.profile
         };
@@ -129,7 +129,7 @@ class Profile extends React.Component {
                         </p>
                     </div>
                     <CardFooter className="flex justify-end">
-                        <Button className="btn btn-primary">Edit Profile</Button>
+                        <Link className="btn btn-accent" to={`/profile/update/${playerId}`}>Edit Profile</Link>
                     </CardFooter>
                 </Card>
             </div>
