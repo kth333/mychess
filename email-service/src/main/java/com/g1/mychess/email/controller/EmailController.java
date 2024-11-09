@@ -61,6 +61,21 @@ public class EmailController {
         }
     }
 
+    @PostMapping("/send-password-reset")
+    public ResponseEntity<String> sendPasswordResetEmail(@RequestBody EmailRequestDTO emailRequestDTO) {
+        try {
+            emailService.sendPasswordResetEmail(
+                    emailRequestDTO.getTo(),
+                    emailRequestDTO.getUsername(),
+                    emailRequestDTO.getUserToken()
+            );
+            return ResponseEntity.ok("Password reset email sent successfully.");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Failed to send password reset email.");
+        }
+    }
+
     @GetMapping("/health")
     public ResponseEntity<String> healthCheck() {
         return ResponseEntity.ok("Service is up and running");
