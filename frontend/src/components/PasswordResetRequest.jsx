@@ -19,7 +19,7 @@ class PasswordResetRequest extends Component {
         
         try {
             const res = await AuthService.requestPasswordReset(email);
-            console.log("Sending reset password request for:", email);
+            console.log(res);
             if(res){
                 this.setState({message: 'Reset link sent'})
             }

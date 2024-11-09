@@ -35,9 +35,11 @@ class PasswordReset extends Component {
         }
 
         let newPasswordAndToken = {
+            resetToken: token,
             newPassword: newPassword,
-            token: token
+            
         };
+        console.log(newPasswordAndToken);
 
         try {
            
