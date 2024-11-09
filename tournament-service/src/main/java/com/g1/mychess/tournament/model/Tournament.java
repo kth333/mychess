@@ -6,6 +6,7 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
 import java.time.LocalDateTime;
+import java.util.HashSet;
 import java.util.Set;
 
 @Entity
@@ -13,7 +14,6 @@ import java.util.Set;
 public class Tournament {
 
     @Id
-    @NotNull
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "tournament_id")
     private Long id;
@@ -116,7 +116,7 @@ public class Tournament {
     private int maxRounds;
 
     @OneToMany(mappedBy = "tournament", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<TournamentPlayer> participants;
+    private Set<TournamentPlayer> participants = new HashSet<>();
 
     public TimeControlSetting.TimeControlType getTimeControlType() {
         return timeControlSetting.getTimeControlType();
