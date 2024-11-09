@@ -1,19 +1,21 @@
+// AdminServiceImpl.java
 package com.g1.mychess.admin.service.impl;
 
+import com.g1.mychess.admin.client.EmailServiceClient;
+import com.g1.mychess.admin.client.PlayerServiceClient;
 import com.g1.mychess.admin.dto.*;
 import com.g1.mychess.admin.exception.InvalidBlacklistOperationException;
+import com.g1.mychess.admin.mapper.AdminMapper;
 import com.g1.mychess.admin.model.Admin;
 import com.g1.mychess.admin.model.Blacklist;
 import com.g1.mychess.admin.repository.AdminRepository;
 import com.g1.mychess.admin.repository.BlacklistRepository;
 import com.g1.mychess.admin.service.AdminService;
-import com.g1.mychess.admin.util.JwtUtil;
+import com.g1.mychess.admin.service.AuthenticationService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.transaction.Transactional;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
-import org.springframework.web.reactive.function.client.WebClient;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -23,20 +25,22 @@ public class AdminServiceImpl implements AdminService {
 
     private final AdminRepository adminRepository;
     private final BlacklistRepository blacklistRepository;
-    private final WebClient.Builder webClientBuilder;
-    private final JwtUtil jwtUtil;
+    private final PlayerServiceClient playerServiceClient;
+    private final EmailServiceClient emailServiceClient;
+    private final AuthenticationService authenticationService;
 
-    @Value("${email.service.url}")
-    private String emailServiceUrl;
-
-    @Value("${player.service.url}")
-    private String playerServiceUrl;
-
-    public AdminServiceImpl(AdminRepository adminRepository, BlacklistRepository blacklistRepository, WebClient.Builder webClientBuilder, JwtUtil jwtUtil) {
+    public AdminServiceImpl(
+            AdminRepository adminRepository,
+            BlacklistRepository blacklistRepository,
+            PlayerServiceClient playerServiceClient,
+            EmailServiceClient emailServiceClient,
+            AuthenticationService authenticationService
+    ) {
         this.adminRepository = adminRepository;
         this.blacklistRepository = blacklistRepository;
-        this.webClientBuilder = webClientBuilder;
-        this.jwtUtil = jwtUtil;
+        this.playerServiceClient = playerServiceClient;
+        this.emailServiceClient = emailServiceClient;
+        this.authenticationService = authenticationService;
     }
 
     @Override
@@ -44,38 +48,31 @@ public class AdminServiceImpl implements AdminService {
         Admin admin = adminRepository.findByUsername(username)
                 .orElseThrow(() -> new IllegalArgumentException("Admin not found with username: " + username));
 
-        return new UserDTO(admin.getAdminId(), admin.getUsername(), admin.getPassword(), admin.getEmail(), admin.getRole());
+        return AdminMapper.toUserDTO(admin);
     }
 
     @Override
     @Transactional
     public void blacklistPlayer(BlacklistDTO blacklistDTO, HttpServletRequest request) {
-        AdminPlayerDTO adminPlayerDTO = fetchPlayerDetails(blacklistDTO.getPlayerId());
+        AdminPlayerDTO adminPlayerDTO = playerServiceClient.fetchPlayerDetails(blacklistDTO.getPlayerId());
 
         if (adminPlayerDTO.isBlacklisted()) {
             throw new InvalidBlacklistOperationException(
                     "Player with ID " + blacklistDTO.getPlayerId() + " is already blacklisted.");
         }
 
-        blacklistDTO.setUsername(adminPlayerDTO.getUsername());
-        blacklistDTO.setEmail(adminPlayerDTO.getEmail());
+        populateBlacklistDTOWithPlayerInfo(blacklistDTO, adminPlayerDTO);
 
         Blacklist blacklist = blacklistRepository.findByPlayerId(blacklistDTO.getPlayerId())
                 .orElse(new Blacklist());
 
-        String jwtToken = request.getHeader("Authorization").substring(7);
-        Long userId = jwtUtil.extractUserId(jwtToken);
+        Long adminId = authenticationService.getUserIdFromRequest(request);
 
-        blacklist.setPlayerId(blacklistDTO.getPlayerId());
-        blacklist.setAdminId(userId);
-        blacklist.setReason(blacklistDTO.getReason());
-        blacklist.setBlacklistedAt(LocalDateTime.now());
-        blacklist.setBanDuration(blacklistDTO.getBanDuration());
-        blacklist.setActive(true);
+        updateBlacklist(blacklist, blacklistDTO, adminId);
 
         blacklistRepository.save(blacklist);
 
-        updatePlayerBlacklistStatus(blacklistDTO.getPlayerId());
+        playerServiceClient.updatePlayerBlacklistStatus(blacklistDTO.getPlayerId());
         sendBlacklistNotificationEmail(blacklistDTO);
     }
 
@@ -86,31 +83,26 @@ public class AdminServiceImpl implements AdminService {
             throw new IllegalArgumentException("Whitelist data must not be null.");
         }
 
-        AdminPlayerDTO adminPlayerDTO = fetchPlayerDetails(whitelistDTO.getPlayerId());
+        AdminPlayerDTO adminPlayerDTO = playerServiceClient.fetchPlayerDetails(whitelistDTO.getPlayerId());
 
         if (!adminPlayerDTO.isBlacklisted()) {
             throw new InvalidBlacklistOperationException(
                     "Player with ID " + whitelistDTO.getPlayerId() + " is not blacklisted.");
         }
 
-        whitelistDTO.setUsername(adminPlayerDTO.getUsername());
-        whitelistDTO.setEmail(adminPlayerDTO.getEmail());
+        populateWhitelistDTOWithPlayerInfo(whitelistDTO, adminPlayerDTO);
 
         Blacklist blacklist = blacklistRepository.findByPlayerId(whitelistDTO.getPlayerId())
                 .orElseThrow(() -> new InvalidBlacklistOperationException(
                         "Player with ID " + whitelistDTO.getPlayerId() + " is not blacklisted."));
 
-        String jwtToken = request.getHeader("Authorization").substring(7);
-        Long userId = jwtUtil.extractUserId(jwtToken);
+        Long adminId = authenticationService.getUserIdFromRequest(request);
 
-        blacklist.setWhitelistedAt(LocalDateTime.now());
-        blacklist.setAdminId(userId);
-        blacklist.setReason(whitelistDTO.getReason());
-        blacklist.setActive(false);
+        updateWhitelist(blacklist, whitelistDTO, adminId);
 
         blacklistRepository.save(blacklist);
 
-        updatePlayerWhitelistStatus(whitelistDTO.getPlayerId());
+        playerServiceClient.updatePlayerWhitelistStatus(whitelistDTO.getPlayerId());
         sendWhitelistNotificationEmail(whitelistDTO);
     }
 
@@ -135,42 +127,42 @@ public class AdminServiceImpl implements AdminService {
         blacklist.setReason("Duration expired.");
         blacklistRepository.save(blacklist);
 
-        updatePlayerWhitelistStatus(blacklist.getPlayerId());
+        playerServiceClient.updatePlayerWhitelistStatus(blacklist.getPlayerId());
 
-        AdminPlayerDTO adminPlayerDTO = fetchPlayerDetails(blacklist.getPlayerId());
-        sendWhitelistNotificationEmail(new WhitelistDTO(
+        AdminPlayerDTO adminPlayerDTO = playerServiceClient.fetchPlayerDetails(blacklist.getPlayerId());
+        WhitelistDTO whitelistDTO = new WhitelistDTO(
                 adminPlayerDTO.getId(),
                 adminPlayerDTO.getEmail(),
                 adminPlayerDTO.getUsername(),
-                blacklist.getReason())
+                blacklist.getReason()
         );
+        sendWhitelistNotificationEmail(whitelistDTO);
     }
 
-    private AdminPlayerDTO fetchPlayerDetails(Long playerId) {
-        return webClientBuilder.build()
-                .get()
-                .uri(playerServiceUrl + "/api/v1/player/" + playerId + "/admin-details")
-                .retrieve()
-                .bodyToMono(AdminPlayerDTO.class)
-                .block();
+    private void populateBlacklistDTOWithPlayerInfo(BlacklistDTO blacklistDTO, AdminPlayerDTO adminPlayerDTO) {
+        blacklistDTO.setUsername(adminPlayerDTO.getUsername());
+        blacklistDTO.setEmail(adminPlayerDTO.getEmail());
     }
 
-    private void updatePlayerBlacklistStatus(Long playerId) {
-        webClientBuilder.build()
-                .put()
-                .uri(playerServiceUrl + "/api/v1/player/update-blacklist-status?playerId=" + playerId)
-                .retrieve()
-                .toBodilessEntity()
-                .block();
+    private void populateWhitelistDTOWithPlayerInfo(WhitelistDTO whitelistDTO, AdminPlayerDTO adminPlayerDTO) {
+        whitelistDTO.setUsername(adminPlayerDTO.getUsername());
+        whitelistDTO.setEmail(adminPlayerDTO.getEmail());
     }
 
-    private void updatePlayerWhitelistStatus(Long playerId) {
-        webClientBuilder.build()
-                .put()
-                .uri(playerServiceUrl + "/api/v1/player/update-whitelist-status?playerId=" + playerId)
-                .retrieve()
-                .toBodilessEntity()
-                .block();
+    private void updateBlacklist(Blacklist blacklist, BlacklistDTO blacklistDTO, Long adminId) {
+        blacklist.setPlayerId(blacklistDTO.getPlayerId());
+        blacklist.setAdminId(adminId);
+        blacklist.setReason(blacklistDTO.getReason());
+        blacklist.setBlacklistedAt(LocalDateTime.now());
+        blacklist.setBanDuration(blacklistDTO.getBanDuration());
+        blacklist.setActive(true);
+    }
+
+    private void updateWhitelist(Blacklist blacklist, WhitelistDTO whitelistDTO, Long adminId) {
+        blacklist.setWhitelistedAt(LocalDateTime.now());
+        blacklist.setAdminId(adminId);
+        blacklist.setReason(whitelistDTO.getReason());
+        blacklist.setActive(false);
     }
 
     private void sendBlacklistNotificationEmail(BlacklistDTO blacklistDTO) {
@@ -180,13 +172,7 @@ public class AdminServiceImpl implements AdminService {
         emailDTO.setReason(blacklistDTO.getReason());
         emailDTO.setBanDuration(blacklistDTO.getBanDuration());
 
-        webClientBuilder.build()
-                .post()
-                .uri(emailServiceUrl + "/api/v1/email/send-blacklist")
-                .bodyValue(emailDTO)
-                .retrieve()
-                .toBodilessEntity()
-                .block();
+        emailServiceClient.sendBlacklistNotificationEmail(emailDTO);
     }
 
     private void sendWhitelistNotificationEmail(WhitelistDTO whitelistDTO) {
@@ -195,12 +181,6 @@ public class AdminServiceImpl implements AdminService {
         emailDTO.setUsername(whitelistDTO.getUsername());
         emailDTO.setReason(whitelistDTO.getReason());
 
-        webClientBuilder.build()
-                .post()
-                .uri(emailServiceUrl + "/api/v1/email/send-whitelist")
-                .bodyValue(emailDTO)
-                .retrieve()
-                .toBodilessEntity()
-                .block();
+        emailServiceClient.sendWhitelistNotificationEmail(emailDTO);
     }
 }

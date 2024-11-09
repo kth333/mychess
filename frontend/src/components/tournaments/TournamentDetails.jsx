@@ -157,6 +157,9 @@ class TournamentDetails extends Component {
         this.setState({ searchRound }, this.filterMatches);
     };
 
+    
+    
+
     // Filter matches based on round number
     filterMatches = () => {
         const { matches, searchRound } = this.state;
@@ -345,6 +348,8 @@ class TournamentDetails extends Component {
     }
 }
 
-export default withNavigateandLocation((props) => (
+const TournamentDetailsWithParams = (props) => (
     <TournamentDetails {...props} params={useParams()} />
-));
+);
+
+export default withNavigateandLocation(TournamentDetailsWithParams);

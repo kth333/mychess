@@ -12,17 +12,14 @@ import java.util.List;
 public class Profile {
 
     @Id
-    @NotNull
     @Column(name = "player_id")
     private Long playerId;
 
     @OneToOne
     @MapsId
-    @NotNull
     @JoinColumn(name = "player_id")
     private Player player;
 
-    @NotNull
     @Size(min = 2, max = 100, message = "Full name must be between 2 and 100 characters.")
     @Column(name = "full_name")
     private String fullName;

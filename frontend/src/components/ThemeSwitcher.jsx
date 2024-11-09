@@ -32,7 +32,7 @@ const ThemeSwitcher = () => {
         <div className="w-11 h-6 bg-gray-300 rounded-full peer peer-checked:bg-primary transition-colors duration-300"></div>
         <span className={`absolute left-1 top-0.5 w-4 h-4 bg-white rounded-full transition-transform duration-300 ${isDim ? 'translate-x-5' : 'translate-x-0'}`}></span>
       </label>
-      {/* <span className="ml-2">{isDim ? 'Dim' : 'Light'}</span> */}
+      
     </div>
   );
 };

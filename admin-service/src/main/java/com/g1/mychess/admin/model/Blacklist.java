@@ -9,7 +9,6 @@ import jakarta.validation.constraints.*;
 public class Blacklist {
 
     @Id
-    @NotNull
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 

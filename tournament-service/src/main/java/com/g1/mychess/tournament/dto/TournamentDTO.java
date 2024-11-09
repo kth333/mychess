@@ -174,7 +174,9 @@ public class TournamentDTO {
 
     public void setParticipants(Set<TournamentPlayerDTO> participants) { this.participants = participants; }
 
-    public TimeControlSetting getTimeControl() { return timeControl; }
+    public TimeControlSetting getTimeControlSetting() { return timeControl; }
+
+    public void setTimeControlSetting(TimeControlSetting timeControl) { this.timeControl = timeControl; }
 
     public void setTimeControl(TimeControlSetting timeControl) { this.timeControl = timeControl; }
 }

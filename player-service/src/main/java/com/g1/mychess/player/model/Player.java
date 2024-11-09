@@ -12,7 +12,6 @@ import java.util.List;
 public class Player {
 
     @Id
-    @NotNull
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "player_id")
     private Long playerId;
@@ -37,7 +36,6 @@ public class Player {
     @Column(name = "email", nullable = false, unique = true)
     private String email;
 
-    @NotNull
     @OneToOne(mappedBy = "player", cascade = CascadeType.ALL, orphanRemoval = true)
     private Profile profile;
 
@@ -48,10 +46,6 @@ public class Player {
     @NotNull
     @Column(name = "tournament_count")
     private Integer tournamentCount;
-
-    @NotNull
-    @Column(name = "last_active")
-    private LocalDate lastActive;
 
     @OneToMany(mappedBy = "player", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
     private List<PlayerRatingHistory> ratingHistory;
