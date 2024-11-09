@@ -10,7 +10,8 @@ class AuthService {
     }
 
     async requestPasswordReset(email){
-        return await AuthAPI.post("/auth/request-password-reset", email);
+        console.log("Sending reset password request for:", email);
+        return await AuthAPI.post(`/auth/request-password-reset/${email}`);
     }
 
     async resetPassword(newPasswordAndToken){

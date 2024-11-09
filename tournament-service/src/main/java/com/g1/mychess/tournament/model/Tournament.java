@@ -107,7 +107,7 @@ public class Tournament {
     private String address;
 
     @Column(name = "current_round")
-    @Min(1)
+    @Min(0)
     private int currentRound;
 
     @Column(name = "max_rounds", nullable = false)

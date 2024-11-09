@@ -54,10 +54,12 @@ public class AuthController {
         return authService.resendVerificationEmail(email);
     }
 
-    @PostMapping("/request-password-reset")
-    public ResponseEntity<String> requestPasswordReset(@RequestBody @Valid String email) {
+    @PostMapping("/request-password-reset/{email}")
+    public ResponseEntity<String> requestPasswordReset(@PathVariable String email) {
+        System.out.println(email);
         return authService.requestPasswordReset(email);
     }
+
 
     @PostMapping("/reset-password")
     public ResponseEntity<String> resetPassword(@RequestBody @Valid ResetPasswordRequestDTO resetPasswordRequest) {

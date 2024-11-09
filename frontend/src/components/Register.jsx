@@ -45,7 +45,7 @@ class Register extends Component {
         this.setState({
           showAlert: true,
           alertType: 'success',
-          alertMessage: 'Registration successful! Redirecting to login...',
+          alertMessage: 'Registration successful! Please check your email to verify your account.',
         });
         setTimeout(() => {
           this.setState({ showAlert: false });

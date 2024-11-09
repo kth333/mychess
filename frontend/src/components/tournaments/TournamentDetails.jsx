@@ -262,7 +262,7 @@ class TournamentDetails extends Component {
             city,
             region,
             country,
-            timeControl,
+            timeControlSetting,
         } = tournament;
 
         return (
@@ -300,7 +300,7 @@ class TournamentDetails extends Component {
                     <div className="my-4">
                         <h5 className="text-xl font-semibold text-primary">Time Control</h5>
                         <p className="text-secondary">
-                            Base Time: {timeControl.baseTimeMinutes} minutes, Increment: {timeControl.incrementSeconds} seconds, Type: {timeControl.timeControlType}
+                            Base Time: {timeControlSetting.baseTimeMinutes} minutes, Increment: {timeControlSetting.incrementSeconds} seconds, Type: {timeControlSetting.timeControlType}
                         </p>
                         <p className="text-secondary">
                             Registration from {new Date(registrationStartDate).toLocaleString()} to {new Date(registrationEndDate).toLocaleString()}
