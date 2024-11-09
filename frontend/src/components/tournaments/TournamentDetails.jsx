@@ -157,17 +157,8 @@ class TournamentDetails extends Component {
         this.setState({ searchRound }, this.filterMatches);
     };
 
-    // Filter matches based on round number
-    filterMatches = () => {
-        const { matches, searchRound } = this.state;
-        const filteredMatches = matches.filter((match) => {
-            return match.roundNumber.toString().includes(searchRound);
-        });
-        this.setState({ filteredMatches });
-    };
-
-    renderMatchesTable = () => {
-        const { matches } = this.state;
+    
+    
 
     // Filter matches based on round number
     filterMatches = () => {
@@ -357,6 +348,8 @@ class TournamentDetails extends Component {
     }
 }
 
-export default withNavigateandLocation((props) => (
+const TournamentDetailsWithParams = (props) => (
     <TournamentDetails {...props} params={useParams()} />
-));
+);
+
+export default withNavigateandLocation(TournamentDetailsWithParams);

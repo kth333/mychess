@@ -61,24 +61,6 @@ public class ProfileServiceImpl implements ProfileService {
                 .orElseThrow(() -> new PlayerNotFoundException("Player not found with id: " + playerId));
     }
 
-    @Override
-    @Transactional
-    public ResponseEntity<String> updatePlayerProfile(Long playerId, PlayerProfileUpdateDTO profileUpdateDTO) {
-        Profile profile = profileRepository.findById(playerId)
-                .orElseThrow(() -> new IllegalArgumentException("Profile not found for player ID: " + playerId));
-
-        profile.setFullName(profileUpdateDTO.getFullName());
-        profile.setBio(profileUpdateDTO.getBio());
-        profile.setAvatarUrl(profileUpdateDTO.getAvatarUrl());
-        profile.setCountry(profileUpdateDTO.getCountry());
-        profile.setRegion(profileUpdateDTO.getRegion());
-        profile.setCity(profileUpdateDTO.getCity());
-        profile.setPublic(profileUpdateDTO.isPublic());
-
-        profileRepository.save(profile);
-
-        return ResponseEntity.ok("Profile updated successfully");
-    }
 
     
 
