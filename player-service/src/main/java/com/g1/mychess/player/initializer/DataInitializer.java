@@ -57,7 +57,6 @@ public class DataInitializer implements CommandLineRunner {
             profile.setAvatarUrl(null);
             profile.setCountry("Country " + i);
             profile.setCity("City " + i);
-            profile.setRegion("Region " + i);
             profile.setBirthDate(LocalDate.of(1990 + i, 1, 1)); // Vary birth dates
             profile.setRank(CustomChessRank.INTERMEDIATE); // Assuming PLAYER rank for all initially
             profile.setGlickoRating(1500); // Vary Glicko rating between 1450 and 1550

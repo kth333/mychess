@@ -22,6 +22,7 @@ import org.springframework.web.bind.annotation.SessionAttributes;
 public class Tournament {
 
     @Id
+    @NotNull
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "tournament_id")
     private Long id;
@@ -113,7 +114,6 @@ public class Tournament {
     private String address;
 
     @Column(name = "current_round")
-    @NotNull
     @Min(0)
     private int currentRound;
 

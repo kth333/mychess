@@ -38,6 +38,33 @@ public class DataInitializer implements CommandLineRunner {
     }
 
     private void createTournaments() {
+        Tournament tournament1 = new Tournament();
+        tournament1.setId((long) 1);
+        tournament1.setAdminId(1L);
+        tournament1.setName("Kings and Queens Championship 2025");
+        tournament1.setDescription("A tournament celebrating diversity in chess");
+        tournament1.setMaxPlayers(16);
+        tournament1.setStartDateTime(LocalDateTime.of(2025, 5, 1, 10, 0));
+        tournament1.setEndDateTime(LocalDateTime.of(2025, 5, 5, 18, 0));
+        tournament1.setRegistrationStartDate(LocalDateTime.of(2025, 1, 1, 0, 0));
+        tournament1.setRegistrationEndDate(LocalDateTime.of(2025, 4, 15, 23, 59));
+        tournament1.setFormat(TournamentFormat.ROUND_ROBIN);
+        tournament1.setTimeControlSetting(new TimeControlSetting(15, 10)); 
+        tournament1.setStatus(TournamentStatus.UPCOMING);
+        tournament1.setMinRating(1200);
+        tournament1.setMaxRating(2000);
+        tournament1.setAffectsRating(true);
+        tournament1.setMinAge(16);
+        tournament1.setMaxAge(60);
+        tournament1.setRequiredGender(null);
+        tournament1.setCountry("USA");
+        tournament1.setRegion("California");
+        tournament1.setCity("San Francisco");
+        tournament1.setAddress("100 Chess Way");
+        tournament1.setCurrentRound(0);
+        tournament1.setMaxRounds(3);
+        tournament1.setParticipants(new HashSet<>());
+
         Tournament tournament2 = new Tournament();
         tournament2.setId((long) 2);
         tournament2.setAdminId(2L);
