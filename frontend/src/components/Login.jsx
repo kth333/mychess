@@ -127,7 +127,7 @@ class Login extends Component {
                 <p>
                   Forget password?
                 </p>
-                <Link to="/reset-password" className="text-blue-500">
+                <Link to="/password-reset-request" className="text-blue-500">
                   Reset
                 </Link>
               </div>

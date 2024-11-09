@@ -3,7 +3,7 @@ import withNavigateandLocation from './withNavigateandLocation';
 import { Link } from "react-router-dom";
 import AuthService from '../services/AuthService';
 
-class ResetPassword extends Component {
+class PasswordResetRequest extends Component {
     constructor(props) {
         super(props);
         this.state = {
@@ -78,4 +78,4 @@ class ResetPassword extends Component {
     }
 }
 
-export default withNavigateandLocation(ResetPassword);
+export default withNavigateandLocation(PasswordResetRequest);
