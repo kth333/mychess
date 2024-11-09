@@ -7,4 +7,6 @@ public interface EmailService {
     void sendBlacklistEmail(String to, String username, String reason, Long banDuration);
 
     void sendWhitelistEmail(String to, String username, String reason);
+
+    void sendPasswordResetEmail(String to, String username, String resetToken);
 }

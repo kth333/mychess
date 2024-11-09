@@ -15,6 +15,9 @@ public class EmailServiceImpl implements EmailService {
     @Value("${auth.service.url}")
     private String authServiceUrl;
 
+    @Value("${frontend.url}")
+    private String frontendUrl;
+
     public EmailServiceImpl(JavaMailSender mailSender) {
         this.mailSender = mailSender;
     }
@@ -37,6 +40,13 @@ public class EmailServiceImpl implements EmailService {
     public void sendWhitelistEmail(String to, String username, String reason) {
         String subject = "Whitelist Notification - MyChess";
         String content = EmailContentBuilder.buildWhitelistEmailContent(username, reason);
+        sendEmail(to, subject, content);
+    }
+
+    @Override
+    public void sendPasswordResetEmail(String to, String username, String resetToken) {
+        String subject = "Password Reset Request - MyChess";
+        String content = EmailContentBuilder.buildPasswordResetEmailContent(username, resetToken, frontendUrl);
         sendEmail(to, subject, content);
     }
 
