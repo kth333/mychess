@@ -83,7 +83,7 @@ public class TournamentServiceImplTest {
         tournamentDTO.setAffectsRating(true);
         tournamentDTO.setMinAge(18);
         tournamentDTO.setMaxAge(60);
-        tournamentDTO.setRequiredGender("ANY");
+        tournamentDTO.setRequiredGender(null);
         tournamentDTO.setCountry("USA");
         tournamentDTO.setRegion("CA");
         tournamentDTO.setCity("San Francisco");
