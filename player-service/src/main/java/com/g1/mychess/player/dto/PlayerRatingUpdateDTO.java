@@ -17,7 +17,7 @@ public class PlayerRatingUpdateDTO {
     // Getters and Setters
     public Long getPlayerId() { return playerId; }
 
-    public void setPlayedId(Long playerId) { this.playerId = playerId; }
+    public void setPlayerId(Long playerId) { this.playerId = playerId; }
 
     public double getGlickoRating() { return glickoRating; }
 
