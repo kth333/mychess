@@ -50,6 +50,13 @@ public class EmailServiceImpl implements EmailService {
         sendEmail(to, subject, content);
     }
 
+    @Override
+    public void sendContactUsEmail(String name, String email, String message) {
+        String subject = "Feedback from " + name;
+        String content = EmailContentBuilder.buildContactUsEmailContent(name, email, message);
+        sendEmail("mychessfeedback@gmail.com", subject, content);
+    }
+
     private void sendEmail(String to, String subject, String content) {
         SimpleMailMessage message = new SimpleMailMessage();
         message.setTo(to);

@@ -1,9 +1,11 @@
 package com.g1.mychess.email.controller;
 
 import com.g1.mychess.email.dto.BlacklistEmailDTO;
+import com.g1.mychess.email.dto.ContactFormDTO;
 import com.g1.mychess.email.dto.WhitelistEmailDTO;
 import com.g1.mychess.email.service.EmailService;
 import com.g1.mychess.email.dto.EmailRequestDTO;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -19,7 +21,7 @@ public class EmailController {
     }
 
     @PostMapping("/verification")
-    public ResponseEntity<String> sendVerificationEmail(@RequestBody EmailRequestDTO emailRequestDTO) {
+    public ResponseEntity<String> sendVerificationEmail(@RequestBody @Valid EmailRequestDTO emailRequestDTO) {
         try {
             emailService.sendVerificationEmail(emailRequestDTO.getTo(), emailRequestDTO.getUsername(), emailRequestDTO.getUserToken());
             return ResponseEntity.ok("Verification email sent successfully.");
@@ -30,7 +32,7 @@ public class EmailController {
     }
 
     @PostMapping("/blacklists")
-    public ResponseEntity<String> sendBlacklistEmail(@RequestBody BlacklistEmailDTO blacklistEmailDTO) {
+    public ResponseEntity<String> sendBlacklistEmail(@RequestBody @Valid BlacklistEmailDTO blacklistEmailDTO) {
         try {
             emailService.sendBlacklistEmail(
                     blacklistEmailDTO.getTo(),
@@ -46,7 +48,7 @@ public class EmailController {
     }
 
     @PostMapping("/whitelists")
-    public ResponseEntity<String> sendWhitelistEmail(@RequestBody WhitelistEmailDTO whitelistEmailDTO) {
+    public ResponseEntity<String> sendWhitelistEmail(@RequestBody @Valid WhitelistEmailDTO whitelistEmailDTO) {
         try {
             emailService.sendWhitelistEmail(
                     whitelistEmailDTO.getTo(),
@@ -61,7 +63,7 @@ public class EmailController {
     }
 
     @PostMapping("/password-resets")
-    public ResponseEntity<String> sendPasswordResetEmail(@RequestBody EmailRequestDTO emailRequestDTO) {
+    public ResponseEntity<String> sendPasswordResetEmail(@RequestBody @Valid EmailRequestDTO emailRequestDTO) {
         try {
             emailService.sendPasswordResetEmail(
                     emailRequestDTO.getTo(),
@@ -72,6 +74,21 @@ public class EmailController {
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body("Failed to send password reset email.");
+        }
+    }
+
+    @PostMapping("/feedback")
+    public ResponseEntity<String> sendContactUsEmail(@RequestBody @Valid ContactFormDTO contactFormDTO) {
+        try {
+            emailService.sendContactUsEmail(
+                    contactFormDTO.getName(),
+                    contactFormDTO.getEmail(),
+                    contactFormDTO.getMessage()
+            );
+            return ResponseEntity.ok("Feedback email sent successfully.");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Failed to send feedback email.");
         }
     }
 

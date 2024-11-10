@@ -9,4 +9,6 @@ public interface EmailService {
     void sendWhitelistEmail(String to, String username, String reason);
 
     void sendPasswordResetEmail(String to, String username, String resetToken);
+
+    void sendContactUsEmail(String name, String email, String message);
 }

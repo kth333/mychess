@@ -25,6 +25,12 @@ public class EmailContentBuilder {
                 + "Thank you,\nMyChess Team";
     }
 
+    public static String buildContactUsEmailContent(String name, String email, String message) {
+        return "Feedback from: " + name + ",\n\n"
+                + "Email Address: " + email + ",\n\n"
+                + "Message: " + message;
+    }
+
     public static String buildPasswordResetEmailContent(String username, String resetToken, String baseUrl) {
         String resetUrl = baseUrl + "/password-reset/" + resetToken;
         return "Dear " + username + ",\n\n"
