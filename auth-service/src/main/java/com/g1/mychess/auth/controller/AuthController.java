@@ -94,7 +94,7 @@ public class AuthController {
      * @param email the email address to send the password reset link to
      * @return ResponseEntity with a message indicating the result of the reset request
      */
-    @PostMapping("/password-reset-requests/{email}")
+    @PostMapping("/password-recovery/{email}")
     public ResponseEntity<String> requestPasswordReset(@PathVariable String email) {
         return authService.requestPasswordReset(email);
     }
