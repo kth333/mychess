@@ -3,11 +3,15 @@ package com.g1.mychess.player.controller;
 import com.g1.mychess.player.dto.PlayerProfileDTO;
 import com.g1.mychess.player.dto.PlayerProfileUpdateDTO;
 import com.g1.mychess.player.dto.PlayerRatingUpdateDTO;
+import com.g1.mychess.player.dto.PlayerRatingHistoryDTO;
 import com.g1.mychess.player.service.PlayerRatingHistoryService;
 import com.g1.mychess.player.service.ProfileService;
 import com.g1.mychess.player.util.JwtUtil;
 
 import jakarta.validation.Valid;
+
+import java.util.List;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -47,6 +51,11 @@ public class ProfileController {
     @PutMapping("/{playerId}")
     public ResponseEntity<String> updatePlayerProfile(@Valid @PathVariable Long playerId, @RequestBody PlayerProfileUpdateDTO profileUpdateDTO) {
         return profileService.updatePlayerProfile(playerId, profileUpdateDTO);
+    }
+
+    @GetMapping("/rating-history/{playerId}")
+    public ResponseEntity<List<PlayerRatingHistoryDTO>> getPlayerRatingHistory(@Valid @PathVariable Long playerId) {
+        return playerRatingHistoryService.getPlayerRatingHistory(playerId);
     }
 
 }

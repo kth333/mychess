@@ -28,10 +28,21 @@ public class SecurityConfig {
 
     private final JwtRequestFilter jwtRequestFilter;
 
+    /**
+     * Constructor to initialize the JwtRequestFilter.
+     *
+     * @param jwtRequestFilter the JWT request filter to be used in the security filter chain
+     */
     public SecurityConfig(JwtRequestFilter jwtRequestFilter) {
         this.jwtRequestFilter = jwtRequestFilter;
     }
 
+    /**
+     * Configures CORS (Cross-Origin Resource Sharing) settings for the application.
+     * Allows specific origins, methods, headers, and credentials for cross-origin requests.
+     *
+     * @return the CorsConfigurationSource for the application
+     */
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
@@ -46,6 +57,14 @@ public class SecurityConfig {
         return source;
     }
 
+    /**
+     * Configures the security filter chain for the application, including disabling CSRF,
+     * setting session management to stateless, configuring CORS, and adding JWT authentication filter.
+     *
+     * @param http the HttpSecurity object used to configure the security settings
+     * @return the configured SecurityFilterChain
+     * @throws Exception if the configuration fails
+     */
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http.csrf(csrf -> csrf.disable())  // Disable CSRF for stateless API
@@ -60,11 +79,24 @@ public class SecurityConfig {
         return http.build();
     }
 
+    /**
+     * Provides the AuthenticationManager bean to manage authentication for the application.
+     *
+     * @param authenticationConfiguration the AuthenticationConfiguration used to get the AuthenticationManager
+     * @return the AuthenticationManager instance
+     * @throws Exception if there is an issue creating the AuthenticationManager
+     */
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration) throws Exception {
         return authenticationConfiguration.getAuthenticationManager();
     }
 
+    /**
+     * Provides the PasswordEncoder bean to encode and validate passwords.
+     * Uses BCrypt for password encoding.
+     *
+     * @return the PasswordEncoder instance
+     */
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();  // Password encoder

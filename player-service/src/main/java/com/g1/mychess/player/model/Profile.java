@@ -68,7 +68,6 @@ public class Profile {
 
     @Column(name = "volatility", nullable = false)
     @Min(value = 0, message = "Volatility must be non-negative.")
-    @Max(value = 1, message = "Volatility must not exceed 1.")
     private double volatility = 0.06;
 
     @Column(name = "total_wins")
@@ -255,5 +254,33 @@ public class Profile {
 
     public int getAge() {
         return LocalDate.now().getYear() - birthDate.getYear();
+    }
+
+    @Override
+    public String toString() {
+        return "Profile{" +
+                "playerId=" + playerId +
+                ", player=" + (player != null ? player.getPlayerId() : "null") +
+                ", fullName='" + fullName + '\'' +
+                ", bio='" + bio + '\'' +
+                ", avatarUrl='" + avatarUrl + '\'' +
+                ", gender='" + gender + '\'' +
+                ", country='" + country + '\'' +
+                ", region='" + region + '\'' +
+                ", city='" + city + '\'' +
+                ", birthDate=" + birthDate +
+                ", age=" + getAge() +
+                ", rank=" + rank +
+                ", glickoRating=" + glickoRating +
+                ", ratingDeviation=" + ratingDeviation +
+                ", volatility=" + volatility +
+                ", totalWins=" + totalWins +
+                ", totalLosses=" + totalLosses +
+                ", totalDraws=" + totalDraws +
+                ", lastActive=" + lastActive +
+                ", matchHistory=" + matchHistory +
+                ", tournamentHistory=" + tournamentHistory +
+                ", isPublic=" + isPublic +
+                '}';
     }
 }
