@@ -35,7 +35,7 @@ public class PlayerServiceClient {
      */
     public ResponseEntity<PlayerCreationResponseDTO> createPlayer(RegisterRequestDTO playerDTO) {
         return webClient.post()
-                .uri("/api/v1/player/create")
+                .uri("/api/v1/player/")
                 .bodyValue(playerDTO)
                 .retrieve()
                 .toEntity(PlayerCreationResponseDTO.class)
@@ -95,7 +95,7 @@ public class PlayerServiceClient {
         UpdatePasswordRequestDTO updatePasswordRequest = new UpdatePasswordRequestDTO(playerId, hashedPassword);
         try {
             webClient.put()
-                    .uri("/api/v1/player/update-password")
+                    .uri("/api/v1/player/password")
                     .bodyValue(updatePasswordRequest)
                     .retrieve()
                     .bodyToMono(Void.class)

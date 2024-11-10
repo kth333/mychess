@@ -16,7 +16,7 @@ public class MatchServiceClient {
 
     public void runMatchmaking(MatchmakingDTO matchmakingDTO, String jwtToken) {
         webClient.post()
-                .uri("/api/v1/matches/admin/matchmaking/{tournamentId}", matchmakingDTO.getTournamentId())
+                .uri("/api/v1/matches/admin/{tournamentId}/matchmaking", matchmakingDTO.getTournamentId())
                 .header(HttpHeaders.AUTHORIZATION, "Bearer " + jwtToken)
                 .bodyValue(matchmakingDTO)
                 .retrieve()
@@ -26,7 +26,7 @@ public class MatchServiceClient {
 
     public void prepareNextRound(MatchmakingDTO matchmakingDTO, String jwtToken) {
         webClient.post()
-                .uri("/api/v1/matches/admin/prepare-next-round/{tournamentId}", matchmakingDTO.getTournamentId())
+                .uri("/api/v1/matches/admin/{tournamentId}/next-round", matchmakingDTO.getTournamentId())
                 .header(HttpHeaders.AUTHORIZATION, "Bearer " + jwtToken)
                 .bodyValue(matchmakingDTO)
                 .retrieve()
@@ -36,7 +36,7 @@ public class MatchServiceClient {
 
     public void finalizeTournament(MatchmakingDTO matchmakingDTO, String jwtToken) {
         webClient.post()
-                .uri("/api/v1/matches/admin/finalize/{tournamentId}", matchmakingDTO.getTournamentId())
+                .uri("/api/v1/matches/admin/{tournamentId}/status/completed", matchmakingDTO.getTournamentId())
                 .header(HttpHeaders.AUTHORIZATION, "Bearer " + jwtToken)
                 .bodyValue(matchmakingDTO)
                 .retrieve()

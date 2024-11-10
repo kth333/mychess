@@ -38,13 +38,13 @@ public class AuthController {
         this.jwtUtil = jwtUtil;
     }
 
+    @PostMapping("/registration")
     /**
      * Registers a new user.
      *
      * @param registerRequestDTO the registration details
      * @return ResponseEntity containing a success message or error details
      */
-    @PostMapping("/register")
     public ResponseEntity<String> register(@RequestBody @Valid RegisterRequestDTO registerRequestDTO) {
         return authService.registerUser(registerRequestDTO);
     }
@@ -55,7 +55,7 @@ public class AuthController {
      * @param token the token for verifying the email
      * @return ResponseEntity with a success message upon successful verification
      */
-    @GetMapping("/verify-email")
+    @GetMapping("/verification")
     public ResponseEntity<String> verifyEmail(@RequestParam("token") @Valid String token) {
         authService.verifyEmail(token);
         return ResponseEntity.ok("Email successfully verified!");
@@ -67,7 +67,7 @@ public class AuthController {
      * @param loginRequestDTO the login request containing username, password, and role
      * @return ResponseEntity with a JWT token or an error message if login fails
      */
-    @PostMapping("/login")
+    @PostMapping("/session/new")
     public ResponseEntity<?> login(@RequestBody @Valid LoginRequestDTO loginRequestDTO) {
         String token = authService.login(loginRequestDTO.getUsername(), loginRequestDTO.getPassword(), loginRequestDTO.getRole());
 
@@ -83,7 +83,7 @@ public class AuthController {
      * @param email the email address to resend the verification email to
      * @return ResponseEntity with a success or error message
      */
-    @PostMapping("/resend-verification-email")
+    @PostMapping("/verification-requests")
     public ResponseEntity<String> resendVerificationEmail(@RequestBody @Valid String email) {
         return authService.resendVerificationEmail(email);
     }
@@ -94,7 +94,7 @@ public class AuthController {
      * @param email the email address to send the password reset link to
      * @return ResponseEntity with a message indicating the result of the reset request
      */
-    @PostMapping("/request-password-reset/{email}")
+    @PostMapping("/password-reset-requests/{email}")
     public ResponseEntity<String> requestPasswordReset(@PathVariable String email) {
         return authService.requestPasswordReset(email);
     }
@@ -105,7 +105,7 @@ public class AuthController {
      * @param resetPasswordRequest DTO containing the reset token and new password
      * @return ResponseEntity with a success message upon successful password reset
      */
-    @PostMapping("/reset-password")
+    @PostMapping("/password-recovery")
     public ResponseEntity<String> resetPassword(@RequestBody @Valid ResetPasswordRequestDTO resetPasswordRequest) {
         return authService.resetPassword(resetPasswordRequest.getResetToken(), resetPasswordRequest.getNewPassword());
     }

@@ -25,13 +25,13 @@ public class AdminController {
         return ResponseEntity.ok(userDTO);
     }
 
-    @PostMapping("/blacklist")
+    @PostMapping("/blacklists")
     public ResponseEntity<String> blacklistPlayer(@RequestBody @Valid BlacklistDTO blacklistDTO, HttpServletRequest request) {
         adminService.blacklistPlayer(blacklistDTO, request);
         return ResponseEntity.ok("Player blacklisted for " + blacklistDTO.getBanDuration() + " hours.");
     }
 
-    @PostMapping("/whitelist")
+    @PostMapping("/whitelists")
     public ResponseEntity<String> whitelistPlayer(@RequestBody @Valid WhitelistDTO whitelistDTO, HttpServletRequest request) {
         adminService.whitelistPlayer(whitelistDTO, request);
         return ResponseEntity.ok("Player whitelisted successfully.");

@@ -23,7 +23,7 @@ public class PlayerServiceClient {
 
     public void updatePlayerBlacklistStatus(Long playerId) {
         webClient.put()
-                .uri("/api/v1/player/update-blacklist-status?playerId={playerId}", playerId)
+                .uri("/api/v1/player/blacklist-status/{playerId}", playerId)
                 .retrieve()
                 .toBodilessEntity()
                 .block();
@@ -31,9 +31,10 @@ public class PlayerServiceClient {
 
     public void updatePlayerWhitelistStatus(Long playerId) {
         webClient.put()
-                .uri("/api/v1/player/update-whitelist-status?playerId={playerId}", playerId)
+                .uri("/api/v1/player/whitelist-status/{playerId}", playerId)
                 .retrieve()
                 .toBodilessEntity()
                 .block();
     }
+
 }

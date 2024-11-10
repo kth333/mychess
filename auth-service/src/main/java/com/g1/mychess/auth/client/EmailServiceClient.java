@@ -32,7 +32,7 @@ public class EmailServiceClient {
     public void sendVerificationEmail(EmailRequestDTO emailRequestDTO) {
         try {
             webClient.post()
-                    .uri("/api/v1/email/send-verification")
+                    .uri("/api/v1/email/verification")
                     .bodyValue(emailRequestDTO)
                     .retrieve()
                     .bodyToMono(String.class)
@@ -51,7 +51,7 @@ public class EmailServiceClient {
     public void sendPasswordResetEmail(EmailRequestDTO emailRequestDTO) {
         try {
             webClient.post()
-                    .uri("/api/v1/email/send-password-reset")
+                    .uri("/api/v1/email/password-resets")
                     .bodyValue(emailRequestDTO)
                     .retrieve()
                     .bodyToMono(String.class)
