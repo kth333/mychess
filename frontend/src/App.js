@@ -16,6 +16,7 @@ import Blacklist from './components/Blacklist';
 import Whitelist from './components/Whitelist';
 import PasswordResetRequest from "./components/PasswordResetRequest";
 import PasswordReset from './components/PasswordReset';
+import ContactUs from './components/ContactUs';
 
 function App() {
   return (
@@ -30,6 +31,7 @@ function App() {
               <Route exact path="/tournaments/:name" element={<TournamentDetails />} />
               <Route exact path="/password-reset-request" element={<PasswordResetRequest/>} />
               <Route exact path="/password-reset/:token" element={<PasswordReset/>} />
+              <Route exact path="/contact-us" element={<ContactUs />} />
               
               <Route element={<ProtectedRoute />}>
                 <Route exact path="/create-tournament" element={<CreateTournament />} />
