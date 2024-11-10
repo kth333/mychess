@@ -94,7 +94,7 @@ public class TournamentServiceImplTest {
         // Assert
         assertEquals(HttpStatus.CREATED, response.getStatusCode());
         TournamentDTO responseBody = response.getBody();
-        assertNotNull(responseBody);
+
         assertEquals("Test Tournament", responseBody.getName());
 
         Tournament savedTournament = tournamentCaptor.getValue();
@@ -209,10 +209,10 @@ public class TournamentServiceImplTest {
         // MockedStatic was generated using ChatGPT 4.0
         MockedStatic<TournamentMapper> mockedMapper = mockStatic(TournamentMapper.class);
         mockedMapper.when(() -> TournamentMapper.toDTO(tournament)).thenReturn(tournamentDTO);
-
         ResponseEntity<TournamentDTO> result = tournamentService.findTournamentByName(tournamentName);
 
         assertEquals(HttpStatus.OK, result.getStatusCode());
+        mockedMapper.close();
     }
 
     @Test
@@ -337,6 +337,6 @@ public class TournamentServiceImplTest {
     assertEquals("Only the tournament admin can update the tournament.", exception.getMessage());
     }
 
-   
+
 
 }
