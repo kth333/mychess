@@ -10,6 +10,10 @@ class PlayerService {
         return ProtectedPlayerAPI.put(`/profile/${playerId}`, profile);
     }
 
+    async getPlayerRatingHistory(playerId) {
+        return ProtectedPlayerAPI.get(`/profile/rating-history/${playerId}`);
+    }
+
 
 }
 

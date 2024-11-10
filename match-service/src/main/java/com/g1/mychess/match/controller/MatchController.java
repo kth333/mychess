@@ -29,7 +29,7 @@ public class MatchController {
         return ResponseEntity.status(HttpStatus.OK).body("Matchmaking for tournament " + tournamentId + " started successfully.");
     }
 
-    @PostMapping("/admin/{matchId}/status/completed")
+    @PostMapping("/admin/{matchId}/status/completed/match")
     public ResponseEntity<String> completeMatch(@PathVariable Long matchId,@Valid @RequestBody MatchResultDTO matchResultDTO) {
         return matchService.completeMatch(matchId, matchResultDTO.getWinnerId(), matchResultDTO.getLoserId(), matchResultDTO.isDraw());
     }

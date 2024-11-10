@@ -12,7 +12,7 @@ class MatchService {
     }
 
     async completeMatch(matchId, match) {
-        return await ProtectedMatchAPI.post(`/matches/admin/${matchId}/status/completed`, match);
+        return await ProtectedMatchAPI.post(`/matches/admin/${matchId}/status/completed/match`, match);
     }
 
 
