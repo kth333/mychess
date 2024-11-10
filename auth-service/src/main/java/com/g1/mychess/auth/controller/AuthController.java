@@ -28,18 +28,18 @@ public class AuthController {
         this.jwtUtil = jwtUtil;
     }
 
-    @PostMapping("/register")
+    @PostMapping("/registration")
     public ResponseEntity<String> register(@RequestBody @Valid RegisterRequestDTO registerRequestDTO) {
         return authService.registerUser(registerRequestDTO);
     }
 
-    @GetMapping("/verify-email")
+    @GetMapping("/verification")
     public ResponseEntity<String> verifyEmail(@RequestParam("token") @Valid String token) {
         authService.verifyEmail(token);
         return ResponseEntity.ok("Email successfully verified!");
     }
 
-    @PostMapping("/login")
+    @PostMapping("/logins")
     public ResponseEntity<?> login(@RequestBody @Valid LoginRequestDTO loginRequestDTO) {
         String token = authService.login(loginRequestDTO.getUsername(), loginRequestDTO.getPassword(), loginRequestDTO.getRole());
 
@@ -49,19 +49,19 @@ public class AuthController {
         return ResponseEntity.ok(response);
     }
 
-    @PostMapping("/resend-verification-email")
+    @PostMapping("/verification-requests")
     public ResponseEntity<String> resendVerificationEmail(@RequestBody @Valid String email) {
         return authService.resendVerificationEmail(email);
     }
 
-    @PostMapping("/request-password-reset/{email}")
+    @PostMapping("/password-reset-requests/{email}")
     public ResponseEntity<String> requestPasswordReset(@PathVariable String email) {
         System.out.println(email);
         return authService.requestPasswordReset(email);
     }
 
 
-    @PostMapping("/reset-password")
+    @PostMapping("/password-resets")
     public ResponseEntity<String> resetPassword(@RequestBody @Valid ResetPasswordRequestDTO resetPasswordRequest) {
         return authService.resetPassword(resetPasswordRequest.getResetToken(), resetPasswordRequest.getNewPassword());
     }

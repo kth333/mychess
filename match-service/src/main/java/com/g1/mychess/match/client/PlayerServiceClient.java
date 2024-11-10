@@ -15,7 +15,7 @@ public class PlayerServiceClient {
 
     public void updatePlayerProfileRating(PlayerRatingUpdateDTO ratingUpdate) {
         webClient.post()
-                .uri("/api/v1/profile/update-rating")
+                .uri("/api/v1/profile/rating")
                 .bodyValue(ratingUpdate)
                 .retrieve()
                 .bodyToMono(Void.class)

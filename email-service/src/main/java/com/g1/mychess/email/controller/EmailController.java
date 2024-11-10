@@ -18,7 +18,7 @@ public class EmailController {
         this.emailService = emailService;
     }
 
-    @PostMapping("/send-verification")
+    @PostMapping("/verification")
     public ResponseEntity<String> sendVerificationEmail(@RequestBody EmailRequestDTO emailRequestDTO) {
         try {
             emailService.sendVerificationEmail(emailRequestDTO.getTo(), emailRequestDTO.getUsername(), emailRequestDTO.getUserToken());
@@ -29,7 +29,7 @@ public class EmailController {
         }
     }
 
-    @PostMapping("/send-blacklist")
+    @PostMapping("/blacklists")
     public ResponseEntity<String> sendBlacklistEmail(@RequestBody BlacklistEmailDTO blacklistEmailDTO) {
         try {
             emailService.sendBlacklistEmail(
@@ -45,8 +45,7 @@ public class EmailController {
         }
     }
 
-    // Method to send whitelist email
-    @PostMapping("/send-whitelist")
+    @PostMapping("/whitelists")
     public ResponseEntity<String> sendWhitelistEmail(@RequestBody WhitelistEmailDTO whitelistEmailDTO) {
         try {
             emailService.sendWhitelistEmail(
@@ -61,7 +60,7 @@ public class EmailController {
         }
     }
 
-    @PostMapping("/send-password-reset")
+    @PostMapping("/password-resets")
     public ResponseEntity<String> sendPasswordResetEmail(@RequestBody EmailRequestDTO emailRequestDTO) {
         try {
             emailService.sendPasswordResetEmail(

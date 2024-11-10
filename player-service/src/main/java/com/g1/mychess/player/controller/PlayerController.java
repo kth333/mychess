@@ -5,6 +5,7 @@ import com.g1.mychess.player.service.PlayerService;
 import com.g1.mychess.player.util.JwtUtil;
 
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Positive;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -22,20 +23,20 @@ public class PlayerController {
         this.jwtUtil = jwtUtil;
     }
 
-    @PostMapping("/create")
+    @PostMapping("/")
     public ResponseEntity<PlayerCreationResponseDTO> createPlayer(@Valid @RequestBody RegisterRequestDTO registerRequestDTO) {
         return playerService.createPlayer(registerRequestDTO);
     }
 
-    @PutMapping("/update-blacklist-status")
-    public ResponseEntity<String> updateBlacklistStatus(@Valid @RequestParam Long playerId) {
-        playerService.blacklistPlayer(playerId);  // Use the playerId directly
+    @PutMapping("/blacklist-status/{playerId}")
+    public ResponseEntity<String> updateBlacklistStatus(@PathVariable @Positive Long playerId) {
+        playerService.blacklistPlayer(playerId);
         return ResponseEntity.ok("Player has been blacklisted successfully.");
     }
 
-    @PutMapping("/update-whitelist-status")
-    public ResponseEntity<String> updateWhitelistStatus(@Valid @RequestParam Long playerId) {
-        playerService.whitelistPlayer(playerId);  // Use the playerId directly
+    @PutMapping("/whitelist-status/{playerId}")
+    public ResponseEntity<String> updateWhitelistStatus(@PathVariable @Positive Long playerId) {
+        playerService.whitelistPlayer(playerId);
         return ResponseEntity.ok("Player has been whitelisted successfully.");
     }
 
@@ -57,7 +58,7 @@ public class PlayerController {
         return ResponseEntity.ok(userDTO);
     }
 
-    @PutMapping("/update-password")
+    @PutMapping("/password")
     public ResponseEntity<String> updatePassword(@Valid @RequestBody UpdatePasswordRequestDTO updatePasswordRequest) {
         playerService.updatePlayerPassword(updatePasswordRequest.getPlayerId(), updatePasswordRequest.getNewPassword());
         return ResponseEntity.ok("Password updated successfully.");

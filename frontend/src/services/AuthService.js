@@ -2,20 +2,20 @@ import { AuthAPI } from "./AuthAPI";
 
 class AuthService {
     async loginUser(credentials) {
-      return await AuthAPI.post("/auth/login", credentials);
+      return await AuthAPI.post("/auth/logins", credentials);
     }
 
     async registerUser(userData){
-      return await AuthAPI.post("/auth/register", userData);
+      return await AuthAPI.post("/auth/registration", userData);
     }
 
     async requestPasswordReset(email){
         console.log("Sending reset password request for:", email);
-        return await AuthAPI.post(`/auth/request-password-reset/${email}`);
+        return await AuthAPI.post(`/auth/password-reset-requests/${email}`);
     }
 
     async resetPassword(newPasswordAndToken){
-        return await AuthAPI.post("/auth/reset-password", newPasswordAndToken);
+        return await AuthAPI.post("/auth/password-resets", newPasswordAndToken);
     }
 
 }

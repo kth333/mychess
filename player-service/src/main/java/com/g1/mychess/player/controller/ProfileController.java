@@ -28,8 +28,6 @@ public class ProfileController {
     }
 
     @GetMapping("/")
-    @PreAuthorize("hasRole('PLAYER')")
-    @CrossOrigin(origins = "http://localhost:3000")
     public ResponseEntity<PlayerProfileDTO> getPlayerProfile(@Valid @RequestHeader(value = "Authorization", required = true) String authorizationHeader) {
         String token = null;
         if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
@@ -40,13 +38,13 @@ public class ProfileController {
         return ResponseEntity.ok(profileService.getPlayerProfile(userId));
     }
 
-    @PostMapping("/update-rating")
+    @PostMapping("/rating")
     public ResponseEntity<Void> updateProfileRating(@Valid @RequestBody PlayerRatingUpdateDTO ratingUpdateDTO) {
         profileService.updateProfileRating(ratingUpdateDTO);
         return ResponseEntity.status(HttpStatus.OK).build();
     }
 
-    @PutMapping("/update/{playerId}")
+    @PutMapping("/{playerId}")
     public ResponseEntity<String> updatePlayerProfile(@Valid @PathVariable Long playerId, @RequestBody PlayerProfileUpdateDTO profileUpdateDTO) {
         return profileService.updatePlayerProfile(playerId, profileUpdateDTO);
     }
