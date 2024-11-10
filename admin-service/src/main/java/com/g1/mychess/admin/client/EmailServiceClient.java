@@ -16,7 +16,7 @@ public class EmailServiceClient {
 
     public void sendBlacklistNotificationEmail(BlacklistEmailDTO emailDTO) {
         webClient.post()
-                .uri("/api/v1/email/send-blacklist")
+                .uri("/api/v1/email/blacklists")
                 .bodyValue(emailDTO)
                 .retrieve()
                 .toBodilessEntity()
@@ -25,7 +25,7 @@ public class EmailServiceClient {
 
     public void sendWhitelistNotificationEmail(WhitelistEmailDTO emailDTO) {
         webClient.post()
-                .uri("/api/v1/email/send-whitelist")
+                .uri("/api/v1/email/whitelists")
                 .bodyValue(emailDTO)
                 .retrieve()
                 .toBodilessEntity()

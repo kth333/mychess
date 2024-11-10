@@ -17,6 +17,10 @@ import com.g1.mychess.tournament.service.TournamentService;
 import com.g1.mychess.tournament.validation.PlayerEligibilityChecker;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.transaction.Transactional;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -105,13 +109,15 @@ public class TournamentServiceImpl implements TournamentService {
     }
 
     @Override
-    public ResponseEntity<List<TournamentDTO>> getAllTournaments() {
-        List<Tournament> tournaments = tournamentRepository.findAll();
-        List<TournamentDTO> tournamentDTOs = tournaments.stream()
-                .map(TournamentMapper::toDTO)
-                .collect(Collectors.toList());
+    public ResponseEntity<Page<TournamentDTO>> getAllTournaments(Pageable pageable) {
+        Page<Tournament> tournaments = tournamentRepository.findAll(pageable);
+        Page<TournamentDTO> tournamentDTOs = tournaments.map(this::convertToDTO);
 
         return ResponseEntity.status(HttpStatus.OK).body(tournamentDTOs);
+    }
+
+    private TournamentDTO convertToDTO(Tournament tournament) {
+        return TournamentMapper.toDTO(tournament);
     }
 
     @Override
@@ -311,4 +317,6 @@ public class TournamentServiceImpl implements TournamentService {
         tournament.setStatus(Tournament.TournamentStatus.COMPLETED);
         tournamentRepository.save(tournament);
     }
+
+   
 }

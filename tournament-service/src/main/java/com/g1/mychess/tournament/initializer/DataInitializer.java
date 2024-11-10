@@ -38,35 +38,10 @@ public class DataInitializer implements CommandLineRunner {
     }
 
     private void createTournaments() {
-        Tournament tournament1 = new Tournament();
-        tournament1.setId((long) 1);
-        tournament1.setAdminId(1L);
-        tournament1.setName("Kings and Queens Championship 2025");
-        tournament1.setDescription("A tournament celebrating diversity in chess");
-        tournament1.setMaxPlayers(16);
-        tournament1.setStartDateTime(LocalDateTime.of(2025, 5, 1, 10, 0));
-        tournament1.setEndDateTime(LocalDateTime.of(2025, 5, 5, 18, 0));
-        tournament1.setRegistrationStartDate(LocalDateTime.of(2025, 1, 1, 0, 0));
-        tournament1.setRegistrationEndDate(LocalDateTime.of(2025, 4, 15, 23, 59));
-        tournament1.setFormat(TournamentFormat.ROUND_ROBIN);
-        tournament1.setTimeControlSetting(new TimeControlSetting(15, 10)); 
-        tournament1.setStatus(TournamentStatus.UPCOMING);
-        tournament1.setMinRating(1200);
-        tournament1.setMaxRating(2000);
-        tournament1.setAffectsRating(true);
-        tournament1.setMinAge(16);
-        tournament1.setMaxAge(60);
-        tournament1.setRequiredGender(null);
-        tournament1.setCountry("USA");
-        tournament1.setRegion("California");
-        tournament1.setCity("San Francisco");
-        tournament1.setAddress("100 Chess Way");
-        tournament1.setCurrentRound(0);
-        tournament1.setMaxRounds(3);
-        tournament1.setParticipants(new HashSet<>());
-
+        
+    
+        // Save the other 3 tournaments
         Tournament tournament2 = new Tournament();
-        tournament2.setId((long) 2);
         tournament2.setAdminId(2L);
         tournament2.setName("Women Grand Prix 2025");
         tournament2.setDescription("An exclusive tournament for female chess players");
@@ -91,9 +66,8 @@ public class DataInitializer implements CommandLineRunner {
         tournament2.setCurrentRound(0);
         tournament2.setMaxRounds(7);
         tournament2.setParticipants(new HashSet<>());
-
+    
         Tournament tournament3 = new Tournament();
-        tournament3.setId((long) 3);
         tournament3.setAdminId(3L);
         tournament3.setName("Mixed Doubles Chess Open 2025");
         tournament3.setDescription("A unique tournament featuring mixed-gender teams");
@@ -118,9 +92,8 @@ public class DataInitializer implements CommandLineRunner {
         tournament3.setCurrentRound(0);
         tournament3.setMaxRounds(6);
         tournament3.setParticipants(new HashSet<>());
-
+    
         Tournament tournament4 = new Tournament();
-        tournament4.setId((long) 4);
         tournament4.setAdminId(1L);
         tournament4.setName("Youth Chess Challenge 2025");
         tournament4.setDescription("A tournament for young aspiring chess players");
@@ -145,17 +118,53 @@ public class DataInitializer implements CommandLineRunner {
         tournament4.setCurrentRound(0);
         tournament4.setMaxRounds(5);
         tournament4.setParticipants(new HashSet<>());
-
-        // Save the tournaments to the repository
-        tournamentRepository.save(tournament1);
+    
+        // Save the other tournaments to the repository
         tournamentRepository.save(tournament2);
         tournamentRepository.save(tournament3);
         tournamentRepository.save(tournament4);
 
-        signUpPlayersForTournament(tournament1);
-        System.out.println("Players signed up for tournament 1 successfully!");
-
+        // Create 100 versions of Tournament 1 with incremented years
+        for (int i = 0; i < 100; i++) {
+            int yearOffset = i;
+            
+            // Create a new instance of Tournament 1 with the year incremented
+            Tournament tournament1 = new Tournament();
+            tournament1.setAdminId(1L);
+            tournament1.setName("Kings and Queens Championship " + (2025 + yearOffset));
+            tournament1.setDescription("A tournament celebrating diversity in chess");
+            tournament1.setMaxPlayers(16);
+            tournament1.setStartDateTime(LocalDateTime.of(2025 + yearOffset, 5, 1, 10, 0));
+            tournament1.setEndDateTime(LocalDateTime.of(2025 + yearOffset, 5, 5, 18, 0));
+            tournament1.setRegistrationStartDate(LocalDateTime.of(2025 + yearOffset, 1, 1, 0, 0));
+            tournament1.setRegistrationEndDate(LocalDateTime.of(2025 + yearOffset, 4, 15, 23, 59));
+            tournament1.setFormat(TournamentFormat.ROUND_ROBIN);
+            tournament1.setTimeControlSetting(new TimeControlSetting(15, 10)); 
+            tournament1.setStatus(TournamentStatus.UPCOMING);
+            tournament1.setMinRating(1200);
+            tournament1.setMaxRating(2000);
+            tournament1.setAffectsRating(true);
+            tournament1.setMinAge(16);
+            tournament1.setMaxAge(60);
+            tournament1.setRequiredGender(null);
+            tournament1.setCountry("USA");
+            tournament1.setRegion("California");
+            tournament1.setCity("San Francisco");
+            tournament1.setAddress("100 Chess Way");
+            tournament1.setCurrentRound(0);
+            tournament1.setMaxRounds(3);
+            tournament1.setParticipants(new HashSet<>());
+    
+            // Save the new tournament1 to the repository
+            tournamentRepository.save(tournament1);
+    
+            // Sign up players for the new tournament1
+            signUpPlayersForTournament(tournament1);
+        }
+    
+        System.out.println("100 tournaments and additional fixed tournaments initialized successfully!");
     }
+    
 
     private void signUpPlayersForTournament(Tournament tournament) {
         LocalDateTime signUpDateTime = LocalDateTime.now();

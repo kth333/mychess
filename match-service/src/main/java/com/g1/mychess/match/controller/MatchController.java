@@ -23,36 +23,36 @@ public class MatchController {
         this.matchService = matchService;
     }
 
-    @PostMapping("/admin/matchmaking/{tournamentId}")
+    @PostMapping("/admin/{tournamentId}/matchmaking")
     public ResponseEntity<String> runMatchmaking(@PathVariable Long tournamentId, @Valid @RequestBody MatchmakingDTO matchmakingDTO) {
         matchService.runMatchmaking(matchmakingDTO);
         return ResponseEntity.status(HttpStatus.OK).body("Matchmaking for tournament " + tournamentId + " started successfully.");
     }
 
-    @PostMapping("/admin/complete/{matchId}")
+    @PostMapping("/admin/{matchId}/status/completed/match")
     public ResponseEntity<String> completeMatch(@PathVariable Long matchId,@Valid @RequestBody MatchResultDTO matchResultDTO) {
         return matchService.completeMatch(matchId, matchResultDTO.getWinnerId(), matchResultDTO.getLoserId(), matchResultDTO.isDraw());
     }
 
-    @PostMapping("/admin/prepare-next-round/{tournamentId}")
+    @PostMapping("/admin/{tournamentId}/next-round")
     public ResponseEntity<String> prepareNextRound(@PathVariable Long tournamentId,@Valid @RequestBody MatchmakingDTO matchmakingDTO) {
         matchService.prepareNextRound(matchmakingDTO);
         return ResponseEntity.status(HttpStatus.OK).body("Next round for tournament " + tournamentId + " prepared successfully.");
     }
 
-    @PostMapping("/admin/finalize/{tournamentId}")
+    @PostMapping("/admin/{tournamentId}/status/completed")
     public ResponseEntity<String> finalizeTournament(@Valid @RequestBody MatchmakingDTO matchmakingDTO) {
         matchService.finalizeTournament(matchmakingDTO);
         return ResponseEntity.ok("Tournament finalized successfully.");
     }
 
-    @GetMapping("/public/all/{tournamentId}")
+    @GetMapping("/all/{tournamentId}")
     public ResponseEntity<List<MatchDTO>> getAllMatchByTournamentId(@PathVariable Long tournamentId) {
         List<MatchDTO> matches = matchService.findAllMatchByTournament(tournamentId);
         return ResponseEntity.ok(matches);
     }
 
-    @GetMapping("/public/all/{tournamentId}/round/{roundNumber}")
+    @GetMapping("/{tournamentId}/round/{roundNumber}")
     public ResponseEntity<List<MatchDTO>> getAllMatchByTournamentIdAndRoundNum(@PathVariable Long tournamentId, @PathVariable Integer roundNumber) {
         List<MatchDTO> matches = matchService.findAllMatchByTournamentRound(tournamentId, roundNumber);
         return ResponseEntity.ok(matches);

@@ -18,7 +18,7 @@ public class EmailController {
         this.emailService = emailService;
     }
 
-    @PostMapping("/send-verification")
+    @PostMapping("/verification")
     public ResponseEntity<String> sendVerificationEmail(@RequestBody EmailRequestDTO emailRequestDTO) {
         try {
             emailService.sendVerificationEmail(emailRequestDTO.getTo(), emailRequestDTO.getUsername(), emailRequestDTO.getUserToken());
@@ -29,7 +29,7 @@ public class EmailController {
         }
     }
 
-    @PostMapping("/send-blacklist")
+    @PostMapping("/blacklists")
     public ResponseEntity<String> sendBlacklistEmail(@RequestBody BlacklistEmailDTO blacklistEmailDTO) {
         try {
             emailService.sendBlacklistEmail(
@@ -45,8 +45,7 @@ public class EmailController {
         }
     }
 
-    // Method to send whitelist email
-    @PostMapping("/send-whitelist")
+    @PostMapping("/whitelists")
     public ResponseEntity<String> sendWhitelistEmail(@RequestBody WhitelistEmailDTO whitelistEmailDTO) {
         try {
             emailService.sendWhitelistEmail(
@@ -58,6 +57,21 @@ public class EmailController {
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body("Failed to send whitelist email.");
+        }
+    }
+
+    @PostMapping("/password-resets")
+    public ResponseEntity<String> sendPasswordResetEmail(@RequestBody EmailRequestDTO emailRequestDTO) {
+        try {
+            emailService.sendPasswordResetEmail(
+                    emailRequestDTO.getTo(),
+                    emailRequestDTO.getUsername(),
+                    emailRequestDTO.getUserToken()
+            );
+            return ResponseEntity.ok("Password reset email sent successfully.");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Failed to send password reset email.");
         }
     }
 

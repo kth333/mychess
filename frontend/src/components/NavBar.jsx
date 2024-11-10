@@ -74,7 +74,7 @@ class NavBar extends Component {
                         <Link className="text-primary hover:bg-accent hover:text-accent-foreground rounded-md px-4 py-2" to="/create-tournament">Create Tournament</Link>
                       </NavigationMenuLink>
                       <NavigationMenuLink asChild>
-                        <Link className="text-primary hover:bg-accent hover:text-accent-foreground rounded-md px-4 py-2" to="/tournaments">View All Tournaments</Link>
+                        <Link className="text-primary hover:bg-accent hover:text-accent-foreground rounded-md px-4 py-2" to="/tournaments/page/1">View All Tournaments</Link>
                       </NavigationMenuLink>
                     </NavigationMenuItem>
                     
@@ -82,7 +82,7 @@ class NavBar extends Component {
                   {role === 'ROLE_PLAYER' && (
                     <NavigationMenuItem>
                       <NavigationMenuLink asChild>
-                        <Link className="text-primary hover:bg-accent hover:text-accent-foreground rounded-md px-4 py-2" to="/tournaments">View All Tournaments</Link>
+                        <Link className="text-primary hover:bg-accent hover:text-accent-foreground rounded-md px-4 py-2" to="/tournaments/page/1">View All Tournaments</Link>
                       </NavigationMenuLink>
                       <NavigationMenuLink asChild>
                         <Link className="text-primary hover:bg-accent hover:text-accent-foreground rounded-md px-4 py-2" to="/profile">Profile</Link>

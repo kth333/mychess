@@ -1,7 +1,10 @@
 package com.g1.mychess.player.mapper;
 
+import java.util.List;
+
 import com.g1.mychess.player.dto.*;
 import com.g1.mychess.player.model.Player;
+import com.g1.mychess.player.model.PlayerRatingHistory;
 import com.g1.mychess.player.model.Profile;
 
 public class PlayerMapper {
@@ -72,4 +75,20 @@ public class PlayerMapper {
         profile.setPublic(dto.isPublic());
         return profile;
     }
+
+    public static PlayerRatingHistoryDTO toPlayerRatingHistoryDTO(PlayerRatingHistory playerRatingHistory) {
+        return new PlayerRatingHistoryDTO(
+                playerRatingHistory.getId(),
+                playerRatingHistory.getPlayer().getPlayerId(),
+                playerRatingHistory.getGlickoRating(),
+                playerRatingHistory.getRatingDeviation(),
+                playerRatingHistory.getVolatility(),
+                playerRatingHistory.getDate()
+        );
+    }
+    
+    public static List<PlayerRatingHistoryDTO> toPlayerRatingHistoryDTOList(List<PlayerRatingHistory> playerRatingHistoryList){
+        return playerRatingHistoryList.stream().map(PlayerMapper::toPlayerRatingHistoryDTO).toList();
+    }
+
 }

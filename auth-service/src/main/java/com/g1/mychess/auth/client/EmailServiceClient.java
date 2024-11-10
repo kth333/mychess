@@ -6,18 +6,33 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 
+/**
+ * Service client to interact with the Email Service API to send emails.
+ */
 @Service
 public class EmailServiceClient {
     private final WebClient webClient;
 
+    /**
+     * Constructor that initializes the WebClient with the provided Email Service URL.
+     *
+     * @param emailServiceUrl the URL of the Email Service (from application properties)
+     * @param webClientBuilder the WebClient builder to create the WebClient instance
+     */
     public EmailServiceClient(@Value("${email.service.url}") String emailServiceUrl, WebClient.Builder webClientBuilder) {
         this.webClient = webClientBuilder.baseUrl(emailServiceUrl).build();
     }
 
+    /**
+     * Sends a verification email using the Email Service API.
+     *
+     * @param emailRequestDTO the request data for sending the verification email
+     * @throws EmailSendFailedException if the email sending fails
+     */
     public void sendVerificationEmail(EmailRequestDTO emailRequestDTO) {
         try {
             webClient.post()
-                    .uri("/api/v1/email/send-verification")
+                    .uri("/api/v1/email/verification")
                     .bodyValue(emailRequestDTO)
                     .retrieve()
                     .bodyToMono(String.class)
@@ -27,10 +42,16 @@ public class EmailServiceClient {
         }
     }
 
+    /**
+     * Sends a password reset email using the Email Service API.
+     *
+     * @param emailRequestDTO the request data for sending the password reset email
+     * @throws EmailSendFailedException if the email sending fails
+     */
     public void sendPasswordResetEmail(EmailRequestDTO emailRequestDTO) {
         try {
             webClient.post()
-                    .uri("/api/v1/email/send-password-reset")
+                    .uri("/api/v1/email/password-resets")
                     .bodyValue(emailRequestDTO)
                     .retrieve()
                     .bodyToMono(String.class)

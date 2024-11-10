@@ -1,16 +1,26 @@
 import React from 'react';
-import { testData } from "../test/data"
 import { ResponsiveLine } from "@nivo/line";
 
-const EloChart = () => {
-    console.log("EloChart is rendered");
-   return (
-       <div style={{ height: '600px', width: '1000px'}}>
+const EloChart = ({ ratingHistory }) => {
+    console.log("EloChart is rendered with data:", ratingHistory);
+
+    // Transform ratingHistory data into a format that Nivo expects
+    const chartData = [
+        {
+            id: 'Glicko Rating',
+            data: ratingHistory.map(item => ({
+                x: new Date(item.date),  // Convert date string to Date object for x-axis
+                y: item.glickoRating
+            }))
+        }
+    ];
+
+    return (
+        <div style={{ height: '600px', width: '1000px' }}>
             <ResponsiveLine
-                style={{ height: '400px', width: '100%' }}
-                data={testData}
+                data={chartData}
                 margin={{ top: 50, right: 110, bottom: 50, left: 60 }}
-                xScale={{ type: 'point' }}
+                xScale={{ type: 'time' }}
                 yScale={{
                     type: 'linear',
                     min: 'auto',
@@ -18,26 +28,24 @@ const EloChart = () => {
                     stacked: true,
                     reverse: false
                 }}
-                yFormat=" >-.2f"
                 axisTop={null}
                 axisRight={null}
                 axisBottom={{
                     tickSize: 5,
                     tickPadding: 5,
                     tickRotation: 0,
-                    legend: 'transportation',
+                    format: '%b %d, %Y',  // Format the date on the x-axis
+                    legend: 'Date',
                     legendOffset: 36,
                     legendPosition: 'middle',
-                    truncateTickAt: 0
                 }}
                 axisLeft={{
                     tickSize: 5,
                     tickPadding: 5,
                     tickRotation: 0,
-                    legend: 'count',
+                    legend: 'Glicko Rating',
                     legendOffset: -40,
                     legendPosition: 'middle',
-                    truncateTickAt: 0
                 }}
                 colors={{ scheme: 'category10' }}
                 pointSize={10}
@@ -75,8 +83,8 @@ const EloChart = () => {
                     }
                 ]}
             />
-       </div>
-    )
+        </div>
+    );
 }
 
 export default EloChart;

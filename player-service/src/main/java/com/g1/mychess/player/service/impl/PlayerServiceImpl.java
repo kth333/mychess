@@ -17,6 +17,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Service
 public class PlayerServiceImpl implements PlayerService {
@@ -134,30 +135,6 @@ public class PlayerServiceImpl implements PlayerService {
         Player player = getPlayerById(playerId);
         player.setBlacklisted(false);
         playerRepository.save(player);
-    }
-
-    @Override
-    public void updatePlayerRating(Long playerId, double glickoRating, double ratingDeviation, double volatility) {
-        Player player = getPlayerById(playerId);
-        Profile profile = player.getProfile();
-        if (profile == null) {
-            throw new PlayerNotFoundException("Profile not found for player ID: " + playerId);
-        }
-
-        updateProfileRating(profile, glickoRating, ratingDeviation, volatility);
-        saveRatingHistory(player, glickoRating, ratingDeviation, volatility);
-    }
-
-    private void updateProfileRating(Profile profile, double glickoRating, double ratingDeviation, double volatility) {
-        profile.setGlickoRating(glickoRating);
-        profile.setRatingDeviation(ratingDeviation);
-        profile.setVolatility(volatility);
-        profileRepository.save(profile);
-    }
-
-    private void saveRatingHistory(Player player, double glickoRating, double ratingDeviation, double volatility) {
-        PlayerRatingHistory ratingHistory = new PlayerRatingHistory(player, glickoRating, ratingDeviation, volatility, LocalDateTime.now());
-        playerRatingHistoryRepository.save(ratingHistory);
     }
 
     @Override

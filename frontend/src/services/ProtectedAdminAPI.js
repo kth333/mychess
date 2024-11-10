@@ -1,7 +1,7 @@
 import axios from 'axios';
 
-// const API_BASE_URL = "http://54.251.178.30:8084/api/v1";
-const API_BASE_URL = "http://localhost:8084/api/v1";
+const API_BASE_URL = "http://13.212.177.252:8084/api/v1";
+// const API_BASE_URL = "http://localhost:8084/api/v1";
 
 
 const ProtectedAdminAPI = axios.create({

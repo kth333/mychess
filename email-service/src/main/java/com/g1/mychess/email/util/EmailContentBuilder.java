@@ -24,4 +24,13 @@ public class EmailContentBuilder {
                 + "Reason: " + reason + "\n\n"
                 + "Thank you,\nMyChess Team";
     }
+
+    public static String buildPasswordResetEmailContent(String username, String resetToken, String baseUrl) {
+        String resetUrl = baseUrl + "/password-reset/" + resetToken;
+        return "Dear " + username + ",\n\n"
+                + "We received a request to reset your password. You can reset your password by clicking on the link below:\n"
+                + resetUrl + "\n\n"
+                + "If you did not request this, please ignore this email.\n\n"
+                + "Thank you,\nMyChess Team";
+    }
 }

@@ -34,9 +34,9 @@ public class SecurityConfig {
         http.csrf(csrf -> csrf.disable())
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .authorizeHttpRequests(authorize -> authorize
-                        .requestMatchers("/api/v1/matches/public/**").permitAll()  // Public access
                         .requestMatchers("/api/v1/matches/admin/**").hasRole("ADMIN")  // Only ADMIN can access
                         .requestMatchers("/api/v1/matches/player/**").hasRole("PLAYER")  // Only PLAYER can access
+                        .requestMatchers("/api/v1/matches/**").permitAll()  // Public access
                         .anyRequest().authenticated()           // Protect other endpoints
                 )
                 .addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class)
