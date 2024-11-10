@@ -3,6 +3,8 @@ package com.g1.mychess.player.service;
 import com.g1.mychess.player.dto.*;
 import org.springframework.http.ResponseEntity;
 
+import java.util.List;
+
 public interface PlayerService {
 
     ResponseEntity<PlayerCreationResponseDTO> createPlayer(RegisterRequestDTO registerRequestDTO);
