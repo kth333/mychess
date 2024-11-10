@@ -23,7 +23,5 @@ public interface PlayerService {
 
     void whitelistPlayer(Long playerId);
 
-    void updatePlayerRating(Long playerId, double glickoRating, double ratingDeviation, double volatility);
-
     AdminPlayerDTO getPlayerDetailsForAdmin(Long playerId);
 }
