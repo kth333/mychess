@@ -34,6 +34,7 @@ class TournamentDetails extends Component {
                 await this.fetchPlayers();
                 await this.fetchMatchResults();
             });
+            console.log(tournamentRes.data);
         } catch (error) {
             console.error("Failed to fetch tournament", error);
         }
@@ -126,6 +127,7 @@ class TournamentDetails extends Component {
     startNextRound = async () => {
         try {
             await TournamentService.startNextRound(this.state.tournament.id);
+            alert("Next round started successfully!");
             this.fetchMatches();
         } catch (error) {
             alert("Failed to start next round\nReason: " + error.response.data);
@@ -135,6 +137,7 @@ class TournamentDetails extends Component {
     completeTournament = async () => {
         try {
             await TournamentService.completeTournament(this.state.tournament.id);
+            alert("Tournament completed successfully!");
             this.fetchData();
         } catch (error) {
             alert("Failed to complete tournament\nReason: " + error.response.data);
@@ -357,7 +360,7 @@ class TournamentDetails extends Component {
                                 <Button className="btn btn-primary" onClick={this.startTournament}>Start
                                     Tournament</Button>
                                 <Button className="btn btn-primary" onClick={this.startNextRound}>Next Round</Button>
-                                <Button className="btn btn-danger" onClick={this.completeTournament} disabled={tournament.currentRound !== tournament.maxRounds}>Complete
+                                <Button className="btn btn-danger" onClick={this.completeTournament} disabled={tournament.currentRound !== tournament.maxRounds || tournament.status === 'COMPLETED'}>Complete
                                     Tournament</Button>
                             </>
                         )}

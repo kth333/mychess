@@ -1,5 +1,6 @@
 package com.g1.mychess.player.controller;
 
+import com.g1.mychess.player.dto.LeaderboardProfileDTO;
 import com.g1.mychess.player.dto.PlayerProfileDTO;
 import com.g1.mychess.player.dto.PlayerProfileUpdateDTO;
 import com.g1.mychess.player.dto.PlayerRatingUpdateDTO;
@@ -59,6 +60,11 @@ public class ProfileController {
     @GetMapping("/rating-history/{playerId}")
     public ResponseEntity<List<PlayerRatingHistoryDTO>> getPlayerRatingHistory(@Valid @PathVariable Long playerId) {
         return playerRatingHistoryService.getPlayerRatingHistory(playerId);
+    }
+
+    @GetMapping("/leaderboard")
+    public ResponseEntity<List<LeaderboardProfileDTO>> getLeaderboard() {
+        return ResponseEntity.ok(profileService.getLeaderboard());
     }
 
 }

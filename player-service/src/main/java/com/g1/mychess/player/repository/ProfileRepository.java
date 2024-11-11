@@ -5,10 +5,14 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
+import java.util.List;
 
 @Repository
 public interface ProfileRepository extends JpaRepository<Profile, Long> {
 
     // Find profile by player id
     Optional<Profile> findByPlayer_PlayerId(Long playerId);
+
+    List<Profile> findTop50ByOrderByGlickoRatingDesc();
+
 }
