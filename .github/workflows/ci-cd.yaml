@@ -27,6 +27,13 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v3
 
+      - name: Cleanup Docker Resources
+        run: |
+          docker system prune -f --volumes
+          docker image prune -f
+          docker container prune -f
+          docker volume prune -f
+
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
