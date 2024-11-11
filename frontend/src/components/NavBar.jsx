@@ -52,14 +52,7 @@ class NavBar extends Component {
                       <NavigationMenuItem>
                         <NavigationMenuLink asChild>
                           <Link className="text-primary text-lg hover:bg-accent hover:text-accent-foreground px-4 py-2 rounded-md" to="/login">
-                            Login
-                          </Link>
-                        </NavigationMenuLink>
-                      </NavigationMenuItem>
-                      <NavigationMenuItem>
-                        <NavigationMenuLink asChild>
-                          <Link className="text-primary text-lg hover:bg-accent hover:text-accent-foreground px-4 py-2 rounded-md" to="/register">
-                            Register
+                            Sign in
                           </Link>
                         </NavigationMenuLink>
                       </NavigationMenuItem>

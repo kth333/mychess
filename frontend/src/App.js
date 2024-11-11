@@ -2,7 +2,6 @@ import React from 'react';
 import { BrowserRouter as Router, Routes, Route, BrowserRouter } from 'react-router-dom';
 import './App.css';
 import Login from "./components/Login";
-import Register from './components/Register';
 import Home from './components/Home';
 import Layout from './components/Layout';
 import Tournaments from './components/tournaments/Tournaments';
@@ -26,7 +25,6 @@ function App() {
             <Route element={<Layout />}>
               <Route exact index element={<Home />} />
               <Route exact path="/login" element={<Login />} />
-              <Route exact path="/register" element={<Register />} />
               <Route exact path="/tournaments/page/:pageNumber" element={<Tournaments />} />
               <Route exact path="/tournaments/:name" element={<TournamentDetails />} />
               <Route exact path="/password-reset-request" element={<PasswordResetRequest/>} />

@@ -65,7 +65,7 @@ class Home extends Component {
           >
             <h1 className="text-4xl font-bold mb-4">Welcome to MyChess</h1>
             <p className="text-xl mb-8">Manage and participate in chess tournaments with ease</p>
-            <Link className="btn btn-primary w-auto font-bold" to="/tournaments">
+            <Link className="btn btn-primary w-auto font-bold" to="/tournaments/page/1">
               Explore Tournaments
             </Link>
           </section>
