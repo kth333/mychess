@@ -1,17 +1,21 @@
 package com.g1.mychess.match.service.impl;
 
 import com.g1.mychess.match.client.PlayerServiceClient;
+import com.g1.mychess.match.client.TournamentServiceClient;
 import com.g1.mychess.match.dto.*;
 import com.g1.mychess.match.exception.MatchNotFoundException;
 import com.g1.mychess.match.exception.TournamentNotFoundException;
 import com.g1.mychess.match.exception.TournamentRoundNotFoundException;
+import com.g1.mychess.match.exception.UnauthorizedActionException;
 import com.g1.mychess.match.mapper.MatchMapper;
 import com.g1.mychess.match.model.Match;
 import com.g1.mychess.match.model.MatchPlayer;
 import com.g1.mychess.match.repository.MatchPlayerRepository;
 import com.g1.mychess.match.repository.MatchRepository;
+import com.g1.mychess.match.service.AuthenticationService;
 import com.g1.mychess.match.service.Glicko2RatingService;
 import com.g1.mychess.match.service.MatchService;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -27,17 +31,23 @@ public class MatchServiceImpl implements MatchService {
     private final MatchPlayerRepository matchPlayerRepository;
     private final Glicko2RatingService glicko2RatingService;
     private final PlayerServiceClient playerServiceClient;
+    private final TournamentServiceClient tournamentServiceClient;
+    private final AuthenticationService authenticationService;
 
     @Autowired
     public MatchServiceImpl(
             MatchRepository matchRepository,
             MatchPlayerRepository matchPlayerRepository,
             Glicko2RatingService glicko2RatingService,
-            PlayerServiceClient playerServiceClient) {
+            PlayerServiceClient playerServiceClient,
+            TournamentServiceClient tournamentServiceClient,
+            AuthenticationService authenticationService) {
         this.matchRepository = matchRepository;
         this.matchPlayerRepository = matchPlayerRepository;
         this.glicko2RatingService = glicko2RatingService;
         this.playerServiceClient = playerServiceClient;
+        this.tournamentServiceClient = tournamentServiceClient;
+        this.authenticationService = authenticationService;
     }
 
     @Override
@@ -311,7 +321,6 @@ public class MatchServiceImpl implements MatchService {
             MatchResultDTO matchResult = new MatchResultDTO();
             Long matchId = match.getId();
 
-
             List<MatchPlayer> participants = matchPlayerRepository.findByMatchId(matchId);
             if(participants.get(0).getResult() == null || participants.get(1).getResult() == null) {
                 continue;
@@ -332,4 +341,36 @@ public class MatchServiceImpl implements MatchService {
         return matchResults;
     }
 
+    @Override
+    @Transactional
+    public ResponseEntity<String> updateMatchTime(Long matchId, UpdateMatchTimeDTO updateDTO, HttpServletRequest request) {
+        Long adminId = extractAdminId(request);
+
+        Match match = getMatch(matchId);
+        TournamentDTO tournament = getTournamentById(match.getTournamentId());
+
+        if (!isTournamentAdmin(adminId, tournament)) {
+            throw new UnauthorizedActionException("Only the tournament admin can update the match time.");
+        }
+
+        updateScheduledTime(match, updateDTO.getScheduledTime());
+        return ResponseEntity.ok("Match time updated successfully.");
+    }
+
+    private TournamentDTO getTournamentById(Long tournamentId) {
+        return tournamentServiceClient.getTournamentDetails(tournamentId);
+    }
+
+    private Long extractAdminId(HttpServletRequest request) {
+        return authenticationService.getUserIdFromRequest(request);
+    }
+
+    private boolean isTournamentAdmin(Long adminId, TournamentDTO tournament) {
+        return tournament.getAdminId().equals(adminId);
+    }
+
+    private void updateScheduledTime(Match match, LocalDateTime newScheduledTime) {
+        match.setScheduledTime(newScheduledTime);
+        matchRepository.save(match);
+    }
 }

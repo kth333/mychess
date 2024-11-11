@@ -44,6 +44,14 @@ public class TournamentDTO {
         this.id = id;
     }
 
+    public Long getAdminId() {
+        return adminId;
+    }
+
+    public void setAdminId(Long adminId) {
+        this.adminId = adminId;
+    }
+
     public String getName() {
         return name;
     }
