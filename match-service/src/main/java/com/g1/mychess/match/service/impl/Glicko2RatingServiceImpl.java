@@ -9,10 +9,7 @@ import java.util.List;
 @Service
 public class Glicko2RatingServiceImpl implements Glicko2RatingService {
     public PlayerRatingUpdateDTO calculatePlayerRatings(MatchPlayer player, List<MatchPlayer> opponents, double[] result) {
-        // converting rating and rating deviation to glicko-2 scale
-        System.out.println("Calculating ratings for player: " + player.getPlayerId());
-        System.out.print("Initial rating: " + player.getGlickoRating() + " Initial RD: " + player.getRatingDeviation() + " Initial Volatility: " + player.getVolatility());
-
+        // Converting to Glicko-2 scale
         double R = (player.getGlickoRating() - 1500) / 173.7178;
         double RD = player.getRatingDeviation() / 173.7178;
 
@@ -24,23 +21,19 @@ public class Glicko2RatingServiceImpl implements Glicko2RatingService {
             opponents_RD[j] = opponents.get(j).getRatingDeviation() / 173.7178;
         }
 
+        // Calculate Glicko-2 rating changes
         double delta = calculate_delta(R, opponents_rating, opponents_RD, result);
         double v = calculate_v(R, opponents_rating, opponents_RD);
-
         double newVolatility = calculate_volatility(RD, player.getVolatility(), v, delta * delta);
         double newRatingDeviation = calculateNewRatingDeviation(RD, newVolatility, v);
         double newRating = calculateNewRating(R, newRatingDeviation, delta, v);
 
-        System.out.println("New rating calculated for playerId: " + player.getPlayerId() +
-                " New Rating: " + (173.7178 * newRating + 1500) +
-                " New Rating Deviation: " + (173.7178 * newRatingDeviation) +
-                " New Volatility: " + newVolatility);
-
+        // Convert back to Glicko scale and round values for final DTO
         return new PlayerRatingUpdateDTO(
                 player.getPlayerId(),
-                173.7178 * newRating + 1500,            // Convert back to original scale
-                173.7178 * newRatingDeviation,          // Convert back to original scale
-                newVolatility
+                Math.round(173.7178 * newRating + 1500),              // Glicko scale rating
+                Math.round(173.7178 * newRatingDeviation * 10) / 10.0, // Glicko scale RD, 1 decimal place
+                Math.round(newVolatility * 1000) / 1000.0             // Volatility, 3 decimal places
         );
     }
 
