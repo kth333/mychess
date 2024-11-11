@@ -116,7 +116,7 @@ public class PlayerServiceImpl implements PlayerService {
     }
 
     @Override
-    public PlayerDTO getPlayerWithRatingDetails(Long playerId) {
+    public PlayerDTO getPlayerDetails(Long playerId) {
         Player player = getPlayerById(playerId);
         return PlayerMapper.toPlayerDTO(player);
     }
@@ -135,12 +135,6 @@ public class PlayerServiceImpl implements PlayerService {
         Player player = getPlayerById(playerId);
         player.setBlacklisted(false);
         playerRepository.save(player);
-    }
-
-    @Override
-    public PlayerDTO getPlayerDetailsForAdmin(Long playerId) {
-        Player player = getPlayerById(playerId);
-        return PlayerMapper.toPlayerDTO(player);
     }
 
     private Player getPlayerById(Long playerId) {

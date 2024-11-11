@@ -65,14 +65,8 @@ public class PlayerController {
     }
 
     @GetMapping("/{playerId}/details")
-    public ResponseEntity<PlayerDTO> getPlayerWithRatingDetails(@Valid @PathVariable Long playerId) {
-        PlayerDTO playerDTO = playerService.getPlayerWithRatingDetails(playerId);
-        return ResponseEntity.ok(playerDTO);
-    }
-
-    @GetMapping("/{playerId}/admin-details")
-    public ResponseEntity<PlayerDTO> getPlayerDetailsForAdmin(@Valid @PathVariable Long playerId) {
-        PlayerDTO playerDTO = playerService.getPlayerDetailsForAdmin(playerId);
+    public ResponseEntity<PlayerDTO> getPlayerWithDetails(@Valid @PathVariable Long playerId) {
+        PlayerDTO playerDTO = playerService.getPlayerDetails(playerId);
         return ResponseEntity.ok(playerDTO);
     }
 

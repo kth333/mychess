@@ -13,9 +13,9 @@ public class PlayerServiceClient {
         this.webClient = webClientBuilder.baseUrl(playerServiceUrl).build();
     }
 
-    public PlayerDTO fetchPlayerDetails(Long playerId) {
+    public PlayerDTO getPlayerDetails(Long playerId) {
         return webClient.get()
-                .uri("/api/v1/player/{playerId}/admin-details", playerId)
+                .uri("/api/v1/player/{playerId}/details", playerId)
                 .retrieve()
                 .bodyToMono(PlayerDTO.class)
                 .block();

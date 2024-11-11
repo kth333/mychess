@@ -54,7 +54,7 @@ public class AdminServiceImpl implements AdminService {
     @Override
     @Transactional
     public void blacklistPlayer(BlacklistDTO blacklistDTO, HttpServletRequest request) {
-        PlayerDTO playerDTO = playerServiceClient.fetchPlayerDetails(blacklistDTO.getPlayerId());
+        PlayerDTO playerDTO = playerServiceClient.getPlayerDetails(blacklistDTO.getPlayerId());
 
         if (playerDTO.isBlacklisted()) {
             throw new InvalidBlacklistOperationException(
@@ -83,7 +83,7 @@ public class AdminServiceImpl implements AdminService {
             throw new IllegalArgumentException("Whitelist data must not be null.");
         }
 
-        PlayerDTO playerDTO = playerServiceClient.fetchPlayerDetails(whitelistDTO.getPlayerId());
+        PlayerDTO playerDTO = playerServiceClient.getPlayerDetails(whitelistDTO.getPlayerId());
 
         if (!playerDTO.isBlacklisted()) {
             throw new InvalidBlacklistOperationException(
@@ -129,7 +129,7 @@ public class AdminServiceImpl implements AdminService {
 
         playerServiceClient.updatePlayerWhitelistStatus(blacklist.getPlayerId());
 
-        PlayerDTO playerDTO = playerServiceClient.fetchPlayerDetails(blacklist.getPlayerId());
+        PlayerDTO playerDTO = playerServiceClient.getPlayerDetails(blacklist.getPlayerId());
         WhitelistDTO whitelistDTO = new WhitelistDTO(
                 playerDTO.getId(),
                 playerDTO.getEmail(),
