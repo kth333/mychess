@@ -119,6 +119,7 @@ public class TournamentServiceImplTest {
                 playerId,
                 false,
                 "playerUsername",
+                "player@gmail.com",
                 25,
                 "MALE",
                 1500.0,
@@ -155,6 +156,7 @@ public class TournamentServiceImplTest {
                 playerId,
                 true, // isBlacklisted
                 "playerUsername",
+                "player@gmail.com",
                 25,
                 "MALE",
                 1500.0,

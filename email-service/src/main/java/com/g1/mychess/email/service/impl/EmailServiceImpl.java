@@ -57,6 +57,11 @@ public class EmailServiceImpl implements EmailService {
         sendEmail("mychessfeedback@gmail.com", subject, content);
     }
 
+    @Override
+    public void sendTournamentNotificationEmail(String to, String subject, String message) {
+        sendEmail(to, subject, message);
+    }
+
     private void sendEmail(String to, String subject, String content) {
         SimpleMailMessage message = new SimpleMailMessage();
         message.setTo(to);

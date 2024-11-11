@@ -62,7 +62,7 @@ public class EmailController {
         }
     }
 
-    @PostMapping("/password-resets")
+    @PostMapping("/password-recovery")
     public ResponseEntity<String> sendPasswordResetEmail(@RequestBody @Valid EmailRequestDTO emailRequestDTO) {
         try {
             emailService.sendPasswordResetEmail(
@@ -89,6 +89,17 @@ public class EmailController {
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body("Failed to send feedback email.");
+        }
+    }
+
+    @PostMapping("/tournament-notification")
+    public ResponseEntity<String> sendTournamentNotificationEmail(@RequestBody @Valid TournamentNotificationDTO notification) {
+        try {
+            emailService.sendTournamentNotificationEmail(notification.getTo(), notification.getSubject(), notification.getMessage());
+            return ResponseEntity.ok("Tournament notification email sent successfully.");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Failed to send tournament notification email.");
         }
     }
 

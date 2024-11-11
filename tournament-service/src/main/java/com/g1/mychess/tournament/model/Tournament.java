@@ -166,13 +166,13 @@ public class Tournament {
 
     public void setEndDateTime(LocalDateTime endDateTime) { this.endDateTime = endDateTime; }
 
-    public LocalDateTime getRegistrationStartDate() { return registrationStartDate; }
+    public LocalDateTime getRegistrationStartDateTime() { return registrationStartDate; }
 
-    public void setRegistrationStartDate(LocalDateTime registrationStartDate) { this.registrationStartDate = registrationStartDate; }
+    public void setRegistrationStartDateTime(LocalDateTime registrationStartDate) { this.registrationStartDate = registrationStartDate; }
 
-    public LocalDateTime getRegistrationEndDate() { return registrationEndDate; }
+    public LocalDateTime getRegistrationEndDateTime() { return registrationEndDate; }
 
-    public void setRegistrationEndDate(LocalDateTime registrationEndDate) { this.registrationEndDate = registrationEndDate; }
+    public void setRegistrationEndDateTime(LocalDateTime registrationEndDate) { this.registrationEndDate = registrationEndDate; }
 
     public TournamentFormat getFormat() { return format; }
 

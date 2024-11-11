@@ -11,4 +11,6 @@ public interface EmailService {
     void sendPasswordResetEmail(String to, String username, String resetToken);
 
     void sendContactUsEmail(String name, String email, String message);
+
+    void sendTournamentNotificationEmail(String to, String subject, String message);
 }

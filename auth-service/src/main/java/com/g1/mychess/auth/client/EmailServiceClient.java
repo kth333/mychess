@@ -51,7 +51,7 @@ public class EmailServiceClient {
     public void sendPasswordResetEmail(EmailRequestDTO emailRequestDTO) {
         try {
             webClient.post()
-                    .uri("/api/v1/email/password-resets")
+                    .uri("/api/v1/email/password-recovery")
                     .bodyValue(emailRequestDTO)
                     .retrieve()
                     .bodyToMono(String.class)
