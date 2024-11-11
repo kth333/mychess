@@ -138,9 +138,9 @@ public class PlayerServiceImpl implements PlayerService {
     }
 
     @Override
-    public AdminPlayerDTO getPlayerDetailsForAdmin(Long playerId) {
+    public PlayerDTO getPlayerDetailsForAdmin(Long playerId) {
         Player player = getPlayerById(playerId);
-        return PlayerMapper.toAdminPlayerDTO(player);
+        return PlayerMapper.toPlayerDTO(player);
     }
 
     private Player getPlayerById(Long playerId) {

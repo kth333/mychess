@@ -1,6 +1,6 @@
 package com.g1.mychess.admin.client;
 
-import com.g1.mychess.admin.dto.AdminPlayerDTO;
+import com.g1.mychess.admin.dto.PlayerDTO;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -13,11 +13,11 @@ public class PlayerServiceClient {
         this.webClient = webClientBuilder.baseUrl(playerServiceUrl).build();
     }
 
-    public AdminPlayerDTO fetchPlayerDetails(Long playerId) {
+    public PlayerDTO fetchPlayerDetails(Long playerId) {
         return webClient.get()
                 .uri("/api/v1/player/{playerId}/admin-details", playerId)
                 .retrieve()
-                .bodyToMono(AdminPlayerDTO.class)
+                .bodyToMono(PlayerDTO.class)
                 .block();
     }
 

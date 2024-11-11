@@ -71,9 +71,9 @@ public class PlayerController {
     }
 
     @GetMapping("/{playerId}/admin-details")
-    public ResponseEntity<AdminPlayerDTO> getPlayerDetailsForAdmin(@Valid @PathVariable Long playerId) {
-        AdminPlayerDTO adminPlayerDTO = playerService.getPlayerDetailsForAdmin(playerId);
-        return ResponseEntity.ok(adminPlayerDTO);
+    public ResponseEntity<PlayerDTO> getPlayerDetailsForAdmin(@Valid @PathVariable Long playerId) {
+        PlayerDTO playerDTO = playerService.getPlayerDetailsForAdmin(playerId);
+        return ResponseEntity.ok(playerDTO);
     }
 
     @GetMapping("/health")

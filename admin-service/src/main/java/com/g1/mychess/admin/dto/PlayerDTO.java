@@ -1,4 +1,4 @@
-package com.g1.mychess.player.dto;
+package com.g1.mychess.admin.dto;
 
 public class PlayerDTO {
 

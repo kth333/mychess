@@ -25,20 +25,12 @@ public class PlayerMapper {
                 player.getPlayerId(),
                 player.isBlacklisted(),
                 player.getUsername(),
+                player.getEmail(),
                 profile != null ? profile.getAge() : null,
                 profile != null ? profile.getGender() : null,
                 profile != null ? profile.getGlickoRating() : null,
                 profile != null ? profile.getRatingDeviation() : null,
                 profile != null ? profile.getVolatility() : null
-        );
-    }
-
-    public static AdminPlayerDTO toAdminPlayerDTO(Player player) {
-        return new AdminPlayerDTO(
-                player.getPlayerId(),
-                player.isBlacklisted(),
-                player.getUsername(),
-                player.getEmail()
         );
     }
 

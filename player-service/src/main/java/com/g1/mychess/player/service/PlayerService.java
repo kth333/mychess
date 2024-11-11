@@ -23,5 +23,5 @@ public interface PlayerService {
 
     void whitelistPlayer(Long playerId);
 
-    AdminPlayerDTO getPlayerDetailsForAdmin(Long playerId);
+    PlayerDTO getPlayerDetailsForAdmin(Long playerId);
 }

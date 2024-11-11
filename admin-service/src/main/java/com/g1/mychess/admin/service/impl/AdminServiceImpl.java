@@ -54,14 +54,14 @@ public class AdminServiceImpl implements AdminService {
     @Override
     @Transactional
     public void blacklistPlayer(BlacklistDTO blacklistDTO, HttpServletRequest request) {
-        AdminPlayerDTO adminPlayerDTO = playerServiceClient.fetchPlayerDetails(blacklistDTO.getPlayerId());
+        PlayerDTO playerDTO = playerServiceClient.fetchPlayerDetails(blacklistDTO.getPlayerId());
 
-        if (adminPlayerDTO.isBlacklisted()) {
+        if (playerDTO.isBlacklisted()) {
             throw new InvalidBlacklistOperationException(
                     "Player with ID " + blacklistDTO.getPlayerId() + " is already blacklisted.");
         }
 
-        populateBlacklistDTOWithPlayerInfo(blacklistDTO, adminPlayerDTO);
+        populateBlacklistDTOWithPlayerInfo(blacklistDTO, playerDTO);
 
         Blacklist blacklist = blacklistRepository.findByPlayerId(blacklistDTO.getPlayerId())
                 .orElse(new Blacklist());
@@ -83,14 +83,14 @@ public class AdminServiceImpl implements AdminService {
             throw new IllegalArgumentException("Whitelist data must not be null.");
         }
 
-        AdminPlayerDTO adminPlayerDTO = playerServiceClient.fetchPlayerDetails(whitelistDTO.getPlayerId());
+        PlayerDTO playerDTO = playerServiceClient.fetchPlayerDetails(whitelistDTO.getPlayerId());
 
-        if (!adminPlayerDTO.isBlacklisted()) {
+        if (!playerDTO.isBlacklisted()) {
             throw new InvalidBlacklistOperationException(
                     "Player with ID " + whitelistDTO.getPlayerId() + " is not blacklisted.");
         }
 
-        populateWhitelistDTOWithPlayerInfo(whitelistDTO, adminPlayerDTO);
+        populateWhitelistDTOWithPlayerInfo(whitelistDTO, playerDTO);
 
         Blacklist blacklist = blacklistRepository.findByPlayerId(whitelistDTO.getPlayerId())
                 .orElseThrow(() -> new InvalidBlacklistOperationException(
@@ -129,24 +129,24 @@ public class AdminServiceImpl implements AdminService {
 
         playerServiceClient.updatePlayerWhitelistStatus(blacklist.getPlayerId());
 
-        AdminPlayerDTO adminPlayerDTO = playerServiceClient.fetchPlayerDetails(blacklist.getPlayerId());
+        PlayerDTO playerDTO = playerServiceClient.fetchPlayerDetails(blacklist.getPlayerId());
         WhitelistDTO whitelistDTO = new WhitelistDTO(
-                adminPlayerDTO.getId(),
-                adminPlayerDTO.getEmail(),
-                adminPlayerDTO.getUsername(),
+                playerDTO.getId(),
+                playerDTO.getEmail(),
+                playerDTO.getUsername(),
                 blacklist.getReason()
         );
         sendWhitelistNotificationEmail(whitelistDTO);
     }
 
-    private void populateBlacklistDTOWithPlayerInfo(BlacklistDTO blacklistDTO, AdminPlayerDTO adminPlayerDTO) {
-        blacklistDTO.setUsername(adminPlayerDTO.getUsername());
-        blacklistDTO.setEmail(adminPlayerDTO.getEmail());
+    private void populateBlacklistDTOWithPlayerInfo(BlacklistDTO blacklistDTO, PlayerDTO playerDTO) {
+        blacklistDTO.setUsername(playerDTO.getUsername());
+        blacklistDTO.setEmail(playerDTO.getEmail());
     }
 
-    private void populateWhitelistDTOWithPlayerInfo(WhitelistDTO whitelistDTO, AdminPlayerDTO adminPlayerDTO) {
-        whitelistDTO.setUsername(adminPlayerDTO.getUsername());
-        whitelistDTO.setEmail(adminPlayerDTO.getEmail());
+    private void populateWhitelistDTOWithPlayerInfo(WhitelistDTO whitelistDTO, PlayerDTO playerDTO) {
+        whitelistDTO.setUsername(playerDTO.getUsername());
+        whitelistDTO.setEmail(playerDTO.getEmail());
     }
 
     private void updateBlacklist(Blacklist blacklist, BlacklistDTO blacklistDTO, Long adminId) {
