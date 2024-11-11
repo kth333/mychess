@@ -27,12 +27,13 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v3
 
-      - name: Cleanup Docker Resources
+      - name: Full Docker Cleanup
         run: |
+          docker container stop $(docker container ls -aq) || true
+          docker container rm $(docker container ls -aq) || true
+          docker image rm $(docker images -q) || true
+          docker volume rm $(docker volume ls -q) || true
           docker system prune -f --volumes
-          docker image prune -f
-          docker container prune -f
-          docker volume prune -f
 
       - name: Set up Node.js
         uses: actions/setup-node@v3
@@ -47,11 +48,6 @@ jobs:
         working-directory: frontend
         run: |
           CI=false npm run build
-
-      # Uncomment if you have frontend tests
-      # - name: Run Frontend Tests
-      #   working-directory: frontend
-      #   run: npm test -- --watchAll=false
 
       - name: Set up JDK 17
         uses: actions/setup-java@v3
@@ -89,7 +85,7 @@ jobs:
         if: ${{ inputs.skip_backend != 'true' }} # Skip backend docker build conditionally
         run: |
           docker-compose build auth-service tournament-service match-service email-service player-service admin-service
-      
+
       - name: Push Backend Docker Images
         if: ${{ inputs.skip_backend != 'true' }} # Skip backend docker push conditionally
         run: |
@@ -101,82 +97,89 @@ jobs:
       - name: Push Frontend Docker Image
         run: docker-compose push frontend
 
-  # Job 4: Deploy Backend Services
   deploy-backend:
     needs: build
     runs-on: ubuntu-latest
 
     steps:
       - name: Deploy Auth Service
-        if: ${{ inputs.skip_backend != 'true' }} # Skip backend deploy conditionally
+        if: ${{ inputs.skip_backend != 'true' }}
         run: |
           echo "${{ secrets.EC2_SSH_KEY }}" > ec2_key.pem
           chmod 600 ec2_key.pem
           ssh -o StrictHostKeyChecking=no -i ec2_key.pem ec2-user@${{ secrets.EC2_AUTH_SERVICE_DNS }} "
-          docker pull ppv1/auth-service:latest &&
-          docker stop auth-service || true &&
-          docker rm auth-service || true &&
-          docker run -d --name auth-service -p 8080:8080 --env-file /home/ec2-user/.env ppv1/auth-service:latest --spring.profiles.active=docker
+            docker container stop auth-service || true &&
+            docker container rm auth-service || true &&
+            docker system prune -f --volumes &&
+            docker pull ppv1/auth-service:latest &&
+            docker run -d --name auth-service -p 8080:8080 --env-file /home/ec2-user/.env ppv1/auth-service:latest --spring.profiles.active=docker
           "
+
       - name: Deploy Admin Service
-        if: ${{ inputs.skip_backend != 'true' }} # Skip backend deploy conditionally
+        if: ${{ inputs.skip_backend != 'true' }}
         run: |
           echo "${{ secrets.EC2_SSH_KEY }}" > ec2_key.pem
           chmod 600 ec2_key.pem
           ssh -o StrictHostKeyChecking=no -i ec2_key.pem ec2-user@${{ secrets.EC2_ADMIN_SERVICE_DNS }} "
-          docker pull ppv1/admin-service:latest &&
-          docker stop admin-service || true &&
-          docker rm admin-service || true &&
-          docker run -d --name admin-service -p 8084:8084 --env-file /home/ec2-user/.env ppv1/admin-service:latest --spring.profiles.active=docker
+            docker container stop admin-service || true &&
+            docker container rm admin-service || true &&
+            docker system prune -f --volumes &&
+            docker pull ppv1/admin-service:latest &&
+            docker run -d --name admin-service -p 8084:8084 --env-file /home/ec2-user/.env ppv1/admin-service:latest --spring.profiles.active=docker
           "
+
       - name: Deploy Player Service
-        if: ${{ inputs.skip_backend != 'true' }} # Skip backend deploy conditionally
+        if: ${{ inputs.skip_backend != 'true' }}
         run: |
           echo "${{ secrets.EC2_SSH_KEY }}" > ec2_key.pem
           chmod 600 ec2_key.pem
           ssh -o StrictHostKeyChecking=no -i ec2_key.pem ec2-user@${{ secrets.EC2_PLAYER_SERVICE_DNS }} "
-          docker pull ppv1/player-service:latest &&
-          docker stop player-service || true &&
-          docker rm player-service || true &&
-          docker run -d --name player-service -p 8081:8081 --env-file /home/ec2-user/.env ppv1/player-service:latest --spring.profiles.active=docker
+            docker container stop player-service || true &&
+            docker container rm player-service || true &&
+            docker system prune -f --volumes &&
+            docker pull ppv1/player-service:latest &&
+            docker run -d --name player-service -p 8081:8081 --env-file /home/ec2-user/.env ppv1/player-service:latest --spring.profiles.active=docker
           "
+
       - name: Deploy Email Service
-        if: ${{ inputs.skip_backend != 'true' }} # Skip backend deploy conditionally
+        if: ${{ inputs.skip_backend != 'true' }}
         run: |
           echo "${{ secrets.EC2_SSH_KEY }}" > ec2_key.pem
           chmod 600 ec2_key.pem
           ssh -o StrictHostKeyChecking=no -i ec2_key.pem ec2-user@${{ secrets.EC2_EMAIL_SERVICE_DNS }} "
-          docker pull ppv1/email-service:latest &&
-          docker stop email-service || true &&
-          docker rm email-service || true &&
-          docker run -d --name email-service -p 8085:8085 --env-file /home/ec2-user/.env ppv1/email-service:latest --spring.profiles.active=docker
+            docker container stop email-service || true &&
+            docker container rm email-service || true &&
+            docker system prune -f --volumes &&
+            docker pull ppv1/email-service:latest &&
+            docker run -d --name email-service -p 8085:8085 --env-file /home/ec2-user/.env ppv1/email-service:latest --spring.profiles.active=docker
           "
+
       - name: Deploy Tournament Service
-        if: ${{ inputs.skip_backend != 'true' }} # Skip backend deploy conditionally
+        if: ${{ inputs.skip_backend != 'true' }}
         run: |
           echo "${{ secrets.EC2_SSH_KEY }}" > ec2_key.pem
           chmod 600 ec2_key.pem
           ssh -o StrictHostKeyChecking=no -i ec2_key.pem ec2-user@${{ secrets.EC2_TOURNAMENT_SERVICE_DNS }} "
-          docker pull ppv1/tournament-service:latest &&
-          docker stop tournament-service || true &&
-          docker rm tournament-service || true &&
-          docker run -d --name tournament-service -p 8083:8083 --env-file /home/ec2-user/.env ppv1/tournament-service:latest --spring.profiles.active=docker
+            docker container stop tournament-service || true &&
+            docker container rm tournament-service || true &&
+            docker system prune -f --volumes &&
+            docker pull ppv1/tournament-service:latest &&
+            docker run -d --name tournament-service -p 8083:8083 --env-file /home/ec2-user/.env ppv1/tournament-service:latest --spring.profiles.active=docker
           "
 
       - name: Deploy Match Service
-        if: ${{ inputs.skip_backend != 'true' }} # Skip backend deploy conditionally
+        if: ${{ inputs.skip_backend != 'true' }}
         run: |
           echo "${{ secrets.EC2_SSH_KEY }}" > ec2_key.pem
           chmod 600 ec2_key.pem
           ssh -o StrictHostKeyChecking=no -i ec2_key.pem ec2-user@${{ secrets.EC2_MATCH_SERVICE_DNS }} "
-          docker pull ppv1/match-service:latest &&
-          docker stop match-service || true &&
-          docker rm match-service || true &&
-          docker run -d --name match-service -p 8082:8082 --env-file /home/ec2-user/.env ppv1/match-service:latest --spring.profiles.active=docker
+            docker container stop match-service || true &&
+            docker container rm match-service || true &&
+            docker system prune -f --volumes &&
+            docker pull ppv1/match-service:latest &&
+            docker run -d --name match-service -p 8082:8082 --env-file /home/ec2-user/.env ppv1/match-service:latest --spring.profiles.active=docker
           "
 
-
-  # Job 5: Deploy Frontend
   deploy-frontend:
     needs: build
     runs-on: ubuntu-latest
@@ -187,8 +190,9 @@ jobs:
           echo "${{ secrets.EC2_SSH_KEY }}" > ec2_key.pem
           chmod 600 ec2_key.pem
           ssh -o StrictHostKeyChecking=no -i ec2_key.pem ec2-user@${{ secrets.EC2_FRONTEND_DNS }} "
-          docker pull ppv1/frontend:latest &&
-          docker stop frontend || true &&
-          docker rm frontend || true &&
-          docker run -d --name frontend -p 80:80  ppv1/frontend:latest
+            docker container stop frontend || true &&
+            docker container rm frontend || true &&
+            docker system prune -f --volumes &&
+            docker pull ppv1/frontend:latest &&
+            docker run -d --name frontend -p 80:80 ppv1/frontend:latest
           "
