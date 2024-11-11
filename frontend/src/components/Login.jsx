@@ -30,12 +30,20 @@ class Login extends Component {
           console.log("login success");
           console.log(res.data);
           sessionStorage.setItem("token", res.data.token);
+
           const token = sessionStorage.getItem('token');
 
           if (token) {
             const decodedToken = jwtDecode(token);
-            console.log(decodedToken.role[0]);
             const role = decodedToken.role[0];
+            let playerId;
+
+            if (role === "ROLE_PLAYER") {
+              playerId = decodedToken.userId;
+              sessionStorage.setItem("currentPlayerId", playerId);
+            }
+            console.log(`Role: ${role}, Player ID: ${playerId || "N/A"}`);
+
             sessionStorage.setItem("role", role);
           }
 
@@ -45,7 +53,7 @@ class Login extends Component {
     } catch (error) {
       console.error('login error:', error.response ? error.response.data : error.message);
     }
-  };
+  }
 
   handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -116,20 +124,12 @@ class Login extends Component {
 
             <div className="flex justify-between mt-4 text-sm">
               <div className="flex items-center space-x-1">
-                <p>
-                  Need an account?
-                </p>
-                <Link to="/register" className="text-blue-500">
-                  Sign up
-                </Link>
+                <p>Need an account?</p>
+                <Link to="/register" className="text-blue-500">Sign up</Link>
               </div>
               <div className="flex items-center space-x-1">
-                <p>
-                  Forget password?
-                </p>
-                <Link to="/password-reset-request" className="text-blue-500">
-                  Reset
-                </Link>
+                <p>Forgot password?</p>
+                <Link to="/password-reset-request" className="text-blue-500">Reset</Link>
               </div>
             </div>
           </form>

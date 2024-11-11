@@ -8,6 +8,7 @@ import com.g1.mychess.player.model.CustomChessRank;
 public class PlayerProfileDTO {
 
     private Long playerId;
+    private String username;
     private String fullName;
     private String bio;
     private String avatarUrl;
@@ -28,8 +29,9 @@ public class PlayerProfileDTO {
     private boolean isPublic;
     private int age;
 
-    public PlayerProfileDTO(Long playerId, String fullName, String bio, String avatarUrl, String gender, String country, String region, String city, LocalDate birthDate, CustomChessRank rank, double glickoRating, double ratingDeviation, double volatility, int totalWins, int totalLosses, int totalDraws, boolean isPublic, int age) {
+    public PlayerProfileDTO(Long playerId, String username, String fullName, String bio, String avatarUrl, String gender, String country, String region, String city, LocalDate birthDate, CustomChessRank rank, double glickoRating, double ratingDeviation, double volatility, int totalWins, int totalLosses, int totalDraws, boolean isPublic, int age) {
         this.playerId = playerId;
+        this.username = username;
         this.fullName = fullName;
         this.bio = bio;
         this.avatarUrl = avatarUrl;
@@ -58,6 +60,10 @@ public class PlayerProfileDTO {
     public void setPlayerId(Long playerId) {
         this.playerId = playerId;
     }
+
+    public String getUsername() { return username; }
+
+    public void setUsername(String username) { this.username = username; }
 
     public String getFullName() {
         return fullName;

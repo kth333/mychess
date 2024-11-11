@@ -40,15 +40,16 @@ class TournamentService {
     }
 
     async leaveTournament(tournamentId) {
-      return await ProtectedTournamentAPI.delete(`/tournaments/player/${tournamentId}/leave`);
+      return await ProtectedTournamentAPI.delete(`/tournaments/player/${tournamentId}`);
     }
 
     async removePlayerFromTournament(tournamentId, playerId) {
       return await ProtectedTournamentAPI.delete(`/tournaments/admin/${tournamentId}/players/${playerId}`);
     }
 
-    
-
+    async getPlayersByTournament(tournamentId) {
+        return await TournamentAPI.get(`/tournaments/public/${tournamentId}/players`);
+    }
 }
 
 export default new TournamentService();

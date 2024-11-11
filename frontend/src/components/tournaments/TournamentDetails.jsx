@@ -4,17 +4,19 @@ import { Button } from '../ui/button';
 import { useParams, Link } from 'react-router-dom';
 import withNavigateandLocation from '../withNavigateandLocation';
 import TournamentService from '../../services/TournamentService';
-import MatchService from '../../services/MatchService'; // Import MatchService
+import MatchService from '../../services/MatchService';
 
 class TournamentDetails extends Component {
     constructor(props) {
         super(props);
         this.state = {
+            showPlayers: false,
             tournament: null,
-            matches: [], // Store the matches here
-            selectedWinners: {}, // Store selected winners for each match
-            filteredMatches: [], // Store filtered matches
-            searchRound: '', // Store the search round number
+            matches: [],
+            players: [],
+            selectedWinners: {},
+            filteredMatches: [],
+            searchRound: '',
         };
     }
 
@@ -22,289 +24,275 @@ class TournamentDetails extends Component {
         await this.fetchData();
     }
 
-    // Fetch tournament details
     fetchData = async () => {
         const { name } = this.props.params;
         try {
-            const res = await TournamentService.getTournamentByName(name);
-            console.log("Tournament data:", res.data);
-            this.setState({ tournament: res.data }, this.fetchMatches);
+            const tournamentRes = await TournamentService.getTournamentByName(name);
+            this.setState({ tournament: tournamentRes.data }, async () => {
+                await this.fetchMatches();
+                await this.fetchPlayers();
+            });
         } catch (error) {
             console.error("Failed to fetch tournament", error);
         }
     };
 
-    // Fetch matches associated with the tournament
+    fetchPlayers = async () => {
+        const { id } = this.state.tournament;
+        try {
+            const res = await TournamentService.getPlayersByTournament(id);
+            this.setState({ players: res.data });
+        } catch (error) {
+            console.error("Failed to fetch players", error);
+        }
+    };
+
     fetchMatches = async () => {
         const { id } = this.state.tournament;
         try {
             const res = await MatchService.getAllMatchesById(id);
-            console.log("Matches data:", res.data);
             this.setState({ matches: res.data, filteredMatches: res.data });
         } catch (error) {
             console.error("Failed to fetch matches", error);
         }
     };
 
-    // Complete match by ID
     completeMatch = async (matchId) => {
         const { selectedWinners } = this.state;
         const { winnerId, loserId, isDraw } = selectedWinners[matchId];
-
-        let match = {
-            winnerId: winnerId,
-            loserId: loserId,
-            isDraw: isDraw,
-        };
-
-        console.log("Completing match with data:", JSON.stringify(match));
         try {
-            await MatchService.completeMatch(matchId, match).then(() => {this.fetchMatches();});
-            console.log("Match completed successfully");
+            await MatchService.completeMatch(matchId, { winnerId, loserId, isDraw });
+            this.fetchMatches();
         } catch (error) {
-            console.error("Failed to complete match", error);
             alert("Failed to complete match\nReason: " + error.response.data);
         }
     };
 
-    // Handle winner selection
     handleWinnerChange = (matchId, value) => {
         const selectedWinners = { ...this.state.selectedWinners };
-        if (value === 'draw') {
-            selectedWinners[matchId] = { winnerId: null, loserId: null, isDraw: true };
-        } else {
-            const winnerId = value === 'player1' ? this.state.matches.find(m => m.id === matchId).participantIds[0] : this.state.matches.find(m => m.id === matchId).participantIds[1];
-            const loserId = value === 'player1' ? this.state.matches.find(m => m.id === matchId).participantIds[1] : this.state.matches.find(m => m.id === matchId).participantIds[0];
-            selectedWinners[matchId] = { winnerId, loserId, isDraw: false };
-        }
+        const match = this.state.matches.find(m => m.id === matchId);
+        const player1 = match.participantIds[0];
+        const player2 = match.participantIds[1];
+
+        selectedWinners[matchId] = value === 'draw'
+            ? { winnerId: null, loserId: null, isDraw: true }
+            : { winnerId: value === 'player1' ? player1 : player2, loserId: value === 'player1' ? player2 : player1, isDraw: false };
+
         this.setState({ selectedWinners });
     };
 
     signUp = async () => {
-        const { id } = this.state.tournament;
         try {
-            await TournamentService.signUp(id);
-            console.log("Register success");
+            await TournamentService.signUp(this.state.tournament.id);
+            await this.fetchPlayers();
         } catch (error) {
-            console.error("Failed to sign up for tournament", error);
             alert("Failed to sign up for tournament\nReason: " + error.response.data);
         }
     };
 
     leaveTournament = async () => {
-        const { id } = this.state.tournament;
         try {
-            await TournamentService.leaveTournament(id);
-            console.log("Leave success");
+            await TournamentService.leaveTournament(this.state.tournament.id);
+            await this.fetchPlayers();
         } catch (error) {
-            console.error("Failed to leave tournament", error);
             alert("Failed to leave tournament\nReason: " + error.response.data);
         }
     };
 
     startTournament = async () => {
-        const { id } = this.state.tournament;
         try {
-            await TournamentService.startTournament(id).then(() => {this.fetchMatches();});
-            console.log("Start success");
+            await TournamentService.startTournament(this.state.tournament.id);
+            this.fetchMatches();
         } catch (error) {
-            console.error("Failed to start tournament", error);
             alert("Failed to start tournament\nReason: " + error.response.data);
         }
     };
 
     startNextRound = async () => {
-        const { id } = this.state.tournament;
         try {
-            await TournamentService.startNextRound(id).then(() => {this.fetchMatches();});
-            console.log("Next round success");
+            await TournamentService.startNextRound(this.state.tournament.id);
+            this.fetchMatches();
         } catch (error) {
-            console.error("Failed to start next round", error);
             alert("Failed to start next round\nReason: " + error.response.data);
         }
     };
 
     completeTournament = async () => {
-        const { id } = this.state.tournament;
         try {
-            await TournamentService.completeTournament(id).then(() => {
-                alert("Tournament completed successfully");
-                this.fetchData(); // Refresh tournament data after completion
-            });
-            console.log("Complete tournament success");
+            await TournamentService.completeTournament(this.state.tournament.id);
+            this.fetchData();
         } catch (error) {
-            console.error("Failed to complete tournament", error);
             alert("Failed to complete tournament\nReason: " + error.response.data);
         }
     };
 
-    // Remove player from tournament
     removePlayerFromTournament = async (playerId) => {
-        const { id } = this.state.tournament;
         try {
-            await TournamentService.removePlayerFromTournament(id, playerId);
-            console.log(`Player ${playerId} removed successfully`);
-            this.fetchMatches(); // Refresh matches after removing a player
+            await TournamentService.removePlayerFromTournament(this.state.tournament.id, playerId);
+            this.fetchPlayers();
+            this.fetchMatches();
         } catch (error) {
-            console.error(`Failed to remove player ${playerId} from tournament`, error);
-            alert("Failed to remove player from tournament\nReason: " + error.response.data);
+            alert("Failed to remove player\nReason: " + error.response.data);
         }
     };
 
-    // Handle search input change
-    handleSearchChange = (event) => {
-        const searchRound = event.target.value;
+    handleSearchChange = (e) => {
+        const searchRound = e.target.value;
         this.setState({ searchRound }, this.filterMatches);
     };
 
-    
-    
-
-    // Filter matches based on round number
     filterMatches = () => {
         const { matches, searchRound } = this.state;
-        const filteredMatches = matches.filter((match) => {
-            return match.roundNumber.toString().includes(searchRound);
-        });
+        const filteredMatches = matches.filter((match) => match.roundNumber.toString().includes(searchRound));
         this.setState({ filteredMatches });
+    };
+
+    togglePlayersList = () => {
+        this.setState((prevState) => ({ showPlayers: !prevState.showPlayers }));
+    };
+
+    getChessRankTitle = (glickoRating) => {
+        if (glickoRating < 1200) {
+            return "Novice";
+        } else if (glickoRating < 1600) {
+            return "Intermediate";
+        } else if (glickoRating < 2000) {
+            return "Advanced";
+        } else if (glickoRating < 2400) {
+            return "Expert";
+        } else if (glickoRating < 2700) {
+            return "Master";
+        } else {
+            return "Grandmaster";
+        }
+    };
+
+    renderPlayersList = () => {
+        const { players } = this.state;
+        const isAdmin = sessionStorage.getItem("role") === 'ROLE_ADMIN';
+
+        if (!players.length) return <p className="text-center text-gray-500">No players signed up for this tournament.</p>;
+
+        return (
+            <div className="grid grid-cols-1 gap-4 mt-4">
+                {players.map((player) => (
+                    <div key={player.id} className="flex items-center p-4 bg-white rounded-lg shadow">
+                        {/* Display chess rank title next to the username */}
+                        <div className="flex-grow">
+                            <p className="font-semibold">{player.username}</p>
+                            <p className="text-gray-600 text-sm">
+                                Rank: {this.getChessRankTitle(player.glickoRating || 0)}
+                            </p>
+                            <p className="text-gray-600 text-sm">
+                                Rating: {player.glickoRating || "Unrated"}
+                            </p>
+                        </div>
+                        <Link to={`/profile/${player.id}`} className="btn btn-secondary mx-2">View Profile</Link>
+                        {isAdmin && (
+                            <Button className="btn btn-danger" onClick={() => this.removePlayerFromTournament(player.id)}>Remove</Button>
+                        )}
+                    </div>
+                ))}
+            </div>
+        );
     };
 
     renderMatchesTable = () => {
         const { filteredMatches } = this.state;
-
-        if (filteredMatches.length === 0) {
-            return <p>No matches available yet.</p>;
-        }
+        if (!filteredMatches.length) return <p>No matches available yet.</p>;
 
         return (
-            <table className="table-auto w-full border-collapse border border-gray-300 my-4">
-                <thead>
-                    <tr>
-                        <th className="border px-4 py-2">Match ID</th>
-                        <th className="border px-4 py-2">Player 1</th>
-                        <th className="border px-4 py-2">Player 2</th>
-                        <th className="border px-4 py-2">Round</th>
-                        <th className="border px-4 py-2">Status</th>
-                        <th className="border px-4 py-2">Action</th> {/* New column for actions */}
-                    </tr>
+            <table className="table-auto w-full border-collapse border border-gray-300 my-4 shadow-md">
+                <thead className="bg-gray-200">
+                <tr>
+                    <th className="border px-4 py-2">Match ID</th>
+                    <th className="border px-4 py-2">Player 1</th>
+                    <th className="border px-4 py-2">Player 2</th>
+                    <th className="border px-4 py-2">Round</th>
+                    <th className="border px-4 py-2">Status</th>
+                    <th className="border px-4 py-2">Action</th>
+                </tr>
                 </thead>
                 <tbody>
-                    {filteredMatches.map((match) => (
-                        <tr key={match.id}>
-                            <td className="border px-4 py-2">{match.id}</td>
-                            <td className="border px-4 py-2">{match.participantIds[0]}
-                                <Button 
-                                    className="btn btn-success mt-2" 
-                                    onClick={() => this.removePlayerFromTournament(match.participantIds[0])}>
-                                    Remove
-                                </Button>   
-                            </td>
-                            <td className="border px-4 py-2">{match.participantIds[1]}
-                                <Button 
-                                    className="btn btn-success mt-2" 
-                                    onClick={() => this.removePlayerFromTournament(match.participantIds[1])}>
-                                    Remove
-                                </Button>
-                            </td>
-                            <td className="border px-4 py-2">{match.roundNumber}</td>
-                            <td className="border px-4 py-2">{match.status}</td>
-                            <td className="border px-4 py-2">
-                                {match.status !== 'COMPLETED' && <select
-                                    onChange={(e) => this.handleWinnerChange(match.id, e.target.value)}
-                                    className="border rounded p-1"
-                                >
+                {filteredMatches.map((match) => (
+                    <tr key={match.id} className="bg-white">
+                        <td className="border px-4 py-2">{match.id}</td>
+                        <td className="border px-4 py-2">{match.participantIds[0]}</td>
+                        <td className="border px-4 py-2">{match.participantIds[1]}</td>
+                        <td className="border px-4 py-2">{match.roundNumber}</td>
+                        <td className="border px-4 py-2">{match.status}</td>
+                        <td className="border px-4 py-2 flex items-center space-x-2">
+                            {match.status !== 'COMPLETED' && (
+                                <select onChange={(e) => this.handleWinnerChange(match.id, e.target.value)} className="border rounded p-1 mr-2">
                                     <option value="">Select Winner</option>
                                     <option value="player1">Player 1 Wins</option>
                                     <option value="player2">Player 2 Wins</option>
                                     <option value="draw">Draw</option>
-                                </select>}
-                                
-                                <Button 
-                                    className="btn btn-success mt-2" 
-                                    onClick={() => this.completeMatch(match.id)} 
-                                    disabled={match.status === 'COMPLETED'} // Disable if not ongoing
-                                >
-                                    Complete Match
-                                </Button>
-                            </td>
-                        </tr>
-                    ))}
+                                </select>
+                            )}
+                            <Button className="btn btn-success" onClick={() => this.completeMatch(match.id)} disabled={match.status === 'COMPLETED'}>Complete Match</Button>
+                        </td>
+                    </tr>
+                ))}
                 </tbody>
             </table>
         );
     };
 
     render() {
-        const { tournament, searchRound } = this.state;
-        const userRole = sessionStorage.getItem("role");
-        const isPlayer = userRole === 'ROLE_PLAYER';
+        const { tournament, searchRound, showPlayers } = this.state;
+        const isPlayer = sessionStorage.getItem("role") === 'ROLE_PLAYER';
 
-        if (!tournament) {
-            return <p>Loading...</p>;
-        }
+        if (!tournament) return <p>Loading...</p>;
 
-        const {
-            adminId,
-            name,
-            description,
-            startDateTime,
-            endDateTime,
-            registrationStartDate,
-            registrationEndDate,
-            format,
-            status,
-            minRating,
-            maxRating,
-            affectsRating,
-            minAge,
-            maxAge,
-            requiredGender,
-            city,
-            region,
-            country,
-            timeControlSetting,
-        } = tournament;
+        const { name, description, adminId, startDateTime, endDateTime, registrationStartDate, registrationEndDate, format, status, minRating, maxRating, affectsRating, minAge, maxAge, requiredGender, city, region, country, timeControlSetting } = tournament;
 
         return (
             <div className="p-6 max-w-4xl mx-auto">
-                <Card className="p-4 bg-primary">
-                    <h2 className="text-2xl font-bold text-primary">{name}</h2>
-                    <p className="my-2 text-accent">{description}</p>
-                    <p className="my-2 text-secondary">Host: admin{adminId}</p>
+                <Card className="p-6 bg-white rounded-lg shadow-lg">
+                    <h2 className="text-3xl font-bold text-center text-gray-800 mb-4">{name}</h2>
+                    <p className="text-center text-gray-700 mb-6">{description}</p>
+                    <p className="text-center text-gray-500 mb-8">Host: Admin{adminId}</p>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 my-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-6">
                         <div>
-                            <h5 className="text-xl font-semibold text-primary">Tournament Details</h5>
-                            <ul className="list-disc ml-6">
-                                <li>Start: {new Date(startDateTime).toLocaleString()}</li>
-                                <li>End: {new Date(endDateTime).toLocaleString()}</li>
-                                <li>Format: {format}</li>
-                                <li>Status: {status}</li>
-                            </ul>
+                            <h5 className="text-xl font-semibold text-gray-800 mb-4">Tournament Details</h5>
+                            <p className="text-gray-700">
+                                <strong>Start:</strong> {new Date(startDateTime).toLocaleString()}</p>
+                            <p className="text-gray-700"><strong>End:</strong> {new Date(endDateTime).toLocaleString()}
+                            </p>
+                            <p className="text-gray-700"><strong>Format:</strong> {format}</p>
+                            <p className="text-gray-700"><strong>Status:</strong> {status}</p>
+                            <p className="text-gray-700"><strong>Time
+                                Control:</strong> {timeControlSetting.baseTimeMinutes}+{timeControlSetting.incrementSeconds}
+                            </p>
                         </div>
-
                         <div>
-                            <h5 className="text-xl font-semibold text-primary">Requirements</h5>
-                            <ul className="list-disc ml-6">
-                                <li>Min Rating: {minRating}</li>
-                                <li>Max Rating: {maxRating}</li>
-                                <li>Affects Rating: {affectsRating ? 'Yes' : 'No'}</li>
-                                <li>Min Age: {minAge}</li>
-                                <li>Max Age: {maxAge}</li>
-                                <li>Required Gender: {requiredGender}</li>
-                                <li>Location: {city}, {region}, {country}</li>
-                            </ul>
+                            <h5 className="text-xl font-semibold text-gray-800 mb-4">Requirements</h5>
+                            <p className="text-gray-700"><strong>Min Rating:</strong> {minRating}</p>
+                            <p className="text-gray-700"><strong>Max Rating:</strong> {maxRating}</p>
+                            <p className="text-gray-700"><strong>Affects Rating:</strong> {affectsRating ? 'Yes' : 'No'}
+                            </p>
+                            <p className="text-gray-700"><strong>Min Age:</strong> {minAge}</p>
+                            <p className="text-gray-700"><strong>Max Age:</strong> {maxAge}</p>
+                            <p className="text-gray-700"><strong>Required Gender:</strong> {requiredGender}</p>
+                            <p className="text-gray-700"><strong>Location:</strong> {city}, {region}, {country}</p>
                         </div>
                     </div>
 
-                    <div className="my-4">
-                        <h5 className="text-xl font-semibold text-primary">Time Control</h5>
-                        <p className="text-secondary">
-                            Base Time: {timeControlSetting.baseTimeMinutes} minutes, Increment: {timeControlSetting.incrementSeconds} seconds, Type: {timeControlSetting.timeControlType}
-                        </p>
-                        <p className="text-secondary">
-                            Registration from {new Date(registrationStartDate).toLocaleString()} to {new Date(registrationEndDate).toLocaleString()}
-                        </p>
+                    <div className="mb-6">
+                        <p className="text-gray-500 text-sm"><strong>Registration:</strong> {new Date(registrationStartDate).toLocaleString()} to {new Date(registrationEndDate).toLocaleString()}</p>
+                    </div>
+
+                    {/* Toggle Button for Player List */}
+                    <div className="mb-6">
+                        <h5 className="text-xl font-semibold text-gray-800">Players</h5>
+                        <Button
+                            onClick={this.togglePlayersList}
+                            className="btn btn-secondary mb-4">
+                            {showPlayers ? 'Hide Players' : 'Show Players'}
+                        </Button>
+                        {showPlayers && this.renderPlayersList()}
                     </div>
 
                     <input
@@ -317,31 +305,24 @@ class TournamentDetails extends Component {
 
                     {!isPlayer && this.renderMatchesTable()}
 
-                    {isPlayer ? (
-                        <div>
-                        <Button className="btn btn-primary mt-6" onClick={this.signUp}>
-                            Sign Up
-                        </Button>
-                        <Button className="btn btn-primary mt-6" onClick={this.leaveTournament}>
-                            Leave
-                        </Button>
-                        </div>
-                    ) : (
-                        <>
-                            <Link className="btn btn-primary mt-6" to={`/update-tournament/${tournament.name}`}>
-                                Update
-                            </Link>
-                            <Button className="btn btn-primary mt-6" onClick={this.startTournament} disabled={tournament.currentRound !== 0}>
-                                Start tournament
-                            </Button>
-                            <Button className="btn btn-primary mt-6" onClick={this.startNextRound} disabled={tournament.currentRound === tournament.maxRounds}>
-                                Start next round
-                            </Button>
-                            <Button className="btn btn-primary mt-6" onClick={this.completeTournament} disabled={status === 'COMPLETED'}>
-                                Complete tournament
-                            </Button>
-                        </>
-                    )}
+                    <div className="flex space-x-4 mt-6">
+                        {isPlayer ? (
+                            <>
+                                <Button className="btn btn-primary" onClick={this.signUp}>Sign Up</Button>
+                                <Button className="btn btn-danger" onClick={this.leaveTournament}>Leave</Button>
+                            </>
+                        ) : (
+                            <>
+                                <Link className="btn btn-primary"
+                                      to={`/update-tournament/${tournament.name}`}>Update</Link>
+                                <Button className="btn btn-primary" onClick={this.startTournament}>Start
+                                    Tournament</Button>
+                                <Button className="btn btn-primary" onClick={this.startNextRound}>Next Round</Button>
+                                <Button className="btn btn-danger" onClick={this.completeTournament}>Complete
+                                    Tournament</Button>
+                            </>
+                        )}
+                    </div>
                 </Card>
             </div>
         );
@@ -349,7 +330,7 @@ class TournamentDetails extends Component {
 }
 
 const TournamentDetailsWithParams = (props) => (
-    <TournamentDetails {...props} params={useParams()} />
+    <TournamentDetails {...props} params={useParams()}/>
 );
 
 export default withNavigateandLocation(TournamentDetailsWithParams);

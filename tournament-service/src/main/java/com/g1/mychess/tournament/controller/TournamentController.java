@@ -84,6 +84,11 @@ public class TournamentController {
         return tournamentService.signUpToTournament(tournamentId, playerId);
     }
 
+    @GetMapping("/public/{tournamentId}/players")
+    public ResponseEntity<List<PlayerDTO>> getPlayersByTournament(@PathVariable Long tournamentId) {
+        return tournamentService.getPlayersByTournament(tournamentId);
+    }
+
     @GetMapping("/health")
     public ResponseEntity<String> healthCheck() {
         return ResponseEntity.ok("Service is up and running");

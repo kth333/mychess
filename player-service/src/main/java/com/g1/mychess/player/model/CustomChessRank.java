@@ -5,13 +5,14 @@ public enum CustomChessRank {
     INTERMEDIATE("Intermediate", 1200, 1599),
     ADVANCED("Advanced", 1600, 1999),
     EXPERT("Expert", 2000, 2399),
-    MASTER("Master", 2400, Integer.MAX_VALUE);
+    MASTER("Master", 2400, 2699),
+    GRANDMASTER("Grandmaster", 2700, Double.MAX_VALUE);
 
     private final String title;
-    private final int minRating;
-    private final int maxRating;
+    private final double minRating;
+    private final double maxRating;
 
-    CustomChessRank(String title, int minRating, int maxRating) {
+    CustomChessRank(String title, double minRating, double maxRating) {
         this.title = title;
         this.minRating = minRating;
         this.maxRating = maxRating;
@@ -21,15 +22,15 @@ public enum CustomChessRank {
         return title;
     }
 
-    public int getMinRating() {
+    public double getMinRating() {
         return minRating;
     }
 
-    public int getMaxRating() {
+    public double getMaxRating() {
         return maxRating;
     }
 
-    public static CustomChessRank getRankForRating(int rating) {
+    public static CustomChessRank getRankForRating(double rating) {
         for (CustomChessRank rank : values()) {
             if (rating >= rank.minRating && rating <= rank.maxRating) {
                 return rank;

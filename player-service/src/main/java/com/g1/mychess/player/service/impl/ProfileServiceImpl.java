@@ -5,6 +5,7 @@ import com.g1.mychess.player.dto.PlayerProfileUpdateDTO;
 import com.g1.mychess.player.dto.PlayerRatingUpdateDTO;
 import com.g1.mychess.player.exception.PlayerNotFoundException;
 import com.g1.mychess.player.mapper.PlayerMapper;
+import com.g1.mychess.player.model.CustomChessRank;
 import com.g1.mychess.player.model.Player;
 import com.g1.mychess.player.model.PlayerRatingHistory;
 import com.g1.mychess.player.model.Profile;
@@ -52,6 +53,8 @@ public class ProfileServiceImpl implements ProfileService {
         profile.setGlickoRating(ratingUpdateDTO.getGlickoRating());
         profile.setRatingDeviation(ratingUpdateDTO.getRatingDeviation());
         profile.setVolatility(ratingUpdateDTO.getVolatility());
+        CustomChessRank rank = CustomChessRank.getRankForRating(ratingUpdateDTO.getGlickoRating());
+        profile.setRank(rank);
         profileRepository.save(profile);
     }
 

@@ -1,9 +1,13 @@
 import { ProtectedPlayerAPI } from "./ProtectedPlayerAPI";
 
 class PlayerService {
-  
-    async getProfile() {
-        return ProtectedPlayerAPI.get("/profile/");
+
+    async getProfile(playerId) {
+        if (playerId) {
+            return ProtectedPlayerAPI.get(`/profile/${playerId}`);
+        } else {
+            return ProtectedPlayerAPI.get("/profile"); // Endpoint to get the authenticated user
+        }
     }
 
     async updateProfile(playerId, profile) {

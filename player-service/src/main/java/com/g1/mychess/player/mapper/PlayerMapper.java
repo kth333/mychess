@@ -45,6 +45,7 @@ public class PlayerMapper {
     public static PlayerProfileDTO toPlayerProfileDTO(Profile profile) {
         return new PlayerProfileDTO(
                 profile.getPlayerId(),
+                extractUsernameFromProfile(profile),
                 profile.getFullName(),
                 profile.getBio(),
                 profile.getAvatarUrl(),
@@ -91,4 +92,10 @@ public class PlayerMapper {
         return playerRatingHistoryList.stream().map(PlayerMapper::toPlayerRatingHistoryDTO).toList();
     }
 
+    private static String extractUsernameFromProfile(Profile profile) {
+        Player player = profile.getPlayer();
+        System.out.println(player.getUsername());
+        System.out.println(player);
+        return player != null ? player.getUsername() : null;
+    }
 }

@@ -32,11 +32,11 @@ function App() {
               <Route exact path="/password-reset-request" element={<PasswordResetRequest/>} />
               <Route exact path="/password-reset/:token" element={<PasswordReset/>} />
               <Route exact path="/contact-us" element={<ContactUs />} />
-              
+
               <Route element={<ProtectedRoute />}>
                 <Route exact path="/create-tournament" element={<CreateTournament />} />
                 <Route exact path="/update-tournament/:name" element={<UpdateTournament />} />
-                <Route exact path="/profile" element={<Profile/>} />
+                <Route exact path="/profile/:playerId" element={<Profile/>} />
                 <Route exact path="/profile/update/:id" element={<UpdateProfile/>} />
                 <Route exact path="/blacklist" element={<Blacklist/>} />
                 <Route exact path="/whitelist" element={<Whitelist/>} />

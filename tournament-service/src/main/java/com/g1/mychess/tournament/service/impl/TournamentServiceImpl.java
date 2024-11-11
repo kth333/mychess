@@ -281,6 +281,24 @@ public class TournamentServiceImpl implements TournamentService {
         return ResponseEntity.status(HttpStatus.OK).body("Tournament completed successfully.");
     }
 
+    @Override
+    public ResponseEntity<List<PlayerDTO>> getPlayersByTournament(Long tournamentId) {
+        Tournament tournament = tournamentRepository.findById(tournamentId)
+                .orElseThrow(() -> new TournamentNotFoundException("Tournament not found with id: " + tournamentId));
+
+        List<Long> playerIds = tournamentPlayerRepository.findByTournamentId(tournamentId)
+                .orElseThrow(() -> new IllegalArgumentException("No players found for tournament with id: " + tournamentId))
+                .stream()
+                .map(TournamentPlayer::getPlayerId)
+                .toList();
+
+        List<PlayerDTO> players = playerIds.stream()
+                .map(playerServiceClient::getPlayerDetails)
+                .collect(Collectors.toList());
+
+        return ResponseEntity.ok(players);
+    }
+
     private Tournament getTournamentById(Long tournamentId) {
         return tournamentRepository.findById(tournamentId)
                 .orElseThrow(() -> new TournamentNotFoundException("Tournament not found with id: " + tournamentId));

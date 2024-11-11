@@ -1,7 +1,7 @@
 import React from 'react';
 import { Card, CardHeader, CardContent, CardFooter } from "./ui/card";
 import { AvatarImage } from './ui/avatar';
-import { Link } from 'react-router-dom';
+import { Link, useParams } from 'react-router-dom';
 import { Button } from './ui/button';
 import withNavigateandLocation from './withNavigateandLocation';
 import PlayerService from '../services/PlayerService';
@@ -13,8 +13,8 @@ class Profile extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            profile: null, // Initialize profile as null
-            ratingHistory: []  // Initialize rating history state
+            profile: null,
+            ratingHistory: []
         };
     }
 
@@ -22,12 +22,12 @@ class Profile extends React.Component {
         this.fetchProfileData();
     }
 
-    // Fetch player profile data
     fetchProfileData = async () => {
+        const { playerId } = this.props.params;
+        console.log("Fetching profile for playerId:", playerId);
         try {
-            const response = await PlayerService.getProfile();
+            const response = await PlayerService.getProfile(playerId || null);
             this.setState({ profile: response.data }, () => {
-                // Fetch rating history after profile data is fetched
                 this.fetchPlayerRatingHistory(response.data.playerId);
             });
             console.log('Profile data:', response.data);
@@ -36,7 +36,6 @@ class Profile extends React.Component {
         }
     }
 
-    // Fetch rating history data
     fetchPlayerRatingHistory = async (playerId) => {
         try {
             const response = await PlayerService.getPlayerRatingHistory(playerId);
@@ -50,7 +49,6 @@ class Profile extends React.Component {
     render() {
         const { profile } = this.state;
 
-        // If profile is not yet loaded, show loading state
         if (!profile) {
             return <div>Loading...</div>;
         }
@@ -97,40 +95,40 @@ class Profile extends React.Component {
                                             <h3 className="text-xl font-bold border-b pb-2 mb-4">Player Information</h3>
                                             <div className="space-y-2">
                                                 <p>
-                                                   <strong>Name:</strong> {fullName || "Unknown"}
+                                                    <strong>Name:</strong> {fullName || "Unknown"}
                                                 </p>
                                                 <p>
-                                                   <strong>Bio:</strong> {bio || "No bio available"}
+                                                    <strong>Bio:</strong> {bio || "No bio available"}
                                                 </p>
-                                           </div>
-                                       </div>
-                                       <div className="p-4 shadow-md rounded-md">
-                                           <h4 className="text-lg font-semibold">Location Information</h4>
-                                           <div className="space-y-2">
-                                               <p className="text-lg">
-                                                   <strong>Country:</strong> {country || "Unknown"}
-                                               </p>
-                                               <p className="text-lg">
-                                                   <strong>Region:</strong> {region || "Unknown"}
-                                               </p>
-                                               <p className="text-lg">
-                                                   <strong>City:</strong> {city || "Unknown"}
-                                               </p>
-                                           </div>
-                                       </div>
-                                       <div className="p-4 shadow-md rounded-md">
-                                           <h4 className="text-lg font-semibold">Demographic Information</h4>
-                                           <div className="space-y-2">
-                                               <p className="text-lg">
-                                                   <strong>Gender:</strong> {gender || "Not specified"}
-                                               </p>
-                                               <p className="text-lg">
-                                                   <strong>Birth Date:</strong> {birthDate ? birthDate.toString() : "N/A"} <br />
-                                                   <strong>Age:</strong> {age || "N/A"}
-                                               </p>
-                                           </div>
-                                       </div>
-                                   </div>
+                                            </div>
+                                        </div>
+                                        <div className="p-4 shadow-md rounded-md">
+                                            <h4 className="text-lg font-semibold">Location Information</h4>
+                                            <div className="space-y-2">
+                                                <p className="text-lg">
+                                                    <strong>Country:</strong> {country || "Unknown"}
+                                                </p>
+                                                <p className="text-lg">
+                                                    <strong>Region:</strong> {region || "Unknown"}
+                                                </p>
+                                                <p className="text-lg">
+                                                    <strong>City:</strong> {city || "Unknown"}
+                                                </p>
+                                            </div>
+                                        </div>
+                                        <div className="p-4 shadow-md rounded-md">
+                                            <h4 className="text-lg font-semibold">Demographic Information</h4>
+                                            <div className="space-y-2">
+                                                <p className="text-lg">
+                                                    <strong>Gender:</strong> {gender || "Not specified"}
+                                                </p>
+                                                <p className="text-lg">
+                                                    <strong>Birth Date:</strong> {birthDate ? birthDate.toString() : "N/A"} <br />
+                                                    <strong>Age:</strong> {age || "N/A"}
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </CardContent>
                             </Card>
                             <EloChart ratingHistory={this.state.ratingHistory} />
@@ -150,9 +148,12 @@ class Profile extends React.Component {
                                 <strong>Profile Visibility:</strong> {isPublic ? "Public" : "Private"}
                             </p>
                         </div>
-                        <CardFooter className="flex justify-end">
-                            <Link className="btn btn-accent" to={`/profile/update/${playerId}`}>Edit Profile</Link>
-                        </CardFooter>
+                        {/** Button to edit profile if this is the current user **/}
+                        {playerId === parseInt(sessionStorage.getItem("currentPlayerId")) && (
+                            <CardFooter className="flex justify-end">
+                                <Link className="btn btn-accent" to={`/profile/update/${playerId}`}>Edit Profile</Link>
+                            </CardFooter>
+                        )}
                     </Card>
                 </div>
             </div>
@@ -160,4 +161,8 @@ class Profile extends React.Component {
     }
 }
 
-export default withNavigateandLocation(Profile);
+const ProfileWithParams = (props) => (
+    <Profile {...props} params={useParams()} />
+);
+
+export default withNavigateandLocation(ProfileWithParams);
