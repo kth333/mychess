@@ -13,5 +13,5 @@ import org.springframework.stereotype.Repository;
 public interface TournamentRepository extends JpaRepository<Tournament, Long>{
     Optional<Tournament> findByName(String name);
     Optional<Tournament> findById(Long id);
-    List<Tournament> findByRegistrationStartDateTimeBeforeAndStatus(LocalDateTime dateTime, Tournament.TournamentStatus status);
+    List<Tournament> findByRegistrationStartDateBeforeAndStatus(LocalDateTime dateTime, Tournament.TournamentStatus status);
 }

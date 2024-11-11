@@ -195,7 +195,7 @@ public class TournamentServiceImpl implements TournamentService {
     // Helper Methods
     private void validateRegistrationPeriod(Tournament tournament) {
         LocalDateTime now = LocalDateTime.now();
-        if (now.isBefore(tournament.getRegistrationStartDateTime()) || now.isAfter(tournament.getRegistrationEndDateTime())) {
+        if (now.isBefore(tournament.getRegistrationStartDate()) || now.isAfter(tournament.getRegistrationEndDateTime())) {
             throw new RegistrationPeriodException("Registration for this tournament is not open.");
         }
     }
