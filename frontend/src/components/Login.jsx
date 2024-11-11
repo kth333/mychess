@@ -289,7 +289,7 @@ class AuthPage extends Component {
                   disabled={showLogin}
                   className="input input-bordered w-full"
                 />
-                <button type="submit" className="btn btn-primary w-full" disabled={showLogin}>Register</button>
+                <button type="submit" className="btn btn-outline w-full mt-2" disabled={showLogin}>Register</button>
                 <button onClick={this.toggleAuthForm} className="btn btn-link w-full" disabled={showLogin}>Sign In</button>
               </form>
             </div>

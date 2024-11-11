@@ -14,6 +14,7 @@ class TournamentDetails extends Component {
             tournament: null,
             matches: [],
             players: [],
+            matchResults: [],
             selectedWinners: {},
             filteredMatches: [],
             searchRound: '',
@@ -31,6 +32,7 @@ class TournamentDetails extends Component {
             this.setState({ tournament: tournamentRes.data }, async () => {
                 await this.fetchMatches();
                 await this.fetchPlayers();
+                await this.fetchMatchResults();
             });
         } catch (error) {
             console.error("Failed to fetch tournament", error);
@@ -51,18 +53,31 @@ class TournamentDetails extends Component {
         const { id } = this.state.tournament;
         try {
             const res = await MatchService.getAllMatchesById(id);
-            this.setState({ matches: res.data, filteredMatches: res.data });
+            this.setState({ matches: res.data, filteredMatches: res.data }); 
         } catch (error) {
             console.error("Failed to fetch matches", error);
         }
     };
+
+    fetchMatchResults = async () => {
+        const { id } = this.state.tournament;
+        try {
+            const res = await MatchService.getAllMatchResults(id);
+            this.setState({ matchResults: res.data });
+            console.log(res.data);
+        } catch (error) {
+            console.error("Failed to fetch match results", error);
+        }
+    };
+
 
     completeMatch = async (matchId) => {
         const { selectedWinners } = this.state;
         const { winnerId, loserId, isDraw } = selectedWinners[matchId];
         try {
             await MatchService.completeMatch(matchId, { winnerId, loserId, isDraw });
-            this.fetchMatches();
+            await this.fetchMatches();
+            await this.fetchMatchResults();
         } catch (error) {
             alert("Failed to complete match\nReason: " + error.response.data);
         }
@@ -171,19 +186,19 @@ class TournamentDetails extends Component {
         const { players } = this.state;
         const isAdmin = sessionStorage.getItem("role") === 'ROLE_ADMIN';
 
-        if (!players.length) return <p className="text-center text-gray-500">No players signed up for this tournament.</p>;
+        if (!players.length) return <p className="text-center text-primary">No players signed up for this tournament.</p>;
 
         return (
             <div className="grid grid-cols-1 gap-4 mt-4">
                 {players.map((player) => (
-                    <div key={player.id} className="flex items-center p-4 bg-white rounded-lg shadow">
+                    <div key={player.id} className="flex items-center p-4 bg-primary rounded-lg shadow">
                         {/* Display chess rank title next to the username */}
                         <div className="flex-grow">
                             <p className="font-semibold">{player.username}</p>
-                            <p className="text-gray-600 text-sm">
+                            <p className="text-primary text-sm">
                                 Rank: {this.getChessRankTitle(player.glickoRating || 0)}
                             </p>
-                            <p className="text-gray-600 text-sm">
+                            <p className="text-primary text-sm">
                                 Rating: {player.glickoRating || "Unrated"}
                             </p>
                         </div>
@@ -198,46 +213,70 @@ class TournamentDetails extends Component {
     };
 
     renderMatchesTable = () => {
-        const { filteredMatches } = this.state;
+        const { filteredMatches, matchResults } = this.state;
         if (!filteredMatches.length) return <p>No matches available yet.</p>;
-
+    
         return (
-            <table className="table-auto w-full border-collapse border border-gray-300 my-4 shadow-md">
-                <thead className="bg-gray-200">
-                <tr>
-                    <th className="border px-4 py-2">Match ID</th>
-                    <th className="border px-4 py-2">Player 1</th>
-                    <th className="border px-4 py-2">Player 2</th>
-                    <th className="border px-4 py-2">Round</th>
-                    <th className="border px-4 py-2">Status</th>
-                    <th className="border px-4 py-2">Action</th>
-                </tr>
+            <table className="table-auto w-full border-collapse border border-primary my-4 shadow-md">
+                <thead className="bg-primary">
+                    <tr>
+                        <th className="border-primary px-4 py-2">Match ID</th>
+                        <th className="border-primary px-4 py-2">Player 1</th>
+                        <th className="border-primary px-4 py-2">Player 2</th>
+                        <th className="border-primary px-4 py-2">Round</th>
+                        <th className="border-primary px-4 py-2">Status</th>
+                        <th className="border-primary px-4 py-2">Action</th>
+                        <th className="border-primary px-4 py-2">Result</th>
+                    </tr>
                 </thead>
                 <tbody>
-                {filteredMatches.map((match) => (
-                    <tr key={match.id} className="bg-white">
-                        <td className="border px-4 py-2">{match.id}</td>
-                        <td className="border px-4 py-2">{match.participantIds[0]}</td>
-                        <td className="border px-4 py-2">{match.participantIds[1]}</td>
-                        <td className="border px-4 py-2">{match.roundNumber}</td>
-                        <td className="border px-4 py-2">{match.status}</td>
-                        <td className="border px-4 py-2 flex items-center space-x-2">
-                            {match.status !== 'COMPLETED' && (
-                                <select onChange={(e) => this.handleWinnerChange(match.id, e.target.value)} className="border rounded p-1 mr-2">
-                                    <option value="">Select Winner</option>
-                                    <option value="player1">Player 1 Wins</option>
-                                    <option value="player2">Player 2 Wins</option>
-                                    <option value="draw">Draw</option>
-                                </select>
-                            )}
-                            <Button className="btn btn-success" onClick={() => this.completeMatch(match.id)} disabled={match.status === 'COMPLETED'}>Complete Match</Button>
-                        </td>
-                    </tr>
-                ))}
+                    {filteredMatches.map((match) => {
+                        // Find the result for the current match
+                        const result = matchResults.find((r) => r.matchId === match.id);
+    
+                        return (
+                            <tr key={match.id} className="bg-primary">
+                                <td className="border-primary px-4 py-2">{match.id}</td>
+                                <td className="border-primary px-4 py-2">{match.participantIds[0]}</td>
+                                <td className="border-primary px-4 py-2">{match.participantIds[1]}</td>
+                                <td className="border-primary px-4 py-2">{match.roundNumber}</td>
+                                <td className="border-primary px-4 py-2">{match.status}</td>
+                                <td className="border-primary px-4 py-2 flex flex-col items-center space-y-2">
+                                    {match.status !== 'COMPLETED' && (
+                                        <select onChange={(e) => this.handleWinnerChange(match.id, e.target.value)} className="border-primary rounded p-1">
+                                            <option value="">Select Winner</option>
+                                            <option value="player1">Player 1 Wins</option>
+                                            <option value="player2">Player 2 Wins</option>
+                                            <option value="draw">Draw</option>
+                                        </select>
+                                    )}
+                                    <Button className="rounded-lg btn btn-success mt-2" onClick={() => this.completeMatch(match.id)} disabled={match.status === 'COMPLETED'}>
+                                        Complete Match
+                                    </Button>
+                                </td>
+
+                                <td className="border-primary px-4 py-2">
+                                    {result ? (
+                                        result.isDraw ? (
+                                            "Draw"
+                                        ) : (
+                                            <>
+                                                Winner: {result.winnerId} <br />
+                                                Loser: {result.loserId}
+                                            </>
+                                        )
+                                    ) : (
+                                        "Pending"
+                                    )}
+                                </td>
+                            </tr>
+                        );
+                    })}
                 </tbody>
             </table>
         );
     };
+    
 
     render() {
         const { tournament, searchRound, showPlayers } = this.state;
@@ -249,44 +288,44 @@ class TournamentDetails extends Component {
 
         return (
             <div className="p-6 max-w-4xl mx-auto">
-                <Card className="p-6 bg-white rounded-lg shadow-lg">
-                    <h2 className="text-3xl font-bold text-center text-gray-800 mb-4">{name}</h2>
-                    <p className="text-center text-gray-700 mb-6">{description}</p>
-                    <p className="text-center text-gray-500 mb-8">Host: Admin{adminId}</p>
+                <Card className="p-6 bg-primary rounded-lg shadow-lg w-full">
+                    <h2 className="text-3xl font-bold text-center text-primary mb-4">{name}</h2>
+                    <p className="text-center text-primary mb-6">{description}</p>
+                    <p className="text-center text-primary mb-8">Host: Admin{adminId}</p>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-6">
                         <div>
-                            <h5 className="text-xl font-semibold text-gray-800 mb-4">Tournament Details</h5>
-                            <p className="text-gray-700">
+                            <h5 className="text-xl font-semibold text-primary mb-4">Tournament Details</h5>
+                            <p className="text-primary">
                                 <strong>Start:</strong> {new Date(startDateTime).toLocaleString()}</p>
-                            <p className="text-gray-700"><strong>End:</strong> {new Date(endDateTime).toLocaleString()}
+                            <p className="text-primary"><strong>End:</strong> {new Date(endDateTime).toLocaleString()}
                             </p>
-                            <p className="text-gray-700"><strong>Format:</strong> {format}</p>
-                            <p className="text-gray-700"><strong>Status:</strong> {status}</p>
-                            <p className="text-gray-700"><strong>Time
+                            <p className="text-primary"><strong>Format:</strong> {format}</p>
+                            <p className="text-primary"><strong>Status:</strong> {status}</p>
+                            <p className="text-primary"><strong>Time
                                 Control:</strong> {timeControlSetting.baseTimeMinutes}+{timeControlSetting.incrementSeconds}
                             </p>
                         </div>
                         <div>
-                            <h5 className="text-xl font-semibold text-gray-800 mb-4">Requirements</h5>
-                            <p className="text-gray-700"><strong>Min Rating:</strong> {minRating}</p>
-                            <p className="text-gray-700"><strong>Max Rating:</strong> {maxRating}</p>
-                            <p className="text-gray-700"><strong>Affects Rating:</strong> {affectsRating ? 'Yes' : 'No'}
+                            <h5 className="text-xl font-semibold text-primary mb-4">Requirements</h5>
+                            <p className="text-primary"><strong>Min Rating:</strong> {minRating}</p>
+                            <p className="text-primary"><strong>Max Rating:</strong> {maxRating}</p>
+                            <p className="text-primary"><strong>Affects Rating:</strong> {affectsRating ? 'Yes' : 'No'}
                             </p>
-                            <p className="text-gray-700"><strong>Min Age:</strong> {minAge}</p>
-                            <p className="text-gray-700"><strong>Max Age:</strong> {maxAge}</p>
-                            <p className="text-gray-700"><strong>Required Gender:</strong> {requiredGender || "Any"}</p>
-                            <p className="text-gray-700"><strong>Location:</strong> {city}, {region}, {country}</p>
+                            <p className="text-primary"><strong>Min Age:</strong> {minAge}</p>
+                            <p className="text-primary"><strong>Max Age:</strong> {maxAge}</p>
+                            <p className="text-primary"><strong>Required Gender:</strong> {requiredGender || "Any"}</p>
+                            <p className="text-primary"><strong>Location:</strong> {city}, {region}, {country}</p>
                         </div>
                     </div>
 
                     <div className="mb-6">
-                        <p className="text-gray-500 text-sm"><strong>Registration:</strong> {new Date(registrationStartDate).toLocaleString()} to {new Date(registrationEndDate).toLocaleString()}</p>
+                        <p className="text-primary text-sm"><strong>Registration:</strong> {new Date(registrationStartDate).toLocaleString()} to {new Date(registrationEndDate).toLocaleString()}</p>
                     </div>
 
                     {/* Toggle Button for Player List */}
                     <div className="mb-6">
-                        <h5 className="text-xl font-semibold text-gray-800">Players</h5>
+                        <h5 className="text-xl font-semibold text-primary">Players</h5>
                         <Button
                             onClick={this.togglePlayersList}
                             className="btn btn-secondary mb-4">
@@ -318,7 +357,7 @@ class TournamentDetails extends Component {
                                 <Button className="btn btn-primary" onClick={this.startTournament}>Start
                                     Tournament</Button>
                                 <Button className="btn btn-primary" onClick={this.startNextRound}>Next Round</Button>
-                                <Button className="btn btn-danger" onClick={this.completeTournament}>Complete
+                                <Button className="btn btn-danger" onClick={this.completeTournament} disabled={tournament.currentRound !== tournament.maxRounds}>Complete
                                     Tournament</Button>
                             </>
                         )}
