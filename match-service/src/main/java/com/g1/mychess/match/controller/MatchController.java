@@ -31,7 +31,7 @@ public class MatchController {
 
     @PostMapping("/admin/{matchId}/status/completed/match")
     public ResponseEntity<String> completeMatch(@PathVariable Long matchId,@Valid @RequestBody MatchResultDTO matchResultDTO) {
-        return matchService.completeMatch(matchId, matchResultDTO.getWinnerId(), matchResultDTO.getLoserId(), matchResultDTO.isDraw());
+        return matchService.completeMatch(matchId, matchResultDTO.getWinnerId(), matchResultDTO.getLoserId(), matchResultDTO.getIsDraw());
     }
 
     @PostMapping("/admin/{tournamentId}/next-round")
