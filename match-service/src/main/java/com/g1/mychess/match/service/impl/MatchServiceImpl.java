@@ -310,6 +310,7 @@ public class MatchServiceImpl implements MatchService {
         for(Match match : matches) {
             MatchResultDTO matchResult = new MatchResultDTO();
             Long matchId = match.getId();
+            matchResult.setMatchId(matchId);
 
 
             List<MatchPlayer> participants = matchPlayerRepository.findByMatchId(matchId);
