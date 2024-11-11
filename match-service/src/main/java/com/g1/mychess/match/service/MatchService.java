@@ -2,6 +2,7 @@ package com.g1.mychess.match.service;
 
 import com.g1.mychess.match.dto.MatchDTO;
 import com.g1.mychess.match.dto.MatchmakingDTO;
+import com.g1.mychess.match.dto.MatchResultDTO;
 import org.springframework.http.ResponseEntity;
 
 import java.util.List;
@@ -19,4 +20,6 @@ public interface MatchService {
     List<MatchDTO> findAllMatchByTournament(Long tournamentId);
 
     List<MatchDTO> findAllMatchByTournamentRound(Long tournamentId, Integer roundNumber);
+
+    List<MatchResultDTO> findAllMatchResultsByTournament(Long tournamentId);
 }

@@ -304,4 +304,37 @@ public class MatchServiceImpl implements MatchService {
 
         return MatchMapper.toDTOList(matches);
     }
+
+    @Override
+    @Transactional
+    public List<MatchResultDTO> findAllMatchResultsByTournament(Long tournamentId) {
+        List<Match> matches = matchRepository.findByTournamentId(tournamentId)
+                .orElseThrow(() -> new TournamentNotFoundException("Tournament with id = " + tournamentId + " does not exist."));
+        List<MatchResultDTO> matchResults = new ArrayList<>();
+
+        for(Match match : matches) {
+            MatchResultDTO matchResult = new MatchResultDTO();
+            Long matchId = match.getId();
+
+
+            List<MatchPlayer> participants = matchPlayerRepository.findByMatchId(matchId);
+            if(participants.get(0).getResult() == null || participants.get(1).getResult() == null) {
+                continue;
+            }
+            for(MatchPlayer participant : participants) {
+                if(participant.getResult() == MatchPlayer.Result.DRAW) {
+                    matchResult.setIsDraw(true);
+                } else if(participant.getResult() == MatchPlayer.Result.WIN) {
+                    matchResult.setWinnerId(participant.getPlayerId());
+                } else if(participant.getResult() == MatchPlayer.Result.LOSS) {
+                    matchResult.setLoserId(participant.getPlayerId());
+                }
+            }
+
+            matchResults.add(matchResult);
+        }
+
+        return matchResults;
+    }
+
 }

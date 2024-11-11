@@ -58,6 +58,12 @@ public class MatchController {
         return ResponseEntity.ok(matches);
     }
 
+    @GetMapping("/all/result/{tournamentId}")
+    public ResponseEntity<List<MatchResultDTO>> getAllMatchResultByTournament(@PathVariable Long tournamentId) {
+        List<MatchResultDTO> matches = matchService.findAllMatchResultsByTournament(tournamentId);
+        return ResponseEntity.ok(matches);
+    }
+
     @GetMapping("/health")
     public ResponseEntity<String> healthCheck() {
         return ResponseEntity.ok("Service is up and running");
