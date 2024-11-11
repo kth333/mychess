@@ -4,6 +4,10 @@ import { ResponsiveLine } from "@nivo/line";
 const EloChart = ({ ratingHistory }) => {
     console.log("EloChart is rendered with data:", ratingHistory);
 
+    if (!ratingHistory || ratingHistory.length === 0) {
+        return <p style={{ margin: '20px', fontSize: '16px' }}>No rating history to display.</p>;
+    }
+
     // Transform ratingHistory data into a format that Nivo expects
     const chartData = [
         {
