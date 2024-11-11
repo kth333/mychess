@@ -31,7 +31,7 @@ public class MatchController {
 
     @PostMapping("/admin/{matchId}/status/completed/match")
     public ResponseEntity<String> completeMatch(@PathVariable Long matchId,@Valid @RequestBody MatchResultDTO matchResultDTO) {
-        return matchService.completeMatch(matchId, matchResultDTO.getWinnerId(), matchResultDTO.getLoserId(), matchResultDTO.isDraw());
+        return matchService.completeMatch(matchId, matchResultDTO.getWinnerId(), matchResultDTO.getLoserId(), matchResultDTO.getIsDraw());
     }
 
     @PostMapping("/admin/{tournamentId}/status/completed")
@@ -49,6 +49,12 @@ public class MatchController {
     @GetMapping("/{tournamentId}/round/{roundNumber}")
     public ResponseEntity<List<MatchDTO>> getAllMatchByTournamentIdAndRoundNum(@PathVariable Long tournamentId, @PathVariable Integer roundNumber) {
         List<MatchDTO> matches = matchService.findAllMatchByTournamentRound(tournamentId, roundNumber);
+        return ResponseEntity.ok(matches);
+    }
+
+    @GetMapping("/all/result/{tournamentId}")
+    public ResponseEntity<List<MatchResultDTO>> getAllMatchResultByTournament(@PathVariable Long tournamentId) {
+        List<MatchResultDTO> matches = matchService.findAllMatchResultsByTournament(tournamentId);
         return ResponseEntity.ok(matches);
     }
 

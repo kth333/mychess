@@ -34,11 +34,11 @@ public class MatchResultDTO {
         this.loserId = loserId;
     }
 
-    public boolean isDraw() {
+    public boolean getIsDraw() {
         return isDraw;
     }
 
-    public void setDraw(boolean draw) {
+    public void setIsDraw(boolean draw) {
         isDraw = draw;
     }
 }
