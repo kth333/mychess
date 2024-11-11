@@ -26,7 +26,7 @@ public class TournamentSchedulerService {
     public void startScheduledTournaments() {
         LocalDateTime now = LocalDateTime.now();
 
-        List<Tournament> tournamentsToStart = tournamentRepository.findByRegistrationStartDateTimeBeforeAndStatus(now, Tournament.TournamentStatus.UPCOMING);
+        List<Tournament> tournamentsToStart = tournamentRepository.findByRegistrationStartDateBeforeAndStatus(now, Tournament.TournamentStatus.UPCOMING);
 
         tournamentsToStart.forEach(tournament -> {
             try {
