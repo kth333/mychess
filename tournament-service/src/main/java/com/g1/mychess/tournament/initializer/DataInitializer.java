@@ -48,8 +48,8 @@ public class DataInitializer implements CommandLineRunner {
         tournament2.setMaxPlayers(32);
         tournament2.setStartDateTime(LocalDateTime.of(2025, 6, 10, 9, 0));
         tournament2.setEndDateTime(LocalDateTime.of(2025, 6, 15, 17, 0));
-        tournament2.setRegistrationStartDate(LocalDateTime.of(2025, 2, 1, 0, 0));
-        tournament2.setRegistrationEndDate(LocalDateTime.of(2025, 6, 1, 23, 59));
+        tournament2.setRegistrationStartDateTime(LocalDateTime.of(2025, 2, 1, 0, 0));
+        tournament2.setRegistrationEndDateTime(LocalDateTime.of(2025, 6, 1, 23, 59));
         tournament2.setFormat(TournamentFormat.SWISS);
         tournament2.setTimeControlSetting(new TimeControlSetting(15, 10)); 
         tournament2.setStatus(TournamentStatus.UPCOMING);
@@ -74,8 +74,8 @@ public class DataInitializer implements CommandLineRunner {
         tournament3.setMaxPlayers(24);
         tournament3.setStartDateTime(LocalDateTime.of(2025, 7, 5, 10, 0));
         tournament3.setEndDateTime(LocalDateTime.of(2025, 7, 10, 18, 0));
-        tournament3.setRegistrationStartDate(LocalDateTime.of(2025, 3, 1, 0, 0));
-        tournament3.setRegistrationEndDate(LocalDateTime.of(2025, 6, 20, 23, 59));
+        tournament3.setRegistrationStartDateTime(LocalDateTime.of(2025, 3, 1, 0, 0));
+        tournament3.setRegistrationEndDateTime(LocalDateTime.of(2025, 6, 20, 23, 59));
         tournament3.setFormat(TournamentFormat.KNOCKOUT);
         tournament3.setTimeControlSetting(new TimeControlSetting(15, 10)); 
         tournament3.setStatus(TournamentStatus.UPCOMING);
@@ -100,8 +100,8 @@ public class DataInitializer implements CommandLineRunner {
         tournament4.setMaxPlayers(16);
         tournament4.setStartDateTime(LocalDateTime.of(2025, 8, 15, 9, 0));
         tournament4.setEndDateTime(LocalDateTime.of(2025, 8, 20, 20, 0));
-        tournament4.setRegistrationStartDate(LocalDateTime.of(2025, 4, 1, 0, 0));
-        tournament4.setRegistrationEndDate(LocalDateTime.of(2025, 8, 5, 23, 59));
+        tournament4.setRegistrationStartDateTime(LocalDateTime.of(2025, 4, 1, 0, 0));
+        tournament4.setRegistrationEndDateTime(LocalDateTime.of(2025, 8, 5, 23, 59));
         tournament4.setFormat(TournamentFormat.ROUND_ROBIN);
         tournament4.setTimeControlSetting(new TimeControlSetting(15, 10)); 
         tournament4.setStatus(TournamentStatus.UPCOMING);
@@ -136,8 +136,8 @@ public class DataInitializer implements CommandLineRunner {
             tournament1.setMaxPlayers(16);
             tournament1.setStartDateTime(LocalDateTime.of(2025 + yearOffset, 5, 1, 10, 0));
             tournament1.setEndDateTime(LocalDateTime.of(2025 + yearOffset, 5, 5, 18, 0));
-            tournament1.setRegistrationStartDate(LocalDateTime.of(2025 + yearOffset, 1, 1, 0, 0));
-            tournament1.setRegistrationEndDate(LocalDateTime.of(2025 + yearOffset, 4, 15, 23, 59));
+            tournament1.setRegistrationStartDateTime(LocalDateTime.of(2025 + yearOffset, 1, 1, 0, 0));
+            tournament1.setRegistrationEndDateTime(LocalDateTime.of(2025 + yearOffset, 4, 15, 23, 59));
             tournament1.setFormat(TournamentFormat.ROUND_ROBIN);
             tournament1.setTimeControlSetting(new TimeControlSetting(15, 10)); 
             tournament1.setStatus(TournamentStatus.UPCOMING);
