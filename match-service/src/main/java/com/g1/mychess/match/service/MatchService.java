@@ -10,8 +10,6 @@ public interface MatchService {
 
     void runMatchmaking(MatchmakingDTO matchmakingDTO);
 
-    void prepareNextRound(MatchmakingDTO matchmakingDTO);
-
     void finalizeTournament(MatchmakingDTO matchmakingDTO);
 
     ResponseEntity<String> completeMatch(Long matchId, Long winnerPlayerId, Long loserPlayerId, boolean isDraw);

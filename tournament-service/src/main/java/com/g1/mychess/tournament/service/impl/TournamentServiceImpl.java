@@ -274,7 +274,7 @@ public class TournamentServiceImpl implements TournamentService {
 
     private void prepareMatchmakingForNextRound(Tournament tournament, String jwtToken) {
         MatchmakingDTO matchmakingDTO = createMatchmakingDTO(tournament);
-        matchServiceClient.prepareNextRound(matchmakingDTO, jwtToken);
+        matchServiceClient.runMatchmaking(matchmakingDTO, jwtToken);
     }
 
     private Tournament getTournamentById(Long tournamentId) {

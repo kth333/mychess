@@ -34,12 +34,6 @@ public class MatchController {
         return matchService.completeMatch(matchId, matchResultDTO.getWinnerId(), matchResultDTO.getLoserId(), matchResultDTO.isDraw());
     }
 
-    @PostMapping("/admin/{tournamentId}/next-round")
-    public ResponseEntity<String> prepareNextRound(@PathVariable Long tournamentId,@Valid @RequestBody MatchmakingDTO matchmakingDTO) {
-        matchService.prepareNextRound(matchmakingDTO);
-        return ResponseEntity.status(HttpStatus.OK).body("Next round for tournament " + tournamentId + " prepared successfully.");
-    }
-
     @PostMapping("/admin/{tournamentId}/status/completed")
     public ResponseEntity<String> finalizeTournament(@Valid @RequestBody MatchmakingDTO matchmakingDTO) {
         matchService.finalizeTournament(matchmakingDTO);
