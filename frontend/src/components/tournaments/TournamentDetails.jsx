@@ -275,7 +275,7 @@ class TournamentDetails extends Component {
                             </p>
                             <p className="text-gray-700"><strong>Min Age:</strong> {minAge}</p>
                             <p className="text-gray-700"><strong>Max Age:</strong> {maxAge}</p>
-                            <p className="text-gray-700"><strong>Required Gender:</strong> {requiredGender}</p>
+                            <p className="text-gray-700"><strong>Required Gender:</strong> {requiredGender || "Any"}</p>
                             <p className="text-gray-700"><strong>Location:</strong> {city}, {region}, {country}</p>
                         </div>
                     </div>
