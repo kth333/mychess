@@ -24,13 +24,21 @@ class Profile extends React.Component {
 
     fetchProfileData = async () => {
         const { playerId } = this.props.params;
+        const currentPlayerId = parseInt(sessionStorage.getItem("currentPlayerId"));
+
         console.log("Fetching profile for playerId:", playerId);
         try {
             const response = await PlayerService.getProfile(playerId || null);
-            this.setState({ profile: response.data }, () => {
-                this.fetchPlayerRatingHistory(response.data.playerId);
-            });
-            console.log('Profile data:', response.data);
+            const profileData = response.data;
+
+            if (!profileData.isPublic && profileData.playerId !== currentPlayerId) {
+                alert("This profile is private.");
+                this.setState({ profile: null });
+            } else {
+                this.setState({ profile: profileData }, () => {
+                    this.fetchPlayerRatingHistory(profileData.playerId);
+                });
+            }
         } catch (error) {
             console.error('Error fetching profile:', error.response ? error.response.data : error.message);
         }
