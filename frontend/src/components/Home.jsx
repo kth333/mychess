@@ -88,7 +88,7 @@ class Home extends Component {
           {/* Leaderboard Section */}
           <section className="py-16 px-6">
            <h2 className="text-3xl font-bold text-center mb-12">Global Leaderboard</h2>
-           <div className="overflow-x-auto">*/}
+           <div className="overflow-x-auto">
              <div className="overflow-y-auto max-h-96"> /!* Add a fixed height and vertical scrolling *!/
                <table className="min-w-full bg-primary rounded-lg">
                   <thead>
