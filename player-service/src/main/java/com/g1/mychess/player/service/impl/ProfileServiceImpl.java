@@ -17,6 +17,7 @@ import com.g1.mychess.player.repository.ProfileRepository;
 import com.g1.mychess.player.service.ProfileService;
 import jakarta.transaction.Transactional;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
@@ -47,6 +48,10 @@ public class ProfileServiceImpl implements ProfileService {
             ProfileRepository profileRepository, PlayerRatingHistoryRepository playerRatingHistoryRepository
     ) {
         this.playerRepository = playerRepository;
+    }
+
+    @Autowired
+    public void setProfileRepository(ProfileRepository profileRepository) {
         this.profileRepository = profileRepository;
         this.playerRatingHistoryRepository = playerRatingHistoryRepository;
     }

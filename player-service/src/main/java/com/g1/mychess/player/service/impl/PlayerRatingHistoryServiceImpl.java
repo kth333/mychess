@@ -37,6 +37,10 @@ public class PlayerRatingHistoryServiceImpl implements PlayerRatingHistoryServic
      */
     public PlayerRatingHistoryServiceImpl(PlayerRepository playerRepository, PlayerRatingHistoryRepository playerRatingHistoryRepository) {
         this.playerRepository = playerRepository;
+    }
+
+    @Autowired
+    public void setPlayerRatingHistoryRepository(PlayerRatingHistoryRepository playerRatingHistoryRepository) {
         this.playerRatingHistoryRepository = playerRatingHistoryRepository;
     }
 

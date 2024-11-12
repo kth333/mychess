@@ -17,6 +17,7 @@ import com.g1.mychess.player.repository.PlayerRepository;
 import com.g1.mychess.player.service.PlayerService;
 import com.g1.mychess.player.client.EmailServiceClient;
 import jakarta.transaction.Transactional;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -55,6 +56,15 @@ public class PlayerServiceImpl implements PlayerService {
     ) {
         this.playerRepository = playerRepository;
         this.profileRepository = profileRepository;
+    }
+
+    @Autowired
+    public void setPlayerRepository(PlayerRepository playerRepository) {
+        this.playerRepository = playerRepository;
+    }
+
+    @Autowired
+    public void setPlayerRatingHistoryRepository(PlayerRatingHistoryRepository playerRatingHistoryRepository) {
         this.playerRatingHistoryRepository = playerRatingHistoryRepository;
         this.emailServiceClient = emailServiceClient;
         this.followRepository = followRepository;
@@ -97,7 +107,7 @@ public class PlayerServiceImpl implements PlayerService {
      * @return True if the username exists, false otherwise.
      */
     private boolean usernameExists(String username) {
-        return playerRepository.findByUsername(username).isPresent();
+            return playerRepository.findByUsername(username).isPresent();
     }
 
     /**
@@ -393,4 +403,7 @@ public class PlayerServiceImpl implements PlayerService {
         return playerRepository.findById(playerId)
                 .orElseThrow(() -> new PlayerNotFoundException("Player not found with id: " + playerId));
     }
+
+
+
 }
