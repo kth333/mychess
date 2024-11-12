@@ -1,3 +1,5 @@
+version: '3.8'
+
 services:
   nginx:
     image: nginx:alpine
@@ -9,79 +11,84 @@ services:
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf
       - ./nginx/certs/fullchain.pem:/etc/nginx/certs/fullchain.pem
       - ./nginx/certs/privkey.pem:/etc/nginx/certs/privkey.pem
-    networks:
-      - backend
+    depends_on:
+      - auth-service
+      - player-service
+      - match-service
+      - tournament-service
+      - admin-service
+      - email-service
+      - frontend
 
   auth-service:
     build:
       context: ./auth-service
-      dockerfile: Dockerfile
     image: "${DOCKER_USERNAME}/auth-service:latest"
     environment:
       - SPRING_PROFILES_ACTIVE=docker
-    networks:
-      - backend
+    env_file:
+      - .env
+    expose:
+      - "8080"
 
   player-service:
     build:
       context: ./player-service
-      dockerfile: Dockerfile
     image: "${DOCKER_USERNAME}/player-service:latest"
     environment:
       - SPRING_PROFILES_ACTIVE=docker
-    networks:
-      - backend
+    env_file:
+      - .env
+    expose:
+      - "8081"
 
   match-service:
     build:
       context: ./match-service
-      dockerfile: Dockerfile
     image: "${DOCKER_USERNAME}/match-service:latest"
     environment:
       - SPRING_PROFILES_ACTIVE=docker
-    networks:
-      - backend
+    env_file:
+      - .env
+    expose:
+      - "8082"
 
   tournament-service:
     build:
       context: ./tournament-service
-      dockerfile: Dockerfile
     image: "${DOCKER_USERNAME}/tournament-service:latest"
     environment:
       - SPRING_PROFILES_ACTIVE=docker
-    networks:
-      - backend
+    env_file:
+      - .env
+    expose:
+      - "8083"
 
   admin-service:
     build:
       context: ./admin-service
-      dockerfile: Dockerfile
     image: "${DOCKER_USERNAME}/admin-service:latest"
     environment:
       - SPRING_PROFILES_ACTIVE=docker
-    networks:
-      - backend
+    env_file:
+      - .env
+    expose:
+      - "8084"
 
   email-service:
     build:
       context: ./email-service
-      dockerfile: Dockerfile
     image: "${DOCKER_USERNAME}/email-service:latest"
     environment:
       - SPRING_PROFILES_ACTIVE=docker
-    networks:
-      - backend
+    env_file:
+      - .env
+    expose:
+      - "8085"
 
   frontend:
     build:
       context: ./frontend
-      dockerfile: Dockerfile
     image: "${DOCKER_USERNAME}/frontend:latest"
-    ports:
-      - "3000:3000"
-    networks:
-      - backend
-
-networks:
-  backend:
-    driver: bridge
+    expose:
+      - "3000"
