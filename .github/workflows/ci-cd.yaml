@@ -81,9 +81,9 @@ jobs:
         run: |
           echo "${{ secrets.FULLCHAIN_PEM }}" | base64 --decode > fullchain.pem
           echo "${{ secrets.PRIVKEY_PEM }}" | base64 --decode > privkey.pem
-          mkdir -p ./frontend/nginx/certs
-          mv fullchain.pem privkey.pem ./frontend/nginx/certs/
-          ls ./frontend/nginx/certs/
+          mkdir -p ./nginx/certs
+          mv fullchain.pem privkey.pem ./nginx/certs/
+          ls ./nginx/certs/
 
       - name: Log in to Docker Hub
         uses: docker/login-action@v2
