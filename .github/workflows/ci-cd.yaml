@@ -204,5 +204,5 @@ jobs:
             docker container rm frontend || true &&
             docker system prune -f --volumes &&
             docker pull ppv1/frontend:latest &&
-            docker run -d --name frontend -p 80:80 ppv1/frontend:latest
+            docker run -d --name frontend -p 80:80 -p 443:443 ppv1/frontend:latest
           "
