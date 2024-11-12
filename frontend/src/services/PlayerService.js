@@ -1,4 +1,5 @@
 import { ProtectedPlayerAPI } from "./ProtectedPlayerAPI";
+import { PlayerAPI } from "./PlayerAPI";
 
 class PlayerService {
 
@@ -18,6 +19,9 @@ class PlayerService {
         return ProtectedPlayerAPI.get(`/profile/rating-history/${playerId}`);
     }
 
+    async getLeaderboard() {
+        return PlayerAPI.get("/profile/leaderboard");
+    }
 
 }
 
