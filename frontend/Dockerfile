@@ -26,7 +26,7 @@ RUN rm /etc/nginx/conf.d/default.conf
 COPY --from=build /app/build /usr/share/nginx/html
 
 # Copy custom NGINX configuration
-COPY nginx.conf /etc/nginx/nginx.conf
+COPY ./nginx/nginx.conf /etc/nginx/nginx.conf
 
 # Copy the SSL certificates into the container
 COPY ./nginx/certs/fullchain.pem /etc/letsencrypt/live/mychesss.com/fullchain.pem

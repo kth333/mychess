@@ -81,131 +81,39 @@ jobs:
         run: |
           echo "${{ secrets.FULLCHAIN_PEM }}" | base64 --decode > fullchain.pem
           echo "${{ secrets.PRIVKEY_PEM }}" | base64 --decode > privkey.pem
-          for service in auth-service player-service match-service tournament-service admin-service email-service; do
-            mkdir -p ./$service/nginx/certs
-            cp fullchain.pem privkey.pem ./$service/nginx/certs/
-          done
-          mkdir -p ./frontend/nginx/certs
-          cp fullchain.pem privkey.pem ./frontend/nginx/certs/
-          
+          mkdir -p ./nginx/certs
+          mv fullchain.pem privkey.pem ./nginx/certs/
+
       - name: Log in to Docker Hub
         uses: docker/login-action@v2
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
-      - name: Build Backend Docker Images
+      - name: Build and Push Backend Docker Images
         if: ${{ inputs.skip_backend != 'true' }} # Skip backend docker build conditionally
         run: |
           docker-compose build auth-service tournament-service match-service email-service player-service admin-service
-
-      - name: Push Backend Docker Images
-        if: ${{ inputs.skip_backend != 'true' }} # Skip backend docker push conditionally
-        run: |
           docker-compose push auth-service tournament-service match-service email-service player-service admin-service
 
-      - name: Build Frontend Docker Image
-        run: docker-compose build frontend
+      - name: Build and Push Frontend Docker Image
+        run: |
+          docker-compose build frontend
+          docker-compose push frontend
 
-      - name: Push Frontend Docker Image
-        run: docker-compose push frontend
-
-  deploy-backend:
+  deploy:
     needs: build
     runs-on: ubuntu-latest
-
     steps:
-      - name: Deploy Auth Service
-        if: ${{ inputs.skip_backend != 'true' }}
+      - name: Set up SSH Key for Deployment
         run: |
           echo "${{ secrets.EC2_SSH_KEY }}" > ec2_key.pem
           chmod 600 ec2_key.pem
-          ssh -o StrictHostKeyChecking=no -i ec2_key.pem ec2-user@${{ secrets.EC2_AUTH_SERVICE_DNS }} "
-            docker container stop auth-service || true &&
-            docker container rm auth-service || true &&
-            docker system prune -f --volumes &&
-            docker pull ppv1/auth-service:latest &&
-            docker run -d --name auth-service -p 443:443 -p 8080:8080 --env-file /home/ec2-user/.env ppv1/auth-service:latest --spring.profiles.active=docker
-          "
 
-      - name: Deploy Admin Service
-        if: ${{ inputs.skip_backend != 'true' }}
+      - name: Deploy Services on EC2
         run: |
-          echo "${{ secrets.EC2_SSH_KEY }}" > ec2_key.pem
-          chmod 600 ec2_key.pem
-          ssh -o StrictHostKeyChecking=no -i ec2_key.pem ec2-user@${{ secrets.EC2_ADMIN_SERVICE_DNS }} "
-            docker container stop admin-service || true &&
-            docker container rm admin-service || true &&
-            docker system prune -f --volumes &&
-            docker pull ppv1/admin-service:latest &&
-            docker run -d --name admin-service -p 443:443 -p 8084:8084 --env-file /home/ec2-user/.env ppv1/admin-service:latest --spring.profiles.active=docker
-          "
-
-      - name: Deploy Player Service
-        if: ${{ inputs.skip_backend != 'true' }}
-        run: |
-          echo "${{ secrets.EC2_SSH_KEY }}" > ec2_key.pem
-          chmod 600 ec2_key.pem
-          ssh -o StrictHostKeyChecking=no -i ec2_key.pem ec2-user@${{ secrets.EC2_PLAYER_SERVICE_DNS }} "
-            docker container stop player-service || true &&
-            docker container rm player-service || true &&
-            docker system prune -f --volumes &&
-            docker pull ppv1/player-service:latest &&
-            docker run -d --name player-service -p 443:443 -p 8081:8081 --env-file /home/ec2-user/.env ppv1/player-service:latest --spring.profiles.active=docker
-          "
-
-      - name: Deploy Email Service
-        if: ${{ inputs.skip_backend != 'true' }}
-        run: |
-          echo "${{ secrets.EC2_SSH_KEY }}" > ec2_key.pem
-          chmod 600 ec2_key.pem
-          ssh -o StrictHostKeyChecking=no -i ec2_key.pem ec2-user@${{ secrets.EC2_EMAIL_SERVICE_DNS }} "
-            docker container stop email-service || true &&
-            docker container rm email-service || true &&
-            docker system prune -f --volumes &&
-            docker pull ppv1/email-service:latest &&
-            docker run -d --name email-service -p 443:443 -p 8085:8085 --env-file /home/ec2-user/.env ppv1/email-service:latest --spring.profiles.active=docker
-          "
-
-      - name: Deploy Tournament Service
-        if: ${{ inputs.skip_backend != 'true' }}
-        run: |
-          echo "${{ secrets.EC2_SSH_KEY }}" > ec2_key.pem
-          chmod 600 ec2_key.pem
-          ssh -o StrictHostKeyChecking=no -i ec2_key.pem ec2-user@${{ secrets.EC2_TOURNAMENT_SERVICE_DNS }} "
-            docker container stop tournament-service || true &&
-            docker container rm tournament-service || true &&
-            docker system prune -f --volumes &&
-            docker pull ppv1/tournament-service:latest &&
-            docker run -d --name tournament-service -p 443:443 -p 8083:8083 --env-file /home/ec2-user/.env ppv1/tournament-service:latest --spring.profiles.active=docker
-          "
-
-      - name: Deploy Match Service
-        if: ${{ inputs.skip_backend != 'true' }}
-        run: |
-          echo "${{ secrets.EC2_SSH_KEY }}" > ec2_key.pem
-          chmod 600 ec2_key.pem
-          ssh -o StrictHostKeyChecking=no -i ec2_key.pem ec2-user@${{ secrets.EC2_MATCH_SERVICE_DNS }} "
-            docker container stop match-service || true &&
-            docker container rm match-service || true &&
-            docker system prune -f --volumes &&
-            docker pull ppv1/match-service:latest &&
-            docker run -d --name match-service -p 443:443 -p 8082:8082 --env-file /home/ec2-user/.env ppv1/match-service:latest --spring.profiles.active=docker
-          "
-
-  deploy-frontend:
-    needs: build
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Deploy Frontend
-        run: |
-          echo "${{ secrets.EC2_SSH_KEY }}" > ec2_key.pem
-          chmod 600 ec2_key.pem
-          ssh -o StrictHostKeyChecking=no -i ec2_key.pem ec2-user@${{ secrets.EC2_FRONTEND_DNS }} "
-            docker container stop frontend || true &&
-            docker container rm frontend || true &&
-            docker system prune -f --volumes &&
-            docker pull ppv1/frontend:latest &&
-            docker run -d --name frontend -p 80:80 -p 443:443 ppv1/frontend:latest
+          ssh -o StrictHostKeyChecking=no -i ec2_key.pem ec2-user@${{ secrets.EC2_INSTANCE_DNS }} "
+            docker-compose down &&
+            docker-compose pull &&
+            docker-compose up -d
           "
