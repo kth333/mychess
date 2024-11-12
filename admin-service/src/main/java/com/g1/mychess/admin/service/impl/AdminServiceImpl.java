@@ -4,6 +4,7 @@ package com.g1.mychess.admin.service.impl;
 import com.g1.mychess.admin.client.EmailServiceClient;
 import com.g1.mychess.admin.client.PlayerServiceClient;
 import com.g1.mychess.admin.dto.*;
+import com.g1.mychess.admin.exception.AdminNotFoundException;
 import com.g1.mychess.admin.exception.InvalidBlacklistOperationException;
 import com.g1.mychess.admin.mapper.AdminMapper;
 import com.g1.mychess.admin.model.Admin;
@@ -20,6 +21,10 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.List;
 
+/**
+ * Implementation of the AdminService interface, providing administrative operations such as
+ * blacklisting and whitelisting players, and managing blacklist expiration.
+ */
 @Service
 public class AdminServiceImpl implements AdminService {
 
@@ -29,6 +34,15 @@ public class AdminServiceImpl implements AdminService {
     private final EmailServiceClient emailServiceClient;
     private final AuthenticationService authenticationService;
 
+    /**
+     * Constructor to initialize the AdminServiceImpl with required dependencies.
+     *
+     * @param adminRepository Admin repository for accessing admin data
+     * @param blacklistRepository Blacklist repository for accessing blacklist data
+     * @param playerServiceClient Client for accessing player data
+     * @param emailServiceClient Client for sending emails
+     * @param authenticationService Service for user authentication
+     */
     public AdminServiceImpl(
             AdminRepository adminRepository,
             BlacklistRepository blacklistRepository,
@@ -43,23 +57,33 @@ public class AdminServiceImpl implements AdminService {
         this.authenticationService = authenticationService;
     }
 
+    /**
+     * Retrieves an admin by username.
+     *
+     * @param username The username of the admin
+     * @return UserDTO containing the admin's details
+     * @throws AdminNotFoundException if the admin with the given username is not found
+     */
     @Override
     public UserDTO findAdminByUsername(String username) {
         Admin admin = adminRepository.findByUsername(username)
-                .orElseThrow(() -> new IllegalArgumentException("Admin not found with username: " + username));
+                .orElseThrow(() -> new AdminNotFoundException("Admin not found with username: " + username));
 
         return AdminMapper.toUserDTO(admin);
     }
 
+    /**
+     * Blacklists a player based on the provided blacklist information.
+     *
+     * @param blacklistDTO DTO containing blacklist information
+     * @param request The HttpServletRequest to extract the admin ID
+     * @throws InvalidBlacklistOperationException if the player is already blacklisted
+     */
     @Override
     @Transactional
     public void blacklistPlayer(BlacklistDTO blacklistDTO, HttpServletRequest request) {
+        validatePlayerNotBlacklisted(blacklistDTO);
         PlayerDTO playerDTO = playerServiceClient.getPlayerDetails(blacklistDTO.getPlayerId());
-
-        if (playerDTO.isBlacklisted()) {
-            throw new InvalidBlacklistOperationException(
-                    "Player with ID " + blacklistDTO.getPlayerId() + " is already blacklisted.");
-        }
 
         populateBlacklistDTOWithPlayerInfo(blacklistDTO, playerDTO);
 
@@ -76,6 +100,13 @@ public class AdminServiceImpl implements AdminService {
         sendBlacklistNotificationEmail(blacklistDTO);
     }
 
+    /**
+     * Whitelists a player based on the provided whitelist information.
+     *
+     * @param whitelistDTO DTO containing whitelist information
+     * @param request The HttpServletRequest to extract the admin ID
+     * @throws InvalidBlacklistOperationException if the player is not blacklisted
+     */
     @Override
     @Transactional
     public void whitelistPlayer(WhitelistDTO whitelistDTO, HttpServletRequest request) {
@@ -83,12 +114,9 @@ public class AdminServiceImpl implements AdminService {
             throw new IllegalArgumentException("Whitelist data must not be null.");
         }
 
-        PlayerDTO playerDTO = playerServiceClient.getPlayerDetails(whitelistDTO.getPlayerId());
+        validatePlayerIsBlacklisted(whitelistDTO);
 
-        if (!playerDTO.isBlacklisted()) {
-            throw new InvalidBlacklistOperationException(
-                    "Player with ID " + whitelistDTO.getPlayerId() + " is not blacklisted.");
-        }
+        PlayerDTO playerDTO = playerServiceClient.getPlayerDetails(whitelistDTO.getPlayerId());
 
         populateWhitelistDTOWithPlayerInfo(whitelistDTO, playerDTO);
 
@@ -106,6 +134,10 @@ public class AdminServiceImpl implements AdminService {
         sendWhitelistNotificationEmail(whitelistDTO);
     }
 
+    /**
+     * Automatically whitelists players whose bans have expired.
+     * This method is scheduled to run periodically.
+     */
     @Override
     @Scheduled(fixedRate = 3600000)
     public void autoWhitelistExpiredBans() {
@@ -121,6 +153,11 @@ public class AdminServiceImpl implements AdminService {
         }
     }
 
+    /**
+     * Whitelists a player whose ban has expired.
+     *
+     * @param blacklist The blacklist entry of the player
+     */
     private void whitelistPlayerAfterExpiry(Blacklist blacklist) {
         blacklist.setActive(false);
         blacklist.setWhitelistedAt(LocalDateTime.now());
@@ -139,16 +176,35 @@ public class AdminServiceImpl implements AdminService {
         sendWhitelistNotificationEmail(whitelistDTO);
     }
 
+    /**
+     * Populates a BlacklistDTO with player information.
+     *
+     * @param blacklistDTO The DTO to be populated
+     * @param playerDTO The player details
+     */
     private void populateBlacklistDTOWithPlayerInfo(BlacklistDTO blacklistDTO, PlayerDTO playerDTO) {
         blacklistDTO.setUsername(playerDTO.getUsername());
         blacklistDTO.setEmail(playerDTO.getEmail());
     }
 
+    /**
+     * Populates a WhitelistDTO with player information.
+     *
+     * @param whitelistDTO The DTO to be populated
+     * @param playerDTO The player details
+     */
     private void populateWhitelistDTOWithPlayerInfo(WhitelistDTO whitelistDTO, PlayerDTO playerDTO) {
         whitelistDTO.setUsername(playerDTO.getUsername());
         whitelistDTO.setEmail(playerDTO.getEmail());
     }
 
+    /**
+     * Updates a blacklist entry with information from a BlacklistDTO.
+     *
+     * @param blacklist The blacklist entry to update
+     * @param blacklistDTO The DTO containing updated information
+     * @param adminId The ID of the admin performing the action
+     */
     private void updateBlacklist(Blacklist blacklist, BlacklistDTO blacklistDTO, Long adminId) {
         blacklist.setPlayerId(blacklistDTO.getPlayerId());
         blacklist.setAdminId(adminId);
@@ -158,6 +214,13 @@ public class AdminServiceImpl implements AdminService {
         blacklist.setActive(true);
     }
 
+    /**
+     * Updates a blacklist entry to reflect that the player has been whitelisted.
+     *
+     * @param blacklist The blacklist entry to update
+     * @param whitelistDTO The DTO containing whitelist information
+     * @param adminId The ID of the admin performing the action
+     */
     private void updateWhitelist(Blacklist blacklist, WhitelistDTO whitelistDTO, Long adminId) {
         blacklist.setWhitelistedAt(LocalDateTime.now());
         blacklist.setAdminId(adminId);
@@ -165,6 +228,11 @@ public class AdminServiceImpl implements AdminService {
         blacklist.setActive(false);
     }
 
+    /**
+     * Sends a notification email to a player when they are blacklisted.
+     *
+     * @param blacklistDTO The DTO containing the player's information
+     */
     private void sendBlacklistNotificationEmail(BlacklistDTO blacklistDTO) {
         BlacklistEmailDTO emailDTO = new BlacklistEmailDTO();
         emailDTO.setTo(blacklistDTO.getEmail());
@@ -175,6 +243,11 @@ public class AdminServiceImpl implements AdminService {
         emailServiceClient.sendBlacklistNotificationEmail(emailDTO);
     }
 
+    /**
+     * Sends a notification email to a player when they are whitelisted.
+     *
+     * @param whitelistDTO The DTO containing the player's information
+     */
     private void sendWhitelistNotificationEmail(WhitelistDTO whitelistDTO) {
         WhitelistEmailDTO emailDTO = new WhitelistEmailDTO();
         emailDTO.setTo(whitelistDTO.getEmail());
@@ -182,5 +255,33 @@ public class AdminServiceImpl implements AdminService {
         emailDTO.setReason(whitelistDTO.getReason());
 
         emailServiceClient.sendWhitelistNotificationEmail(emailDTO);
+    }
+
+    /**
+     * Validates that a player is not already blacklisted.
+     *
+     * @param blacklistDTO The DTO containing the player's ID
+     * @throws InvalidBlacklistOperationException if the player is already blacklisted
+     */
+    private void validatePlayerNotBlacklisted(BlacklistDTO blacklistDTO) {
+        PlayerDTO playerDTO = playerServiceClient.getPlayerDetails(blacklistDTO.getPlayerId());
+        if (playerDTO.isBlacklisted()) {
+            throw new InvalidBlacklistOperationException(
+                    "Player with ID " + blacklistDTO.getPlayerId() + " is already blacklisted.");
+        }
+    }
+
+    /**
+     * Validates that a player is blacklisted before whitelisting them.
+     *
+     * @param whitelistDTO The DTO containing the player's ID
+     * @throws InvalidBlacklistOperationException if the player is not blacklisted
+     */
+    private void validatePlayerIsBlacklisted(WhitelistDTO whitelistDTO) {
+        PlayerDTO playerDTO = playerServiceClient.getPlayerDetails(whitelistDTO.getPlayerId());
+        if (!playerDTO.isBlacklisted()) {
+            throw new InvalidBlacklistOperationException(
+                    "Player with ID " + whitelistDTO.getPlayerId() + " is not blacklisted.");
+        }
     }
 }
