@@ -1,76 +1,76 @@
-
 services:
+  nginx:
+    image: nginx:alpine
+    container_name: nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+      - ./nginx/certs/fullchain.pem:/etc/nginx/certs/fullchain.pem
+      - ./nginx/certs/privkey.pem:/etc/nginx/certs/privkey.pem
+    networks:
+      - backend
+
   auth-service:
     build:
       context: ./auth-service
       dockerfile: Dockerfile
     image: "${DOCKER_USERNAME}/auth-service:latest"
-    ports:
-      - "8080:8080"
     environment:
       - SPRING_PROFILES_ACTIVE=docker
-    env_file:
-      ./.env
+    networks:
+      - backend
 
   player-service:
     build:
       context: ./player-service
       dockerfile: Dockerfile
     image: "${DOCKER_USERNAME}/player-service:latest"
-    ports:
-      - "8081:8081"
     environment:
       - SPRING_PROFILES_ACTIVE=docker
-    env_file:
-      ./.env
+    networks:
+      - backend
 
   match-service:
     build:
       context: ./match-service
       dockerfile: Dockerfile
     image: "${DOCKER_USERNAME}/match-service:latest"
-    ports:
-      - "8082:8082"
     environment:
       - SPRING_PROFILES_ACTIVE=docker
-    env_file:
-      ./.env
+    networks:
+      - backend
 
   tournament-service:
     build:
       context: ./tournament-service
       dockerfile: Dockerfile
     image: "${DOCKER_USERNAME}/tournament-service:latest"
-    ports:
-      - "8083:8083"
     environment:
       - SPRING_PROFILES_ACTIVE=docker
-    env_file:
-      ./.env
+    networks:
+      - backend
 
   admin-service:
     build:
       context: ./admin-service
       dockerfile: Dockerfile
     image: "${DOCKER_USERNAME}/admin-service:latest"
-    ports:
-      - "8084:8084"
     environment:
       - SPRING_PROFILES_ACTIVE=docker
-    env_file:
-      ./.env
+    networks:
+      - backend
 
   email-service:
     build:
       context: ./email-service
       dockerfile: Dockerfile
     image: "${DOCKER_USERNAME}/email-service:latest"
-    ports:
-      - "8085:8085"
     environment:
       - SPRING_PROFILES_ACTIVE=docker
-    env_file:
-      ./.env
+    networks:
+      - backend
 
   frontend:
     build:
@@ -79,3 +79,9 @@ services:
     image: "${DOCKER_USERNAME}/frontend:latest"
     ports:
       - "3000:3000"
+    networks:
+      - backend
+
+networks:
+  backend:
+    driver: bridge
