@@ -1,81 +1,94 @@
+version: '3.8'
 
 services:
+  nginx:
+    image: nginx:alpine
+    container_name: nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+      - ./nginx/certs/fullchain.pem:/etc/nginx/certs/fullchain.pem
+      - ./nginx/certs/privkey.pem:/etc/nginx/certs/privkey.pem
+    depends_on:
+      - auth-service
+      - player-service
+      - match-service
+      - tournament-service
+      - admin-service
+      - email-service
+      - frontend
+
   auth-service:
     build:
       context: ./auth-service
-      dockerfile: Dockerfile
     image: "${DOCKER_USERNAME}/auth-service:latest"
-    ports:
-      - "8080:8080"
     environment:
       - SPRING_PROFILES_ACTIVE=docker
     env_file:
-      ./.env
+      - .env
+    expose:
+      - "8080"
 
   player-service:
     build:
       context: ./player-service
-      dockerfile: Dockerfile
     image: "${DOCKER_USERNAME}/player-service:latest"
-    ports:
-      - "8081:8081"
     environment:
       - SPRING_PROFILES_ACTIVE=docker
     env_file:
-      ./.env
+      - .env
+    expose:
+      - "8081"
 
   match-service:
     build:
       context: ./match-service
-      dockerfile: Dockerfile
     image: "${DOCKER_USERNAME}/match-service:latest"
-    ports:
-      - "8082:8082"
     environment:
       - SPRING_PROFILES_ACTIVE=docker
     env_file:
-      ./.env
+      - .env
+    expose:
+      - "8082"
 
   tournament-service:
     build:
       context: ./tournament-service
-      dockerfile: Dockerfile
     image: "${DOCKER_USERNAME}/tournament-service:latest"
-    ports:
-      - "8083:8083"
     environment:
       - SPRING_PROFILES_ACTIVE=docker
     env_file:
-      ./.env
+      - .env
+    expose:
+      - "8083"
 
   admin-service:
     build:
       context: ./admin-service
-      dockerfile: Dockerfile
     image: "${DOCKER_USERNAME}/admin-service:latest"
-    ports:
-      - "8084:8084"
     environment:
       - SPRING_PROFILES_ACTIVE=docker
     env_file:
-      ./.env
+      - .env
+    expose:
+      - "8084"
 
   email-service:
     build:
       context: ./email-service
-      dockerfile: Dockerfile
     image: "${DOCKER_USERNAME}/email-service:latest"
-    ports:
-      - "8085:8085"
     environment:
       - SPRING_PROFILES_ACTIVE=docker
     env_file:
-      ./.env
+      - .env
+    expose:
+      - "8085"
 
   frontend:
     build:
       context: ./frontend
-      dockerfile: Dockerfile
     image: "${DOCKER_USERNAME}/frontend:latest"
-    ports:
-      - "3000:3000"
+    expose:
+      - "3000"

@@ -10,6 +10,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 
 import org.springframework.security.web.SecurityFilterChain;
@@ -18,6 +19,12 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
+/**
+ * Security configuration class for setting up authentication and authorization
+ * for the admin-related APIs. It configures JWT-based authentication, CORS
+ * settings, and role-based access control while disabling CSRF protection
+ * for stateless APIs.
+ */
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity
@@ -29,9 +36,17 @@ public class SecurityConfig {
         this.jwtRequestFilter = jwtRequestFilter;
     }
 
+    /**
+     * Configures the security filter chain for the application, including CORS
+     * settings, CSRF disabling, and JWT authentication.
+     *
+     * @param http the HttpSecurity object to configure security settings
+     * @return the configured SecurityFilterChain
+     * @throws Exception if there is a security configuration issue
+     */
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        http.csrf(csrf -> csrf.disable())
+        http.csrf(AbstractHttpConfigurer::disable)
                 .cors(cors -> cors.configurationSource(corsConfigurationSource())) // Correctly configure CORS
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers("/api/v1/admin/username/**", "/api/v1/admin/health").permitAll()
@@ -44,6 +59,11 @@ public class SecurityConfig {
         return http.build();
     }
 
+    /**
+     * Configures CORS settings to allow specific origins and methods for cross-origin requests.
+     *
+     * @return CorsConfigurationSource object with the configured CORS settings
+     */
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
