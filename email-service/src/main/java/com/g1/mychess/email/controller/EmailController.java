@@ -7,16 +7,30 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+/**
+ * Controller for handling email-related requests.
+ * This includes endpoints for verification, blacklist, whitelist, password reset, feedback,
+ * and tournament notifications. Each endpoint sends a specific type of email.
+ */
 @RestController
 @RequestMapping("/api/v1/email")
 public class EmailController {
 
     private final EmailService emailService;
 
+    /**
+     * Constructor to initialize EmailService.
+     * @param emailService the service responsible for sending emails
+     */
     public EmailController(EmailService emailService) {
         this.emailService = emailService;
     }
 
+    /**
+     * Sends a verification email to a specified recipient.
+     * @param emailRequestDTO contains recipient's email, username, and a user token for verification
+     * @return ResponseEntity with a success message if email is sent, otherwise a failure message
+     */
     @PostMapping("/verification")
     public ResponseEntity<String> sendVerificationEmail(@RequestBody @Valid EmailRequestDTO emailRequestDTO) {
         try {
@@ -28,6 +42,11 @@ public class EmailController {
         }
     }
 
+    /**
+     * Sends a blacklist notification email to a specified recipient.
+     * @param blacklistEmailDTO contains recipient's email, username, reason for blacklist, and ban duration
+     * @return ResponseEntity with a success message if email is sent, otherwise a failure message
+     */
     @PostMapping("/blacklists")
     public ResponseEntity<String> sendBlacklistEmail(@RequestBody @Valid BlacklistEmailDTO blacklistEmailDTO) {
         try {
@@ -44,6 +63,11 @@ public class EmailController {
         }
     }
 
+    /**
+     * Sends a whitelist notification email to a specified recipient.
+     * @param whitelistEmailDTO contains recipient's email, username, and reason for whitelist
+     * @return ResponseEntity with a success message if email is sent, otherwise a failure message
+     */
     @PostMapping("/whitelists")
     public ResponseEntity<String> sendWhitelistEmail(@RequestBody @Valid WhitelistEmailDTO whitelistEmailDTO) {
         try {
@@ -59,6 +83,11 @@ public class EmailController {
         }
     }
 
+    /**
+     * Sends a password reset email to a specified recipient.
+     * @param emailRequestDTO contains recipient's email, username, and a user token for password reset
+     * @return ResponseEntity with a success message if email is sent, otherwise a failure message
+     */
     @PostMapping("/password-recovery")
     public ResponseEntity<String> sendPasswordResetEmail(@RequestBody @Valid EmailRequestDTO emailRequestDTO) {
         try {
@@ -74,6 +103,11 @@ public class EmailController {
         }
     }
 
+    /**
+     * Sends a contact form feedback email.
+     * @param contactFormDTO contains the sender's name, email, and message
+     * @return ResponseEntity with a success message if email is sent, otherwise a failure message
+     */
     @PostMapping("/feedback")
     public ResponseEntity<String> sendContactUsEmail(@RequestBody @Valid ContactFormDTO contactFormDTO) {
         try {
@@ -89,6 +123,11 @@ public class EmailController {
         }
     }
 
+    /**
+     * Sends a tournament notification email to a specified recipient.
+     * @param notification contains recipient's email, subject, and message for the tournament notification
+     * @return ResponseEntity with a success message if email is sent, otherwise a failure message
+     */
     @PostMapping("/tournament-notification")
     public ResponseEntity<String> sendTournamentNotificationEmail(@RequestBody @Valid TournamentNotificationDTO notification) {
         try {
@@ -100,6 +139,10 @@ public class EmailController {
         }
     }
 
+    /**
+     * Health check endpoint to verify if the email service is running.
+     * @return ResponseEntity containing a message indicating the service is up and running
+     */
     @GetMapping("/health")
     public ResponseEntity<String> healthCheck() {
         return ResponseEntity.ok("Service is up and running");
