@@ -157,7 +157,7 @@ class AuthPage extends Component {
         <div className="relative w-full max-w-2xl h-auto p-8 bg-primary-content rounded-xl shadow-lg overflow-hidden">
           {/* Alert Message */}
           {showAlert && (
-            <Alert className="fixed bottom-4 right-4 z-50 p-4 max-w-fit w-auto min-w-[200px] rounded-xl shadow-lg bg-accent-content">
+            <Alert className="fixed bottom-4 right-4 z-50 p-4 max-w-fit w-auto min-w-[200px] rounded-xl shadow-lg bg-primary">
               <Terminal className="h-4 w-4" />
               <AlertTitle>{alertType === 'success' ? 'Success!' : 'Error!'}</AlertTitle>
               <AlertDescription>{alertMessage}</AlertDescription>
