@@ -358,6 +358,13 @@ public class MatchServiceImpl implements MatchService {
         return ResponseEntity.ok("Match time updated successfully.");
     }
 
+    @Override
+    @Transactional
+    public TournamentResultsDTO getTournamentResults(Long tournamentId) {
+        List<MatchPlayer> matchPlayers = matchPlayerRepository.findByMatch_TournamentIdOrderByPointsDesc(tournamentId);
+        return MatchMapper.toTournamentResultsDTO(matchPlayers);
+    }
+
     private TournamentDTO getTournamentById(Long tournamentId) {
         return tournamentServiceClient.getTournamentDetails(tournamentId);
     }
