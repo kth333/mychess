@@ -77,14 +77,17 @@ jobs:
           echo "DOCKER_USERNAME=${{ secrets.DOCKER_USERNAME }}" >> .env
           echo "DOCKER_PASSWORD=${{ secrets.DOCKER_PASSWORD }}" >> .env
 
-      - name: Copy Certificate Files into Docker Image
+      - name: Copy Certificate Files into Each Service Directory
         run: |
           echo "${{ secrets.FULLCHAIN_PEM }}" | base64 --decode > fullchain.pem
           echo "${{ secrets.PRIVKEY_PEM }}" | base64 --decode > privkey.pem
-          mkdir -p ./nginx/certs
-          mv fullchain.pem privkey.pem ./nginx/certs/
-          ls ./nginx/certs/
-
+          for service in auth-service player-service match-service tournament-service admin-service email-service; do
+            mkdir -p ./$service/nginx/certs
+            cp fullchain.pem privkey.pem ./$service/nginx/certs/
+          done
+          mkdir -p ./frontend/nginx/certs
+          cp fullchain.pem privkey.pem ./frontend/nginx/certs/
+          
       - name: Log in to Docker Hub
         uses: docker/login-action@v2
         with:

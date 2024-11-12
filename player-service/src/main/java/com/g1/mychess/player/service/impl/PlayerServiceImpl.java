@@ -53,8 +53,10 @@ public class PlayerServiceImpl implements PlayerService {
 
         newPlayer.setProfile(profile);
         profile.setPlayer(newPlayer);
+        PlayerRatingHistory playerRatingHistory = createNewPlayerRatingHistory(profile);
 
         playerRepository.save(newPlayer);
+        playerRatingHistoryRepository.save(playerRatingHistory);
 
         return ResponseEntity.ok(new PlayerCreationResponseDTO(newPlayer.getPlayerId(), "Player and Profile created successfully"));
     }
@@ -86,6 +88,16 @@ public class PlayerServiceImpl implements PlayerService {
         profile.setBirthDate(registerRequestDTO.getBirthDate());
         profile.setLastActive(LocalDate.now());
         return profile;
+    }
+
+    private PlayerRatingHistory createNewPlayerRatingHistory(Profile profile) {
+        PlayerRatingHistory playerRatingHistory = new PlayerRatingHistory();
+        playerRatingHistory.setPlayer(profile.getPlayer());
+        playerRatingHistory.setGlickoRating(profile.getGlickoRating());
+        playerRatingHistory.setRatingDeviation(profile.getRatingDeviation());
+        playerRatingHistory.setVolatility(profile.getVolatility());
+        playerRatingHistory.setDate(LocalDateTime.now());
+        return playerRatingHistory;
     }
 
     @Override
