@@ -38,13 +38,13 @@ public class AuthController {
         this.jwtUtil = jwtUtil;
     }
 
-    @PostMapping("/registration")
     /**
      * Registers a new user.
      *
      * @param registerRequestDTO the registration details
      * @return ResponseEntity containing a success message or error details
      */
+    @PostMapping("/registration")
     public ResponseEntity<String> register(@RequestBody @Valid RegisterRequestDTO registerRequestDTO) {
         return authService.registerUser(registerRequestDTO);
     }

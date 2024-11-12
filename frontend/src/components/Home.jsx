@@ -5,6 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./ui/
 import { CalendarIcon, TrophyIcon, UsersIcon } from "lucide-react";
 import withNavigateandLocation from './withNavigateandLocation';
 import TournamentRoulette from './tournaments/TournamentRoulette';
+import PlayerService from '../services/PlayerService';
 
 class Home extends Component {
   constructor(props) {
@@ -12,11 +13,15 @@ class Home extends Component {
     this.state = {
       mouseX: 0,
       mouseY: 0,
+      leaderboardData: [], // Add state for leaderboard data
     };
   }
 
   componentDidMount() {
     window.addEventListener('mousemove', this.handleMouseMove);
+
+    // Fetch leaderboard data
+    this.fetchLeaderboardData();
   }
 
   componentWillUnmount() {
@@ -30,8 +35,18 @@ class Home extends Component {
     });
   };
 
+  fetchLeaderboardData = async () => {
+    try {
+      const res = await PlayerService.getLeaderboard();
+      
+      this.setState({ leaderboardData: res.data });
+    } catch (error) {
+      console.error("Error fetching leaderboard data:", error);
+    }
+  };
+
   render() {
-    const { mouseX, mouseY } = this.state;
+    const { mouseX, mouseY, leaderboardData } = this.state;
     const theme = sessionStorage.getItem('theme');
 
     // Define gradients based on the theme
@@ -55,7 +70,6 @@ class Home extends Component {
       gradient = `linear-gradient(to right, rgba(0, 128, 255, ${opacityX}), rgba(128, 0, 255, ${opacityY}))`;
     }
 
-
     return (
       <div className="flex flex-col min-h-screen">
         <main className="flex-grow">
@@ -70,6 +84,38 @@ class Home extends Component {
             </Link>
           </section>
           <TournamentRoulette className="w-full"/>
+
+          {/* Leaderboard Section */}
+          <section className="py-16 px-6">
+            <h2 className="text-3xl font-bold text-center mb-12">Global Leaderboard</h2>
+            <div className="overflow-x-auto">
+              <div className="overflow-y-auto max-h-96"> {/* Add a fixed height and vertical scrolling */}
+                <table className="min-w-full bg-primary rounded-lg">
+                  <thead>
+                    <tr>
+                      <th className="px-4 py-2">Rank</th>
+                      <th className="px-4 py-2">Username</th>
+                      <th className="px-4 py-2">Title</th>
+                      <th className="px-4 py-2">Country</th>
+                      <th className="px-4 py-2">Glicko Rating</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {leaderboardData.slice(0, 50).map((player, index) => ( // Limit to first 10 players
+                      <tr key={player.playerId} className="text-center">
+                        <td className="px-4 py-2">{index + 1}</td>
+                        <td className="px-4 py-2">{player.username}</td>
+                        <td className="px-4 py-2">{player.rank || 'N/A'}</td>
+                        <td className="px-4 py-2">{player.country}</td>
+                        <td className="px-4 py-2">{player.glickoRating.toFixed(1)}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </section>
+
 
           <section className="py-16 px-6">
             <h2 className="text-3xl font-bold text-center mb-12">Upcoming Tournaments</h2>
