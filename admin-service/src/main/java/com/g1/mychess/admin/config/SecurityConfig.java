@@ -34,7 +34,7 @@ public class SecurityConfig {
         http.csrf(csrf -> csrf.disable())
                 .cors(cors -> cors.configurationSource(corsConfigurationSource())) // Correctly configure CORS
                 .authorizeHttpRequests(authorize -> authorize
-                        .requestMatchers("/api/v1/admin/username/**").permitAll()
+                        .requestMatchers("/api/v1/admin/username/**", "/api/v1/admin/health").permitAll()
                         .requestMatchers("/api/v1/admin/blacklist/**", "/api/v1/admin/whitelist/**").hasRole("ADMIN")
                         .anyRequest().authenticated()           // Protect other endpoints
                 )
