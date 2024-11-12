@@ -2,6 +2,7 @@ package com.g1.mychess.match.service.impl;
 
 import com.g1.mychess.match.client.PlayerServiceClient;
 import com.g1.mychess.match.client.TournamentServiceClient;
+import com.g1.mychess.match.client.EmailServiceClient;
 import com.g1.mychess.match.dto.*;
 import com.g1.mychess.match.exception.MatchNotFoundException;
 import com.g1.mychess.match.exception.TournamentNotFoundException;
@@ -19,6 +20,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -31,6 +33,7 @@ public class MatchServiceImpl implements MatchService {
     private final MatchPlayerRepository matchPlayerRepository;
     private final Glicko2RatingService glicko2RatingService;
     private final PlayerServiceClient playerServiceClient;
+    private final EmailServiceClient emailServiceClient;
     private final TournamentServiceClient tournamentServiceClient;
     private final AuthenticationService authenticationService;
 
@@ -41,13 +44,16 @@ public class MatchServiceImpl implements MatchService {
             Glicko2RatingService glicko2RatingService,
             PlayerServiceClient playerServiceClient,
             TournamentServiceClient tournamentServiceClient,
-            AuthenticationService authenticationService) {
+            AuthenticationService authenticationService,
+            EmailServiceClient emailServiceClient
+    ) {
         this.matchRepository = matchRepository;
         this.matchPlayerRepository = matchPlayerRepository;
         this.glicko2RatingService = glicko2RatingService;
         this.playerServiceClient = playerServiceClient;
         this.tournamentServiceClient = tournamentServiceClient;
         this.authenticationService = authenticationService;
+        this.emailServiceClient = emailServiceClient;
     }
 
     @Override
@@ -364,6 +370,40 @@ public class MatchServiceImpl implements MatchService {
         List<MatchPlayer> matchPlayers = matchPlayerRepository.findByMatch_TournamentIdOrderByPointsDesc(tournamentId);
         return MatchMapper.toTournamentResultsDTO(matchPlayers);
     }
+
+    @Override
+    @Scheduled(fixedRate = 3600000) // Runs every hour
+    @Transactional
+    public void sendMatchReminders() {
+        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime oneHourLater = now.plusHours(1);
+
+        List<Match> upcomingMatches = matchRepository.findByScheduledTimeBetween(now, oneHourLater);
+
+        for (Match match : upcomingMatches) {
+            sendReminderEmails(match);
+        }
+    }
+
+    private void sendReminderEmails(Match match) {
+        Set<MatchPlayer> participants = match.getParticipants();
+
+        for (MatchPlayer participant : participants) {
+            String email = playerServiceClient.getPlayerDetails(participant.getPlayerId()).getEmail();
+            sendReminderEmail(email, match);
+        }
+    }
+
+    private void sendReminderEmail(String email, Match match) {
+        ReminderEmailDTO emailDTO = new ReminderEmailDTO();
+        emailDTO.setTo(email);
+        emailDTO.setTournamentName(getTournamentById(match.getTournamentId()).getName());
+        emailDTO.setScheduledTime(match.getScheduledTime());
+
+        emailServiceClient.sendMatchReminderEmail(emailDTO);
+    }
+
+
 
     private TournamentDTO getTournamentById(Long tournamentId) {
         return tournamentServiceClient.getTournamentDetails(tournamentId);

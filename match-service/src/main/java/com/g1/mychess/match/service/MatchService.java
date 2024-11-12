@@ -27,4 +27,6 @@ public interface MatchService {
     ResponseEntity<String> updateMatchTime(Long matchId, UpdateMatchTimeDTO updateDTO, HttpServletRequest request);
 
     TournamentResultsDTO getTournamentResults(Long tournamentId);
+
+    void sendMatchReminders();
 }

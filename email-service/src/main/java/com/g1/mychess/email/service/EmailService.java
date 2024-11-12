@@ -1,5 +1,7 @@
 package com.g1.mychess.email.service;
 
+import java.time.LocalDateTime;
+
 /**
  * Interface for defining the contract for email services.
  * This interface outlines the methods for sending various types of emails, such as verification,
@@ -63,4 +65,6 @@ public interface EmailService {
      * @param message The content of the tournament notification.
      */
     void sendTournamentNotificationEmail(String to, String subject, String message);
+
+    void sendMatchReminderEmail(String to, String tournamentName, LocalDateTime scheduledTime);
 }

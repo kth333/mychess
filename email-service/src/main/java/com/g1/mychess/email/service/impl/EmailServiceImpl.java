@@ -2,6 +2,9 @@ package com.g1.mychess.email.service.impl;
 
 import com.g1.mychess.email.service.EmailService;
 import com.g1.mychess.email.util.EmailContentBuilder;
+
+import java.time.LocalDateTime;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -121,6 +124,13 @@ public class EmailServiceImpl implements EmailService {
     @Override
     public void sendTournamentNotificationEmail(String to, String subject, String message) {
         sendEmail(to, subject, message);
+    }
+
+    @Override
+    public void sendMatchReminderEmail(String to, String tournamentName, LocalDateTime scheduledTime) {
+        String subject = "MyChess - Match Reminder for Tournament:" + tournamentName;
+        String content = EmailContentBuilder.buildMatchReminderEmailContent(tournamentName, scheduledTime);
+        sendEmail(to, subject, content);
     }
 
     /**

@@ -22,6 +22,10 @@ class MatchService {
     async getTournamentResults(tournamentId) {
         return await MatchAPI.get(`/matches/tournament/${tournamentId}/results`);
     }
+
+    async updateMatchTime(matchId){
+        return await ProtectedMatchAPI.post(`/matches/admin/${matchId}/scheduled-time`);
+    }
   
 }
 

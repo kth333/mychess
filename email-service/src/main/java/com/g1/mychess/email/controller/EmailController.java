@@ -140,6 +140,22 @@ public class EmailController {
     }
 
     /**
+     * Sends a match reminder email to a specified recipient.
+     * @param reminderEmailDTO contains recipient's email, subject, and message for the match reminder
+     * @return ResponseEntity with a success message if email is sent, otherwise a failure message
+     */
+    @PostMapping("/matchreminder")
+    public ResponseEntity<String> sendMatchReminderEmail(@RequestBody @Valid ReminderEmailDTO reminderEmailDTO) {
+        try {
+            emailService.sendMatchReminderEmail(reminderEmailDTO.getTo(), reminderEmailDTO.getTournamentName(), reminderEmailDTO.getScheduledTime());
+            return ResponseEntity.ok("Match reminder email sent successfully.");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Failed to send match reminder email.");
+        }
+    }
+
+    /**
      * Health check endpoint to verify if the email service is running.
      * @return ResponseEntity containing a message indicating the service is up and running
      */

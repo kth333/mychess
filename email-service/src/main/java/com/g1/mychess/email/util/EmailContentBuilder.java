@@ -1,5 +1,7 @@
 package com.g1.mychess.email.util;
 
+import java.time.LocalDateTime;
+
 /**
  * Utility class that provides methods for building email content for various purposes, such as verification emails,
  * blacklist/whitelist notifications, password reset requests, and feedback/contact emails.
@@ -80,6 +82,13 @@ public class EmailContentBuilder {
                 + "We received a request to reset your password. You can reset your password by clicking on the link below:\n"
                 + resetUrl + "\n\n"
                 + "If you did not request this, please ignore this email.\n\n"
+                + "Thank you,\nMyChess Team";
+    }
+
+    public static String buildMatchReminderEmailContent(String tournamentName, LocalDateTime scheduledTime) {
+        return "Dear Player,\n\n"
+                + "This is a reminder for your upcoming match (Tournament: " + tournamentName + ") scheduled for " + scheduledTime + ".\n\n"
+                + "Please be ready and good luck!\n\n"
                 + "Thank you,\nMyChess Team";
     }
 }
