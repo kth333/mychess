@@ -88,8 +88,8 @@ class Home extends Component {
           {/* Leaderboard Section */}
           <section className="py-16 px-6">
            <h2 className="text-3xl font-bold text-center mb-12">Global Leaderboard</h2>
-           <div className="overflow-x-auto">*/}
-             <div className="overflow-y-auto max-h-96"> /!* Add a fixed height and vertical scrolling *!/
+           <div className="overflow-x-auto">
+             <div className="overflow-y-auto max-h-96">
                <table className="min-w-full bg-primary rounded-lg">
                   <thead>
                    <tr>
@@ -101,7 +101,7 @@ class Home extends Component {
                    </tr>
                  </thead>
                  <tbody>
-                   {(leaderboardData || []).slice(0, 50).map((player, index) => (
+                   {Array.from(leaderboardData || []).slice(0, 50).map((player, index) => (
                       <tr key={player.playerId} className="text-center">
                        <td className="px-4 py-2">{index + 1}</td>
                        <td className="px-4 py-2">{player.username}</td>
