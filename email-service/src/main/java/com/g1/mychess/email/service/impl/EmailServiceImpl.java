@@ -20,7 +20,7 @@ import org.springframework.stereotype.Service;
  */
 @Service
 public class EmailServiceImpl implements EmailService {
-
+    @Autowired
     private final JavaMailSender mailSender;
 
     // URL for the authentication service, injected from application properties
