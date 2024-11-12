@@ -38,7 +38,7 @@ class Home extends Component {
   fetchLeaderboardData = async () => {
     try {
       const res = await PlayerService.getLeaderboard();
-      
+
       this.setState({ leaderboardData: res.data });
     } catch (error) {
       console.error("Error fetching leaderboard data:", error);
@@ -86,35 +86,35 @@ class Home extends Component {
           <TournamentRoulette className="w-full"/>
 
           {/* Leaderboard Section */}
-          <section className="py-16 px-6">
-            <h2 className="text-3xl font-bold text-center mb-12">Global Leaderboard</h2>
-            <div className="overflow-x-auto">
-              <div className="overflow-y-auto max-h-96"> {/* Add a fixed height and vertical scrolling */}
-                <table className="min-w-full bg-primary rounded-lg">
-                  <thead>
-                    <tr>
-                      <th className="px-4 py-2">Rank</th>
-                      <th className="px-4 py-2">Username</th>
-                      <th className="px-4 py-2">Title</th>
-                      <th className="px-4 py-2">Country</th>
-                      <th className="px-4 py-2">Glicko Rating</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {leaderboardData.slice(0, 50).map((player, index) => ( // Limit to first 10 players
-                      <tr key={player.playerId} className="text-center">
-                        <td className="px-4 py-2">{index + 1}</td>
-                        <td className="px-4 py-2">{player.username}</td>
-                        <td className="px-4 py-2">{player.rank || 'N/A'}</td>
-                        <td className="px-4 py-2">{player.country}</td>
-                        <td className="px-4 py-2">{player.glickoRating.toFixed(1)}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          </section>
+          {/*<section className="py-16 px-6">*/}
+          {/*  <h2 className="text-3xl font-bold text-center mb-12">Global Leaderboard</h2>*/}
+          {/*  <div className="overflow-x-auto">*/}
+          {/*    <div className="overflow-y-auto max-h-96"> /!* Add a fixed height and vertical scrolling *!/*/}
+          {/*      <table className="min-w-full bg-primary rounded-lg">*/}
+          {/*        <thead>*/}
+          {/*          <tr>*/}
+          {/*            <th className="px-4 py-2">Rank</th>*/}
+          {/*            <th className="px-4 py-2">Username</th>*/}
+          {/*            <th className="px-4 py-2">Title</th>*/}
+          {/*            <th className="px-4 py-2">Country</th>*/}
+          {/*            <th className="px-4 py-2">Glicko Rating</th>*/}
+          {/*          </tr>*/}
+          {/*        </thead>*/}
+          {/*        <tbody>*/}
+          {/*          {leaderboardData.slice(0, 50).map((player, index) => ( // Limit to first 10 players*/}
+          {/*            <tr key={player.playerId} className="text-center">*/}
+          {/*              <td className="px-4 py-2">{index + 1}</td>*/}
+          {/*              <td className="px-4 py-2">{player.username}</td>*/}
+          {/*              <td className="px-4 py-2">{player.rank || 'N/A'}</td>*/}
+          {/*              <td className="px-4 py-2">{player.country}</td>*/}
+          {/*              <td className="px-4 py-2">{player.glickoRating.toFixed(1)}</td>*/}
+          {/*            </tr>*/}
+          {/*          ))}*/}
+          {/*        </tbody>*/}
+          {/*      </table>*/}
+          {/*    </div>*/}
+          {/*  </div>*/}
+          {/*</section>*/}
 
 
           <section className="py-16 px-6">

@@ -1,5 +1,9 @@
 version: '3.8'
 
+networks:
+  my_network:
+    driver: bridge
+
 services:
   nginx:
     image: nginx:alpine
@@ -19,6 +23,8 @@ services:
       - admin-service
       - email-service
       - frontend
+    networks:
+      - my_network
 
   auth-service:
     build:
@@ -30,6 +36,8 @@ services:
       - .env
     expose:
       - "8080"
+    networks:
+      - my_network
 
   player-service:
     build:
@@ -41,6 +49,8 @@ services:
       - .env
     expose:
       - "8081"
+    networks:
+      - my_network
 
   match-service:
     build:
@@ -52,6 +62,8 @@ services:
       - .env
     expose:
       - "8082"
+    networks:
+      - my_network
 
   tournament-service:
     build:
@@ -63,6 +75,8 @@ services:
       - .env
     expose:
       - "8083"
+    networks:
+      - my_network
 
   admin-service:
     build:
@@ -74,6 +88,8 @@ services:
       - .env
     expose:
       - "8084"
+    networks:
+      - my_network
 
   email-service:
     build:
@@ -85,6 +101,8 @@ services:
       - .env
     expose:
       - "8085"
+    networks:
+      - my_network
 
   frontend:
     build:
@@ -92,3 +110,5 @@ services:
     image: "${DOCKER_USERNAME}/frontend:latest"
     expose:
       - "3000"
+    networks:
+      - my_network
