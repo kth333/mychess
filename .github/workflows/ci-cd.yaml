@@ -125,7 +125,7 @@ jobs:
             docker container rm auth-service || true &&
             docker system prune -f --volumes &&
             docker pull ppv1/auth-service:latest &&
-            docker run -d --name auth-service -p 8080:8080 --env-file /home/ec2-user/.env ppv1/auth-service:latest --spring.profiles.active=docker
+            docker run -d --name auth-service -p 443:443 -p 8080:8080 --env-file /home/ec2-user/.env ppv1/auth-service:latest --spring.profiles.active=docker
           "
 
       - name: Deploy Admin Service
@@ -138,7 +138,7 @@ jobs:
             docker container rm admin-service || true &&
             docker system prune -f --volumes &&
             docker pull ppv1/admin-service:latest &&
-            docker run -d --name admin-service -p 8084:8084 --env-file /home/ec2-user/.env ppv1/admin-service:latest --spring.profiles.active=docker
+            docker run -d --name admin-service -p 443:443 -p 8084:8084 --env-file /home/ec2-user/.env ppv1/admin-service:latest --spring.profiles.active=docker
           "
 
       - name: Deploy Player Service
@@ -151,7 +151,7 @@ jobs:
             docker container rm player-service || true &&
             docker system prune -f --volumes &&
             docker pull ppv1/player-service:latest &&
-            docker run -d --name player-service -p 8081:8081 --env-file /home/ec2-user/.env ppv1/player-service:latest --spring.profiles.active=docker
+            docker run -d --name player-service -p 443:443 -p 8081:8081 --env-file /home/ec2-user/.env ppv1/player-service:latest --spring.profiles.active=docker
           "
 
       - name: Deploy Email Service
@@ -164,7 +164,7 @@ jobs:
             docker container rm email-service || true &&
             docker system prune -f --volumes &&
             docker pull ppv1/email-service:latest &&
-            docker run -d --name email-service -p 8085:8085 --env-file /home/ec2-user/.env ppv1/email-service:latest --spring.profiles.active=docker
+            docker run -d --name email-service -p 443:443 -p 8085:8085 --env-file /home/ec2-user/.env ppv1/email-service:latest --spring.profiles.active=docker
           "
 
       - name: Deploy Tournament Service
@@ -177,7 +177,7 @@ jobs:
             docker container rm tournament-service || true &&
             docker system prune -f --volumes &&
             docker pull ppv1/tournament-service:latest &&
-            docker run -d --name tournament-service -p 8083:8083 --env-file /home/ec2-user/.env ppv1/tournament-service:latest --spring.profiles.active=docker
+            docker run -d --name tournament-service -p 443:443 -p 8083:8083 --env-file /home/ec2-user/.env ppv1/tournament-service:latest --spring.profiles.active=docker
           "
 
       - name: Deploy Match Service
@@ -190,7 +190,7 @@ jobs:
             docker container rm match-service || true &&
             docker system prune -f --volumes &&
             docker pull ppv1/match-service:latest &&
-            docker run -d --name match-service -p 8082:8082 --env-file /home/ec2-user/.env ppv1/match-service:latest --spring.profiles.active=docker
+            docker run -d --name match-service -p 443:443 -p 8082:8082 --env-file /home/ec2-user/.env ppv1/match-service:latest --spring.profiles.active=docker
           "
 
   deploy-frontend:
