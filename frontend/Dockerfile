@@ -29,11 +29,12 @@ COPY --from=build /app/build /usr/share/nginx/html
 COPY nginx.conf /etc/nginx/nginx.conf
 
 # Copy the SSL certificates into the container
-COPY fullchain.pem /etc/letsencrypt/live/mychesss.com/fullchain.pem
-COPY privkey.pem /etc/letsencrypt/live/mychesss.com/privkey.pem
+COPY ./nginx/certs/fullchain.pem /etc/letsencrypt/live/mychesss.com/fullchain.pem
+COPY ./nginx/certs/privkey.pem /etc/letsencrypt/live/mychesss.com/privkey.pem
 
 # Expose the port on which NGINX will run
 EXPOSE 80
+EXPOSE 443
 
 # Start NGINX
 CMD ["nginx", "-g", "daemon off;"]
