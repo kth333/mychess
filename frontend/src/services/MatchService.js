@@ -18,6 +18,10 @@ class MatchService {
     async getAllMatchResults(tournamentId) {
         return await MatchAPI.get(`/matches/all/result/${tournamentId}`);
     }
+
+    async getTournamentResults(tournamentId) {
+        return await MatchAPI.get(`/matches/tournament/${tournamentId}/results`);
+    }
   
 }
 

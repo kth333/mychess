@@ -5,6 +5,7 @@ import java.util.*;
 import com.g1.mychess.match.dto.MatchDTO;
 import com.g1.mychess.match.dto.MatchResultDTO;
 import com.g1.mychess.match.dto.MatchmakingDTO;
+import com.g1.mychess.match.dto.TournamentResultsDTO;
 import com.g1.mychess.match.dto.UpdateMatchTimeDTO;
 import com.g1.mychess.match.service.MatchService;
 import com.g1.mychess.match.model.*;
@@ -66,6 +67,11 @@ public class MatchController {
             @Valid @RequestBody UpdateMatchTimeDTO updateDTO,
             HttpServletRequest request) {
         return matchService.updateMatchTime(matchId, updateDTO, request);
+    }
+
+    @GetMapping("/tournament/{tournamentId}/results")
+    public ResponseEntity<TournamentResultsDTO> getTournamentResults(@PathVariable Long tournamentId) {
+        return ResponseEntity.ok(matchService.getTournamentResults(tournamentId));
     }
 
     @GetMapping("/health")

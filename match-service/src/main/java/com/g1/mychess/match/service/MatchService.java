@@ -2,6 +2,7 @@ package com.g1.mychess.match.service;
 
 import com.g1.mychess.match.dto.MatchDTO;
 import com.g1.mychess.match.dto.MatchmakingDTO;
+import com.g1.mychess.match.dto.TournamentResultsDTO;
 import com.g1.mychess.match.dto.MatchResultDTO;
 import com.g1.mychess.match.dto.UpdateMatchTimeDTO;
 import jakarta.servlet.http.HttpServletRequest;
@@ -24,4 +25,6 @@ public interface MatchService {
     List<MatchResultDTO> findAllMatchResultsByTournament(Long tournamentId);
 
     ResponseEntity<String> updateMatchTime(Long matchId, UpdateMatchTimeDTO updateDTO, HttpServletRequest request);
+
+    TournamentResultsDTO getTournamentResults(Long tournamentId);
 }

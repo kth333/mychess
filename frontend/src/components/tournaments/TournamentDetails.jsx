@@ -5,6 +5,7 @@ import { useParams, Link } from 'react-router-dom';
 import withNavigateandLocation from '../withNavigateandLocation';
 import TournamentService from '../../services/TournamentService';
 import MatchService from '../../services/MatchService';
+import '../styles/tournamentResults.css';
 
 class TournamentDetails extends Component {
     constructor(props) {
@@ -18,6 +19,7 @@ class TournamentDetails extends Component {
             selectedWinners: {},
             filteredMatches: [],
             searchRound: '',
+            playerResults: [],
         };
     }
 
@@ -33,12 +35,25 @@ class TournamentDetails extends Component {
                 await this.fetchMatches();
                 await this.fetchPlayers();
                 await this.fetchMatchResults();
+                await this.fetchTournamentResults();
             });
             console.log(tournamentRes.data);
         } catch (error) {
             console.error("Failed to fetch tournament", error);
         }
     };
+
+    fetchTournamentResults = async () => {
+        const { id } = this.state.tournament;
+        try {
+            // Replace with actual API call to fetch tournament results
+            const resultsRes = await MatchService.getTournamentResults(id);
+            this.setState({ playerResults: resultsRes.data.playerResults });
+        } catch (error) {
+            console.error("Failed to fetch tournament results", error);
+        }
+    };
+
 
     fetchPlayers = async () => {
         const { id } = this.state.tournament;
@@ -279,6 +294,47 @@ class TournamentDetails extends Component {
             </table>
         );
     };
+
+    renderTournamentResults = () => {
+        const { playerResults } = this.state;
+        if (!playerResults.length) return <p className="text-center">No results available yet.</p>;
+    
+        // Sort playerResults by points in descending order
+        const sortedResults = [...playerResults].sort((a, b) => b.points - a.points);
+    
+        // Helper function to determine the row style based on rank
+        const getRowStyle = (index) => {
+            switch (index) {
+                case 0: return 'bg-gold';  // First place: Light gold
+                case 1: return 'bg-silver'; // Second place: Light silver
+                case 2: return 'bg-bronze'; // Third place: Light bronze
+                default: return '';
+            }
+        };
+    
+        return (
+            <table className="table w-full mt-4 border border-primary">
+                <thead className="bg-primary">
+                    <tr>
+                        <th className="px-4 py-2 border-primary">Rank</th>
+                        <th className="px-4 py-2 border-primary">Player ID</th>
+                        <th className="px-4 py-2 border-primary">Points</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {sortedResults.map((result, index) => (
+                        <tr key={index} className={getRowStyle(index)}>
+                            <td className="px-4 py-2 border-primary">{index + 1}</td>
+                            <td className="px-4 py-2 border-primary">{result.playerId}</td>
+                            <td className="px-4 py-2 border-primary">{result.points}</td>
+                        </tr>
+                    ))}
+                </tbody>
+            </table>
+        );
+    };
+    
+
     
 
     render() {
@@ -329,11 +385,11 @@ class TournamentDetails extends Component {
                     {/* Toggle Button for Player List */}
                     <div className="mb-6">
                         <h5 className="text-xl font-semibold text-primary">Players</h5>
-                        <Button
+                        <button
                             onClick={this.togglePlayersList}
                             className="btn btn-secondary mb-4">
                             {showPlayers ? 'Hide Players' : 'Show Players'}
-                        </Button>
+                        </button>
                         {showPlayers && this.renderPlayersList()}
                     </div>
 
@@ -357,14 +413,21 @@ class TournamentDetails extends Component {
                             <>
                                 <Link className="btn btn-primary"
                                       to={`/update-tournament/${tournament.name}`}>Update</Link>
-                                <Button className="btn btn-primary" onClick={this.startTournament}>Start
-                                    Tournament</Button>
-                                <Button className="btn btn-primary" onClick={this.startNextRound}>Next Round</Button>
-                                <Button className="btn btn-danger" onClick={this.completeTournament} disabled={tournament.currentRound !== tournament.maxRounds || tournament.status === 'COMPLETED'}>Complete
-                                    Tournament</Button>
+                                <button className="btn btn-primary" onClick={this.startTournament}>Start
+                                    Tournament</button>
+                                <button className="btn btn-primary" onClick={this.startNextRound}>Next Round</button>
+                                <button className="btn btn-danger" onClick={this.completeTournament} disabled={tournament.currentRound !== tournament.maxRounds || tournament.status === 'COMPLETED'}>Complete
+                                    Tournament</button>
                             </>
                         )}
                     </div>
+                    {/* Results section */}
+                    <div className="mt-8">
+                        <h3 className="text-2xl font-semibold text-primary mb-4 text-center">Results</h3>
+                        {this.renderTournamentResults()}
+                    </div>
+
+
                 </Card>
             </div>
         );
