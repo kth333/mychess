@@ -1,10 +1,7 @@
 package com.g1.mychess.email.controller;
 
-import com.g1.mychess.email.dto.BlacklistEmailDTO;
-import com.g1.mychess.email.dto.ContactFormDTO;
-import com.g1.mychess.email.dto.WhitelistEmailDTO;
+import com.g1.mychess.email.dto.*;
 import com.g1.mychess.email.service.EmailService;
-import com.g1.mychess.email.dto.EmailRequestDTO;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

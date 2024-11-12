@@ -15,7 +15,9 @@ class MatchService {
         return await ProtectedMatchAPI.post(`/matches/admin/${matchId}/status/completed/match`, match);
     }
 
-
+    async getAllMatchResults(tournamentId) {
+        return await MatchAPI.get(`/matches/all/result/${tournamentId}`);
+    }
   
 }
 

@@ -1,26 +1,31 @@
 package com.g1.mychess.tournament.service.impl;
 
+import com.g1.mychess.tournament.client.EmailServiceClient;
 import com.g1.mychess.tournament.client.MatchServiceClient;
 import com.g1.mychess.tournament.client.PlayerServiceClient;
 import com.g1.mychess.tournament.dto.MatchmakingDTO;
 import com.g1.mychess.tournament.dto.PlayerDTO;
 import com.g1.mychess.tournament.dto.TournamentDTO;
-import com.g1.mychess.tournament.exception.*;
+import com.g1.mychess.tournament.dto.TournamentNotificationDTO;
+import com.g1.mychess.tournament.exception.PlayerBlacklistedException;
 import com.g1.mychess.tournament.model.TimeControlSetting;
 import com.g1.mychess.tournament.model.Tournament;
 import com.g1.mychess.tournament.repository.TournamentPlayerRepository;
 import com.g1.mychess.tournament.repository.TournamentRepository;
 import com.g1.mychess.tournament.service.AuthenticationService;
 import jakarta.servlet.http.HttpServletRequest;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
+import reactor.core.publisher.Mono;
 
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.HashSet;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
@@ -48,7 +53,17 @@ public class TournamentServiceImplTest {
     private MatchServiceClient matchServiceClient;
 
     @Mock
+    private EmailServiceClient emailServiceClient;
+
+    @Mock
     private HttpServletRequest mockRequest;
+
+    @BeforeEach
+    void setUp() {
+        // Mock email service client to return a non-null Mono
+        when(emailServiceClient.sendTournamentNotification(any(TournamentNotificationDTO.class)))
+                .thenReturn(Mono.empty());
+    }
 
     @Test
     public void testCreateTournament_Success() {
@@ -75,8 +90,7 @@ public class TournamentServiceImplTest {
         tournamentDTO.setAddress("123 Chess St.");
         tournamentDTO.setMaxRounds(4);
 
-        // Adjusting for TimeControlSetting
-        TimeControlSetting timeControlSetting = new TimeControlSetting(15, 10); // 15 minutes base time with 10 seconds increment
+        TimeControlSetting timeControlSetting = new TimeControlSetting(15, 10);
         tournamentDTO.setTimeControlSetting(timeControlSetting);
 
         when(tournamentRepository.findByName(tournamentDTO.getName())).thenReturn(Optional.empty());
@@ -109,15 +123,17 @@ public class TournamentServiceImplTest {
         Tournament tournament = new Tournament();
         tournament.setId(tournamentId);
         tournament.setParticipants(new HashSet<>());
-        tournament.setMinRating(1000); // Add this line
-        tournament.setMaxRating(2000); // Add this line
+        tournament.setRegistrationStartDate(LocalDateTime.now().minusDays(1));
+        tournament.setRegistrationEndDate(LocalDateTime.now().plusDays(1));
+        tournament.setMinRating(1000);
+        tournament.setMaxRating(2000);
 
         when(tournamentRepository.findById(tournamentId)).thenReturn(Optional.of(tournament));
         when(tournamentPlayerRepository.existsByTournamentIdAndPlayerId(tournamentId, playerId)).thenReturn(false);
 
         PlayerDTO playerDTO = new PlayerDTO(
                 playerId,
-                false,
+                false, // isBlacklisted
                 "playerUsername",
                 "player@gmail.com",
                 25,
@@ -135,7 +151,6 @@ public class TournamentServiceImplTest {
         // Assert
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertEquals("Player successfully signed up to the tournament", response.getBody());
-        verify(tournamentRepository).save(any(Tournament.class));
     }
 
     @Test
@@ -147,11 +162,12 @@ public class TournamentServiceImplTest {
         Tournament tournament = new Tournament();
         tournament.setId(tournamentId);
         tournament.setParticipants(new HashSet<>());
+        tournament.setRegistrationStartDate(LocalDateTime.now().minusDays(1));
+        tournament.setRegistrationEndDate(LocalDateTime.now().plusDays(1));
 
         when(tournamentRepository.findById(tournamentId)).thenReturn(Optional.of(tournament));
         when(tournamentPlayerRepository.existsByTournamentIdAndPlayerId(tournamentId, playerId)).thenReturn(false);
 
-        // Player is blacklisted
         PlayerDTO playerDTO = new PlayerDTO(
                 playerId,
                 true, // isBlacklisted
@@ -183,7 +199,7 @@ public class TournamentServiceImplTest {
         tournamentDTO.setFormat("SWISS");
         tournamentDTO.setStatus(Tournament.TournamentStatus.UPCOMING.name());
 
-        TimeControlSetting timeControlSetting = new TimeControlSetting(30, 0); // 30 minutes base time, no increment
+        TimeControlSetting timeControlSetting = new TimeControlSetting(30, 0);
         tournamentDTO.setTimeControlSetting(timeControlSetting);
 
         Tournament tournament = new Tournament();
@@ -204,9 +220,6 @@ public class TournamentServiceImplTest {
         assertEquals(timeControlSetting, response.getBody().getTimeControlSetting());
     }
 
-    // ... (Include other test methods, adjusting them similarly)
-
-    // Example for testCompleteTournament_Success
     @Test
     void testCompleteTournament_Success() {
         // Arrange

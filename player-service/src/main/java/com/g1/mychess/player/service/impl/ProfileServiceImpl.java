@@ -1,10 +1,12 @@
 package com.g1.mychess.player.service.impl;
 
+import com.g1.mychess.player.dto.LeaderboardProfileDTO;
 import com.g1.mychess.player.dto.PlayerProfileDTO;
 import com.g1.mychess.player.dto.PlayerProfileUpdateDTO;
 import com.g1.mychess.player.dto.PlayerRatingUpdateDTO;
 import com.g1.mychess.player.exception.PlayerNotFoundException;
 import com.g1.mychess.player.mapper.PlayerMapper;
+import com.g1.mychess.player.mapper.ProfileMapper;
 import com.g1.mychess.player.model.CustomChessRank;
 import com.g1.mychess.player.model.Player;
 import com.g1.mychess.player.model.PlayerRatingHistory;
@@ -19,6 +21,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Service
 public class ProfileServiceImpl implements ProfileService {
@@ -81,6 +84,13 @@ public class ProfileServiceImpl implements ProfileService {
     private void saveRatingHistory(Player player, double glickoRating, double ratingDeviation, double volatility) {
         PlayerRatingHistory ratingHistory = new PlayerRatingHistory(player, glickoRating, ratingDeviation, volatility, LocalDateTime.now());
         playerRatingHistoryRepository.save(ratingHistory);
+    }
+
+    @Override
+    @Transactional
+    public List<LeaderboardProfileDTO> getLeaderboard() {
+        return ProfileMapper.toLeaderboardProfileDTOList(profileRepository.findTop50ByOrderByGlickoRatingDesc());
+                
     }
 
 }

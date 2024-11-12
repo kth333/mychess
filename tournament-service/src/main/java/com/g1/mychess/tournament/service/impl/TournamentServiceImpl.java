@@ -195,7 +195,7 @@ public class TournamentServiceImpl implements TournamentService {
     // Helper Methods
     private void validateRegistrationPeriod(Tournament tournament) {
         LocalDateTime now = LocalDateTime.now();
-        if (now.isBefore(tournament.getRegistrationStartDate()) || now.isAfter(tournament.getRegistrationEndDateTime())) {
+        if (now.isBefore(tournament.getRegistrationStartDate()) || now.isAfter(tournament.getRegistrationEndDate())) {
             throw new RegistrationPeriodException("Registration for this tournament is not open.");
         }
     }
@@ -274,7 +274,7 @@ public class TournamentServiceImpl implements TournamentService {
 
     private void prepareMatchmakingForNextRound(Tournament tournament, String jwtToken) {
         MatchmakingDTO matchmakingDTO = createMatchmakingDTO(tournament);
-        matchServiceClient.prepareNextRound(matchmakingDTO, jwtToken);
+        matchServiceClient.runMatchmaking(matchmakingDTO, jwtToken);
     }
 
     private Tournament getTournamentById(Long tournamentId) {

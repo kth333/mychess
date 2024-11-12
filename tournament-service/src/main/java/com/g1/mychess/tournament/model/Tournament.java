@@ -67,10 +67,12 @@ public class Tournament {
 
     @Column(name = "min_rating")
     @Min(value = 0, message = "Minimum rating cannot go lower than 0.")
+    @NotNull
     private Integer minRating;
 
     @Column(name = "max_rating")
     @Min(value = 0, message = "Maximum rating cannot go lower than 0.")
+    @NotNull
     private Integer maxRating;
 
     @Column(name = "affects_rating", nullable = false)
@@ -90,10 +92,12 @@ public class Tournament {
     private String requiredGender;
 
     @Column(name = "country")
+    @Size(max = 50)
     @NotNull
     private String country;
 
     @Column(name = "region")
+    @Size(max = 50)
     @NotNull
     private String region;
 
@@ -170,9 +174,9 @@ public class Tournament {
 
     public void setRegistrationStartDate(LocalDateTime registrationStartDate) { this.registrationStartDate = registrationStartDate; }
 
-    public LocalDateTime getRegistrationEndDateTime() { return registrationEndDate; }
+    public LocalDateTime getRegistrationEndDate() { return registrationEndDate; }
 
-    public void setRegistrationEndDateTime(LocalDateTime registrationEndDate) { this.registrationEndDate = registrationEndDate; }
+    public void setRegistrationEndDate(LocalDateTime registrationEndDate) { this.registrationEndDate = registrationEndDate; }
 
     public TournamentFormat getFormat() { return format; }
 

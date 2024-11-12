@@ -48,7 +48,6 @@ class AuthPage extends Component {
           console.log("login success");
           console.log(res.data);
           sessionStorage.setItem("token", res.data.token);
-
           const token = sessionStorage.getItem('token');
 
           if (token) {
@@ -65,10 +64,28 @@ class AuthPage extends Component {
             sessionStorage.setItem("role", role);
           }
 
-          this.props.navigate('/');
+          this.setState({
+            showAlert: true,
+            alertType: 'success',
+            alertMessage: 'Login successful! Redirecting to home page...',
+          });
+          setTimeout(() => {
+            this.setState({ showAlert: false });
+            this.props.navigate('/');
+          }, 3000);
         }
       });
     } catch (error) {
+      const errorMessage = error.response ? error.response.data : error.message;
+      console.error('Registration error:', errorMessage);
+      this.setState({
+        showAlert: true,
+        alertType: 'error',
+        alertMessage: `Login failed: ${errorMessage}`,
+      });
+      setTimeout(() => {
+        this.setState({ showAlert: false });
+      }, 5000);
       console.error('login error:', error.response ? error.response.data : error.message);
     }
   };
@@ -137,147 +154,148 @@ class AuthPage extends Component {
 
     return (
       <div className="flex min-h-screen justify-center items-center bg-base-100">
-  <div className="relative w-full max-w-2xl h-auto p-8 bg-primary-content rounded-xl shadow-lg overflow-hidden">
-    {/* Alert Message */}
-    {showAlert && (
-      <Alert className="fixed top-4 left-1/2 transform -translate-x-1/2 z-50 p-4 max-w-lg w-full shadow-lg">
-        <Terminal className="h-4 w-4" />
-        <AlertTitle>{alertType === 'success' ? 'Success!' : 'Error!'}</AlertTitle>
-        <AlertDescription>{alertMessage}</AlertDescription>
-      </Alert>
-    )}
+        <div className="relative w-full max-w-2xl h-auto p-8 bg-primary-content rounded-xl shadow-lg overflow-hidden">
+          {/* Alert Message */}
+          {showAlert && (
+            <Alert className="fixed bottom-4 right-4 z-50 p-4 max-w-fit w-auto min-w-[200px] rounded-xl shadow-lg bg-accent-content">
+              <Terminal className="h-4 w-4" />
+              <AlertTitle>{alertType === 'success' ? 'Success!' : 'Error!'}</AlertTitle>
+              <AlertDescription>{alertMessage}</AlertDescription>
+            </Alert>
+          
+          )}
 
-    {/* Sliding Form Container */}
-    <div className="flex w-[200%] transition-transform duration-500 ease-in-out" style={{ transform: showLogin ? 'translateX(0)' : 'translateX(-50%)' }}>
-      {/* Login Form */}
-      <div className="w-1/2 p-8 flex flex-col justify-center items-center">
-        <form className="space-y-4 w-full" onSubmit={this.handleSubmitLogin}>
-          <h2 className="text-2xl font-bold text-center mb-6">Login</h2>
-          <input
-            type="text"
-            name="username"
-            placeholder="Username"
-            value={username}
-            onChange={this.handleInputChange}
-            required
-            disabled={!showLogin}
-            className="input input-bordered w-full"
-          />
-          <input
-            type="password"
-            name="password"
-            placeholder="Password"
-            value={password}
-            onChange={this.handleInputChange}
-            required
-            disabled={!showLogin}
-            className="input input-bordered w-full"
-          />
-          <button type="submit" className="btn btn-outline w-full mt-2" onClick={this.handlePlayerLogin} disabled={!showLogin}>Login</button>
-          <button type="button" className="btn btn-outline w-full mt-2" onClick={this.handleAdminLogin} disabled={!showLogin}>Login as Admin</button>
-          <div className="flex justify-between mt-4">
-            <button onClick={this.toggleAuthForm} className="btn btn-link" disabled={!showLogin}>Register Now</button>
-            <Link className="btn btn-link" to="/password-reset-request" disabled={!showLogin}>Forget Password?</Link>
+          {/* Sliding Form Container */}
+          <div className="flex w-[200%] transition-transform duration-500 ease-in-out" style={{ transform: showLogin ? 'translateX(0)' : 'translateX(-50%)' }}>
+            {/* Login Form */}
+            <div className="w-1/2 p-8 flex flex-col justify-center items-center">
+              <form className="space-y-4 w-full" onSubmit={this.handleSubmitLogin}>
+                <h2 className="text-2xl font-bold text-center mb-6">Login</h2>
+                <input
+                  type="text"
+                  name="username"
+                  placeholder="Username"
+                  value={username}
+                  onChange={this.handleInputChange}
+                  required
+                  disabled={!showLogin}
+                  className="input input-bordered w-full"
+                />
+                <input
+                  type="password"
+                  name="password"
+                  placeholder="Password"
+                  value={password}
+                  onChange={this.handleInputChange}
+                  required
+                  disabled={!showLogin}
+                  className="input input-bordered w-full"
+                />
+                <button type="submit" className="btn btn-outline w-full mt-2" onClick={this.handlePlayerLogin} disabled={!showLogin}>Login</button>
+                <button type="button" className="btn btn-outline w-full mt-2" onClick={this.handleAdminLogin} disabled={!showLogin}>Login as Admin</button>
+                <div className="flex justify-between mt-4">
+                  <button onClick={this.toggleAuthForm} className="btn btn-link" disabled={!showLogin}>Register Now</button>
+                  <Link className="btn btn-link" to="/password-reset-request" disabled={!showLogin}>Forget Password?</Link>
+                </div>
+              </form>
+            </div>
+
+            {/* Register Form */}
+            <div className="w-1/2 p-8 flex flex-col justify-center items-center">
+              <form className="space-y-4 w-full" onSubmit={this.handleSubmitRegister}>
+                <h2 className="text-2xl font-bold text-center mb-6">Register</h2>
+                <input
+                  type="text"
+                  name="username"
+                  placeholder="Username"
+                  value={username}
+                  onChange={this.handleInputChange}
+                  required
+                  disabled={showLogin}
+                  className="input input-bordered w-full"
+                />
+                <input
+                  type="email"
+                  name="email"
+                  placeholder="Email"
+                  value={email}
+                  onChange={this.handleInputChange}
+                  required
+                  disabled={showLogin}
+                  className="input input-bordered w-full"
+                />
+                <input
+                  type="password"
+                  name="password"
+                  placeholder="Password"
+                  value={password}
+                  onChange={this.handleInputChange}
+                  required
+                  disabled={showLogin}
+                  className="input input-bordered w-full"
+                />
+                <select
+                  name="gender"
+                  value={gender}
+                  onChange={this.handleInputChange}
+                  required
+                  disabled={showLogin}
+                  className="select select-bordered w-full"
+                >
+                  <option value="">Select Gender</option>
+                  <option value="Male">Male</option>
+                  <option value="Female">Female</option>
+                  <option value="Other">Other</option>
+                </select>
+                <select
+                  name="country"
+                  value={country}
+                  onChange={this.handleInputChange}
+                  required
+                  disabled={showLogin}
+                  className="select select-bordered w-full"
+                >
+                  <option value="">Select Country</option>
+                  {countries.map((country) => (
+                    <option key={country.value} value={country.label}>{country.label}</option>
+                  ))}
+                </select>
+                <input
+                  type="text"
+                  name="region"
+                  placeholder="Region"
+                  value={region}
+                  onChange={this.handleInputChange}
+                  required
+                  disabled={showLogin}
+                  className="input input-bordered w-full"
+                />
+                <input
+                  type="text"
+                  name="city"
+                  placeholder="City"
+                  value={city}
+                  onChange={this.handleInputChange}
+                  required
+                  disabled={showLogin}
+                  className="input input-bordered w-full"
+                />
+                <input
+                  type="date"
+                  name="birthDate"
+                  value={birthDate}
+                  onChange={this.handleInputChange}
+                  required
+                  disabled={showLogin}
+                  className="input input-bordered w-full"
+                />
+                <button type="submit" className="btn btn-outline w-full mt-2" disabled={showLogin}>Register</button>
+                <button onClick={this.toggleAuthForm} className="btn btn-link w-full" disabled={showLogin}>Sign In</button>
+              </form>
+            </div>
           </div>
-        </form>
+        </div>
       </div>
-
-      {/* Register Form */}
-      <div className="w-1/2 p-8 flex flex-col justify-center items-center">
-        <form className="space-y-4 w-full" onSubmit={this.handleSubmitRegister}>
-          <h2 className="text-2xl font-bold text-center mb-6">Register</h2>
-          <input
-            type="text"
-            name="username"
-            placeholder="Username"
-            value={username}
-            onChange={this.handleInputChange}
-            required
-            disabled={showLogin}
-            className="input input-bordered w-full"
-          />
-          <input
-            type="email"
-            name="email"
-            placeholder="Email"
-            value={email}
-            onChange={this.handleInputChange}
-            required
-            disabled={showLogin}
-            className="input input-bordered w-full"
-          />
-          <input
-            type="password"
-            name="password"
-            placeholder="Password"
-            value={password}
-            onChange={this.handleInputChange}
-            required
-            disabled={showLogin}
-            className="input input-bordered w-full"
-          />
-          <select
-            name="gender"
-            value={gender}
-            onChange={this.handleInputChange}
-            required
-            disabled={showLogin}
-            className="select select-bordered w-full"
-          >
-            <option value="">Select Gender</option>
-            <option value="Male">Male</option>
-            <option value="Female">Female</option>
-            <option value="Other">Other</option>
-          </select>
-          <select
-            name="country"
-            value={country}
-            onChange={this.handleInputChange}
-            required
-            disabled={showLogin}
-            className="select select-bordered w-full"
-          >
-            <option value="">Select Country</option>
-            {countries.map((country) => (
-              <option key={country.value} value={country.label}>{country.label}</option>
-            ))}
-          </select>
-          <input
-            type="text"
-            name="region"
-            placeholder="Region"
-            value={region}
-            onChange={this.handleInputChange}
-            required
-            disabled={showLogin}
-            className="input input-bordered w-full"
-          />
-          <input
-            type="text"
-            name="city"
-            placeholder="City"
-            value={city}
-            onChange={this.handleInputChange}
-            required
-            disabled={showLogin}
-            className="input input-bordered w-full"
-          />
-          <input
-            type="date"
-            name="birthDate"
-            value={birthDate}
-            onChange={this.handleInputChange}
-            required
-            disabled={showLogin}
-            className="input input-bordered w-full"
-          />
-          <button type="submit" className="btn btn-primary w-full" disabled={showLogin}>Register</button>
-          <button onClick={this.toggleAuthForm} className="btn btn-link w-full" disabled={showLogin}>Sign In</button>
-        </form>
-      </div>
-    </div>
-  </div>
-</div>
 
 
     );
