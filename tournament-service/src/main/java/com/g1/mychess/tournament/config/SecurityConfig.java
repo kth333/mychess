@@ -36,9 +36,9 @@ public class SecurityConfig {
         http.csrf(csrf -> csrf.disable())
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .authorizeHttpRequests(authorize -> authorize
-                        .requestMatchers("/api/v1/tournaments/public/**").permitAll()  // Public access
                         .requestMatchers("/api/v1/tournaments/admin/**").hasRole("ADMIN")  // Only ADMIN can access
                         .requestMatchers("/api/v1/tournaments/player/**").hasRole("PLAYER")  // Only PLAYER can access
+                        .requestMatchers("/api/v1/tournaments/**").permitAll()  // Public access
                         .anyRequest().authenticated()  // All other requests must be authenticated
                 )
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))  // Stateless sessions

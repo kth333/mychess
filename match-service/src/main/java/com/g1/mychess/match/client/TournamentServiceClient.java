@@ -16,7 +16,7 @@ public class TournamentServiceClient {
 
     public TournamentDTO getTournamentDetails(Long tournamentId) {
         return webClient.get()
-                .uri("/api/v1/tournaments/public/id/{tournamentId}", tournamentId)
+                .uri("/api/v1/tournaments/id/{tournamentId}", tournamentId)
                 .retrieve()
                 .bodyToMono(TournamentDTO.class)
                 .block();
