@@ -26,6 +26,10 @@ class MatchService {
     async updateMatchTime(matchId){
         return await ProtectedMatchAPI.post(`/matches/admin/${matchId}/scheduled-time`);
     }
+
+    async scheduleMatch(matchId, scheduledTime) {
+        return await ProtectedMatchAPI.put(`/matches/admin/${matchId}/scheduled-time`, scheduledTime);
+    }
   
 }
 

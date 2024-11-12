@@ -16,6 +16,7 @@ import Whitelist from './components/Whitelist';
 import PasswordResetRequest from "./components/PasswordResetRequest";
 import PasswordReset from './components/PasswordReset';
 import ContactUs from './components/ContactUs';
+import ScheduleMatches from './components/tournaments/ScheduleMatches';
 
 function App() {
   return (
@@ -32,6 +33,7 @@ function App() {
               <Route exact path="/contact-us" element={<ContactUs />} />
 
               <Route element={<ProtectedRoute />}>
+                <Route exact path="/schedule-matches/:id" element={<ScheduleMatches />} />
                 <Route exact path="/create-tournament" element={<CreateTournament />} />
                 <Route exact path="/update-tournament/:name" element={<UpdateTournament />} />
                 <Route exact path="/profile/:playerId" element={<Profile/>} />

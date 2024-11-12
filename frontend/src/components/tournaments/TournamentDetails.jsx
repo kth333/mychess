@@ -387,7 +387,7 @@ class TournamentDetails extends Component {
                         <h5 className="text-xl font-semibold text-primary">Players</h5>
                         <button
                             onClick={this.togglePlayersList}
-                            className="btn btn-secondary mb-4">
+                            className="btn btn-primary mb-4">
                             {showPlayers ? 'Hide Players' : 'Show Players'}
                         </button>
                         {showPlayers && this.renderPlayersList()}
@@ -413,10 +413,12 @@ class TournamentDetails extends Component {
                             <>
                                 <Link className="btn btn-primary"
                                       to={`/update-tournament/${tournament.name}`}>Update</Link>
+                                <Link className="btn btn-primary"
+                                      to={`/schedule-matches/${tournament.id}`}>Schedule Matches</Link>      
                                 <button className="btn btn-primary" onClick={this.startTournament}>Start
                                     Tournament</button>
                                 <button className="btn btn-primary" onClick={this.startNextRound}>Next Round</button>
-                                <button className="btn btn-danger" onClick={this.completeTournament} disabled={tournament.currentRound !== tournament.maxRounds || tournament.status === 'COMPLETED'}>Complete
+                                <button className="btn btn-primary" onClick={this.completeTournament} disabled={tournament.currentRound !== tournament.maxRounds || tournament.status === 'COMPLETED'}>Complete
                                     Tournament</button>
                             </>
                         )}
