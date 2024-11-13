@@ -25,6 +25,7 @@ public class PlayerMapper {
                 player.getPlayerId(),
                 player.isBlacklisted(),
                 player.getUsername(),
+                player.getEmail(),
                 profile != null ? profile.getAge() : null,
                 profile != null ? profile.getGender() : null,
                 profile != null ? profile.getGlickoRating() : null,
@@ -33,18 +34,10 @@ public class PlayerMapper {
         );
     }
 
-    public static AdminPlayerDTO toAdminPlayerDTO(Player player) {
-        return new AdminPlayerDTO(
-                player.getPlayerId(),
-                player.isBlacklisted(),
-                player.getUsername(),
-                player.getEmail()
-        );
-    }
-
     public static PlayerProfileDTO toPlayerProfileDTO(Profile profile) {
         return new PlayerProfileDTO(
                 profile.getPlayerId(),
+                extractUsernameFromProfile(profile),
                 profile.getFullName(),
                 profile.getBio(),
                 profile.getAvatarUrl(),
@@ -91,4 +84,10 @@ public class PlayerMapper {
         return playerRatingHistoryList.stream().map(PlayerMapper::toPlayerRatingHistoryDTO).toList();
     }
 
+    private static String extractUsernameFromProfile(Profile profile) {
+        Player player = profile.getPlayer();
+        System.out.println(player.getUsername());
+        System.out.println(player);
+        return player != null ? player.getUsername() : null;
+    }
 }

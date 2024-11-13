@@ -2,10 +2,10 @@ import React, { Component } from 'react';
 import { Button } from './ui/button';
 import { Link } from 'react-router-dom';
 import ThemeSwitcher from './ThemeSwitcher';
-import { 
-  NavigationMenu, 
-  NavigationMenuItem, 
-  NavigationMenuLink, 
+import {
+  NavigationMenu,
+  NavigationMenuItem,
+  NavigationMenuLink,
   NavigationMenuList,
   NavigationMenuTrigger,
   navigationMenuTriggerStyle,
@@ -17,92 +17,109 @@ class NavBar extends Component {
     this.state = {
       isLoggedIn: !!sessionStorage.getItem('token'),
       role: sessionStorage.getItem('role'),
+      playerId: sessionStorage.getItem('currentPlayerId'),
     };
   }
 
   handleSignOut = () => {
     sessionStorage.removeItem('token');
     sessionStorage.removeItem('role');
+    sessionStorage.removeItem('currentPlayerId');
     this.setState({
       isLoggedIn: false,
       role: null,
+      playerId: null,
     });
-    
   };
 
   render() {
-    const { isLoggedIn, role } = this.state;
+    const { isLoggedIn, role, playerId } = this.state;
 
     return (
-      <header className="flex items-center justify-between px-6 py-4 bg-secondary border-b border-accent">
-        <div className="flex items-center space-x-4">
-          <span className="text-2xl font-bold flex items-center space-x-2">
-            <Link to="/" className="text-primary">MyChess</Link>
+        <header className="flex items-center justify-between px-8 py-4 bg-secondary shadow-lg border-b border-gray-300">
+          <div className="flex items-center space-x-6">
+            <Link to="/" className="text-3xl font-bold text-primary hover:text-accent">
+              MyChess
+            </Link>
             <ThemeSwitcher />
-          </span>
-        </div>
-        <nav className="space-x-4">
-          <NavigationMenu>
-            <NavigationMenuList>
-              
+          </div>
+          <nav className="space-x-4">
+            <NavigationMenu>
+              <NavigationMenuList className="flex items-center space-x-6">
 
-              {/* Conditional Links */}
-              {!isLoggedIn ? (
-                <>
-                  <NavigationMenuItem>
-                    <NavigationMenuLink asChild>
-                      <Link className="text-primary hover:bg-accent hover:text-accent-foreground rounded-md px-4 py-2" to="/login">Login</Link>
-                    </NavigationMenuLink>
-                  </NavigationMenuItem>
-                  <NavigationMenuItem>
-                    <NavigationMenuLink asChild>
-                      <Link className="text-primary hover:bg-accent hover:text-accent-foreground rounded-md px-4 py-2" to="/register">Register</Link>
-                    </NavigationMenuLink>
-                  </NavigationMenuItem>
-                </>
-              ) : (
-                <>
-                  {role === 'ROLE_ADMIN' && (
-                    <NavigationMenuItem>
-                      <NavigationMenuLink asChild>
-                        <Link className="text-primary hover:bg-accent hover:text-accent-foreground rounded-md px-4 py-2" to="/whitelist">Whitelist</Link>
-                      </NavigationMenuLink>
-                      <NavigationMenuLink asChild>
-                        <Link className="text-primary hover:bg-accent hover:text-accent-foreground rounded-md px-4 py-2" to="/blacklist">Blacklist</Link>
-                      </NavigationMenuLink>
-                      <NavigationMenuLink asChild>
-                        <Link className="text-primary hover:bg-accent hover:text-accent-foreground rounded-md px-4 py-2" to="/create-tournament">Create Tournament</Link>
-                      </NavigationMenuLink>
-                      <NavigationMenuLink asChild>
-                        <Link className="text-primary hover:bg-accent hover:text-accent-foreground rounded-md px-4 py-2" to="/tournaments/page/1">View All Tournaments</Link>
-                      </NavigationMenuLink>
-                    </NavigationMenuItem>
-                    
-                  )}
-                  {role === 'ROLE_PLAYER' && (
-                    <NavigationMenuItem>
-                      <NavigationMenuLink asChild>
-                        <Link className="text-primary hover:bg-accent hover:text-accent-foreground rounded-md px-4 py-2" to="/tournaments/page/1">View All Tournaments</Link>
-                      </NavigationMenuLink>
-                      <NavigationMenuLink asChild>
-                        <Link className="text-primary hover:bg-accent hover:text-accent-foreground rounded-md px-4 py-2" to="/profile">Profile</Link>
-                      </NavigationMenuLink>
-                    </NavigationMenuItem>
-                    
-                  )}
-                  <NavigationMenuItem>
-                    <NavigationMenuLink asChild>
-                      <Link variant="ghost" className="text-primary hover:bg-accent hover:text-accent-foreground" onClick={this.handleSignOut} to="/">
-                        Sign Out
-                      </Link>
-                    </NavigationMenuLink>
-                  </NavigationMenuItem>
-                </>
-              )}
-            </NavigationMenuList>
-          </NavigationMenu>
-        </nav>
-      </header>
+                {!isLoggedIn ? (
+                    <>
+                      <NavigationMenuItem>
+                        <NavigationMenuLink asChild>
+                          <Link className="text-primary text-lg hover:bg-accent hover:text-accent-foreground px-4 py-2 rounded-md" to="/login">
+                            Sign in
+                          </Link>
+                        </NavigationMenuLink>
+                      </NavigationMenuItem>
+                    </>
+                ) : (
+                    <>
+                      <NavigationMenuItem>
+                        <NavigationMenuLink asChild>
+                          <Link className="text-primary text-lg hover:bg-accent hover:text-accent-foreground px-4 py-2 rounded-md" to="/tournaments/page/1">
+                            View All Tournaments
+                          </Link>
+                        </NavigationMenuLink>
+                      </NavigationMenuItem>
+
+                      {role === 'ROLE_ADMIN' && (
+                          <>
+                            <NavigationMenuItem>
+                              <NavigationMenuLink asChild>
+                                <Link className="text-primary text-lg hover:bg-accent hover:text-accent-foreground px-4 py-2 rounded-md" to="/whitelist">
+                                  Whitelist
+                                </Link>
+                              </NavigationMenuLink>
+                            </NavigationMenuItem>
+                            <NavigationMenuItem>
+                              <NavigationMenuLink asChild>
+                                <Link className="text-primary text-lg hover:bg-accent hover:text-accent-foreground px-4 py-2 rounded-md" to="/blacklist">
+                                  Blacklist
+                                </Link>
+                              </NavigationMenuLink>
+                            </NavigationMenuItem>
+                            <NavigationMenuItem>
+                              <NavigationMenuLink asChild>
+                                <Link className="text-primary text-lg hover:bg-accent hover:text-accent-foreground px-4 py-2 rounded-md" to="/create-tournament">
+                                  Create Tournament
+                                </Link>
+                              </NavigationMenuLink>
+                            </NavigationMenuItem>
+                          </>
+                      )}
+
+                      {role === 'ROLE_PLAYER' && (
+                          <NavigationMenuItem>
+                            <NavigationMenuLink asChild>
+                              <Link className="text-primary text-lg hover:bg-accent hover:text-accent-foreground px-4 py-2 rounded-md" to={`/profile/${playerId}`}>
+                                Profile
+                              </Link>
+                            </NavigationMenuLink>
+                          </NavigationMenuItem>
+                      )}
+
+                      <NavigationMenuItem>
+                        <NavigationMenuLink asChild>
+                          <Link
+                              className="text-primary text-lg hover:bg-accent hover:text-accent-foreground px-4 py-2 rounded-md"
+                              onClick={this.handleSignOut}
+                              to="/"
+                          >
+                            Sign Out
+                          </Link>
+                        </NavigationMenuLink>
+                      </NavigationMenuItem>
+                    </>
+                )}
+              </NavigationMenuList>
+            </NavigationMenu>
+          </nav>
+        </header>
     );
   }
 }

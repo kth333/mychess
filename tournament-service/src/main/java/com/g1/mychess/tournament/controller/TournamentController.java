@@ -29,17 +29,17 @@ public class TournamentController {
         return tournamentService.createTournament(tournamentDTO, request);
     }
 
-    @GetMapping("/public/name/{tournamentName}")
+    @GetMapping("/name/{tournamentName}")
     public ResponseEntity<TournamentDTO> getTournamentByName(@Valid @PathVariable String tournamentName) {
         return tournamentService.findTournamentByName(tournamentName);
     }
 
-    @GetMapping("/public/id/{id}")
+    @GetMapping("/id/{id}")
     public ResponseEntity<TournamentDTO> getTournamentById(@Valid @PathVariable Long id) {
         return tournamentService.findTournamentById(id);
     }
 
-    @GetMapping("/public/all")
+    @GetMapping("/all")
     public ResponseEntity<Page<TournamentDTO>> getAllTournaments(@PageableDefault(size = 9) Pageable pageable) {
         return tournamentService.getAllTournaments(pageable);
     }
@@ -82,6 +82,11 @@ public class TournamentController {
         }
         Long playerId = jwtUtil.extractUserId(token);
         return tournamentService.signUpToTournament(tournamentId, playerId);
+    }
+
+    @GetMapping("/{tournamentId}/players")
+    public ResponseEntity<List<PlayerDTO>> getPlayersByTournament(@PathVariable Long tournamentId) {
+        return tournamentService.getPlayersByTournament(tournamentId);
     }
 
     @GetMapping("/health")

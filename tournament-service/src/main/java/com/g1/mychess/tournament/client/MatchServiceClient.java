@@ -24,16 +24,6 @@ public class MatchServiceClient {
                 .block();
     }
 
-    public void prepareNextRound(MatchmakingDTO matchmakingDTO, String jwtToken) {
-        webClient.post()
-                .uri("/api/v1/matches/admin/{tournamentId}/next-round", matchmakingDTO.getTournamentId())
-                .header(HttpHeaders.AUTHORIZATION, "Bearer " + jwtToken)
-                .bodyValue(matchmakingDTO)
-                .retrieve()
-                .bodyToMono(Void.class)
-                .block();
-    }
-
     public void finalizeTournament(MatchmakingDTO matchmakingDTO, String jwtToken) {
         webClient.post()
                 .uri("/api/v1/matches/admin/{tournamentId}/status/completed", matchmakingDTO.getTournamentId())

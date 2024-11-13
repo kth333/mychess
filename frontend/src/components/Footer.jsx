@@ -8,7 +8,7 @@ const Footer = () => {
       <div className="mt-2">
         <Link to="/about" className="text-primary hover:underline">About</Link>
         <span className="mx-2">|</span>
-        <Link to="/contact" className="text-primary hover:underline">Contact</Link>
+        <Link to="/contact-us" className="text-primary hover:underline">Contact Us</Link>
       </div>
     </footer>
   );

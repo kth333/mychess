@@ -1,5 +1,6 @@
 package com.g1.mychess.player.controller;
 
+import com.g1.mychess.player.dto.LeaderboardProfileDTO;
 import com.g1.mychess.player.dto.PlayerProfileDTO;
 import com.g1.mychess.player.dto.PlayerProfileUpdateDTO;
 import com.g1.mychess.player.dto.PlayerRatingUpdateDTO;
@@ -31,15 +32,18 @@ public class ProfileController {
         this.jwtUtil = jwtUtil;
     }
 
-    @GetMapping("/")
-    public ResponseEntity<PlayerProfileDTO> getPlayerProfile(@Valid @RequestHeader(value = "Authorization", required = true) String authorizationHeader) {
-        String token = null;
-        if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
-            token = authorizationHeader.substring(7); // Remove "Bearer " prefix
-        }
+    // Fetch profile for the authenticated user
+    @GetMapping
+    public ResponseEntity<PlayerProfileDTO> getMyProfile(@RequestHeader(value = "Authorization", required = true) String authorizationHeader) {
+        String token = authorizationHeader.substring(7); // Strip "Bearer " prefix
         Long userId = jwtUtil.extractUserId(token);
-
         return ResponseEntity.ok(profileService.getPlayerProfile(userId));
+    }
+
+    // Fetch profile by playerId for any user
+    @GetMapping("/{playerId}")
+    public ResponseEntity<PlayerProfileDTO> getProfileById(@PathVariable Long playerId) {
+        return ResponseEntity.ok(profileService.getPlayerProfile(playerId));
     }
 
     @PostMapping("/rating")
@@ -56,6 +60,11 @@ public class ProfileController {
     @GetMapping("/rating-history/{playerId}")
     public ResponseEntity<List<PlayerRatingHistoryDTO>> getPlayerRatingHistory(@Valid @PathVariable Long playerId) {
         return playerRatingHistoryService.getPlayerRatingHistory(playerId);
+    }
+
+    @GetMapping("/leaderboard")
+    public ResponseEntity<List<LeaderboardProfileDTO>> getLeaderboard() {
+        return ResponseEntity.ok(profileService.getLeaderboard());
     }
 
 }

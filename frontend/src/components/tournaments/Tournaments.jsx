@@ -117,7 +117,7 @@ class Tournaments extends Component {
 
             <section className="py-16 px-6">
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {tournaments.map((tournament) => (
+                {Array.from(tournaments || []).map((tournament) => (
                     <Card key={tournament.id} className="h-full flex flex-col">
                       <CardHeader>
                         <CardTitle>{tournament.name}</CardTitle>

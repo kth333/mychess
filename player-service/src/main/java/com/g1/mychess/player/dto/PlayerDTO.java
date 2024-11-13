@@ -5,6 +5,7 @@ public class PlayerDTO {
     private Long id;
     private boolean isBlacklisted;
     private String username;
+    private String email;
     private int age;
     private String gender;
 
@@ -14,10 +15,11 @@ public class PlayerDTO {
     private double volatility;
 
     // Full Constructor
-    public PlayerDTO(Long id, boolean isBlacklisted, String username, int age, String gender, double glickoRating, double ratingDeviation, double volatility) {
+    public PlayerDTO(Long id, boolean isBlacklisted, String username, String email, int age, String gender, double glickoRating, double ratingDeviation, double volatility) {
         this.id = id;
         this.isBlacklisted = isBlacklisted;
         this.username = username;
+        this.email = email;
         this.age = age;
         this.gender = gender;
         this.glickoRating = glickoRating;
@@ -48,6 +50,14 @@ public class PlayerDTO {
 
     public void setUsername(String username) {
         this.username = username;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
     }
 
     public int getAge() {

@@ -17,11 +17,9 @@ public interface PlayerService {
 
     UserDTO findPlayerByEmail(String email);
 
-    PlayerDTO getPlayerWithRatingDetails(Long playerId);
+    PlayerDTO getPlayerDetails(Long playerId);
 
     void blacklistPlayer(Long playerId);
 
     void whitelistPlayer(Long playerId);
-
-    AdminPlayerDTO getPlayerDetailsForAdmin(Long playerId);
 }

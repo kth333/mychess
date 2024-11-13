@@ -11,16 +11,16 @@ class TournamentService {
     }
 
     async getAllTournaments(page) {
-        console.log("/tournaments/public/all?page=" + page);
-      return await TournamentAPI.get("/tournaments/public/all?page=" + page);
+        console.log("/tournaments/all?page=" + page);
+      return await TournamentAPI.get("/tournaments/all?page=" + page);
     }
 
     async getTournamentByName(tournamentName) {
-      return await TournamentAPI.get(`/tournaments/public/name/${tournamentName}`);
+      return await TournamentAPI.get(`/tournaments/name/${tournamentName}`);
     }
 
     async getTournamentById(tournamentId) {
-      return await TournamentAPI.get(`/tournaments/public/id/${tournamentId}`);
+      return await TournamentAPI.get(`/tournaments/id/${tournamentId}`);
     }
 
     async signUp(tournamentId) {
@@ -40,15 +40,16 @@ class TournamentService {
     }
 
     async leaveTournament(tournamentId) {
-      return await ProtectedTournamentAPI.delete(`/tournaments/player/${tournamentId}/leave`);
+      return await ProtectedTournamentAPI.delete(`/tournaments/player/${tournamentId}`);
     }
 
     async removePlayerFromTournament(tournamentId, playerId) {
       return await ProtectedTournamentAPI.delete(`/tournaments/admin/${tournamentId}/players/${playerId}`);
     }
 
-    
-
+    async getPlayersByTournament(tournamentId) {
+        return await TournamentAPI.get(`/tournaments/${tournamentId}/players`);
+    }
 }
 
 export default new TournamentService();

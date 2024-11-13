@@ -53,8 +53,10 @@ public class PlayerServiceImpl implements PlayerService {
 
         newPlayer.setProfile(profile);
         profile.setPlayer(newPlayer);
+        PlayerRatingHistory playerRatingHistory = createNewPlayerRatingHistory(profile);
 
         playerRepository.save(newPlayer);
+        playerRatingHistoryRepository.save(playerRatingHistory);
 
         return ResponseEntity.ok(new PlayerCreationResponseDTO(newPlayer.getPlayerId(), "Player and Profile created successfully"));
     }
@@ -88,6 +90,16 @@ public class PlayerServiceImpl implements PlayerService {
         return profile;
     }
 
+    private PlayerRatingHistory createNewPlayerRatingHistory(Profile profile) {
+        PlayerRatingHistory playerRatingHistory = new PlayerRatingHistory();
+        playerRatingHistory.setPlayer(profile.getPlayer());
+        playerRatingHistory.setGlickoRating(profile.getGlickoRating());
+        playerRatingHistory.setRatingDeviation(profile.getRatingDeviation());
+        playerRatingHistory.setVolatility(profile.getVolatility());
+        playerRatingHistory.setDate(LocalDateTime.now());
+        return playerRatingHistory;
+    }
+
     @Override
     public void updatePlayerPassword(Long playerId, String newPassword) {
         Player player = getPlayerById(playerId);
@@ -116,7 +128,7 @@ public class PlayerServiceImpl implements PlayerService {
     }
 
     @Override
-    public PlayerDTO getPlayerWithRatingDetails(Long playerId) {
+    public PlayerDTO getPlayerDetails(Long playerId) {
         Player player = getPlayerById(playerId);
         return PlayerMapper.toPlayerDTO(player);
     }
@@ -137,14 +149,10 @@ public class PlayerServiceImpl implements PlayerService {
         playerRepository.save(player);
     }
 
-    @Override
-    public AdminPlayerDTO getPlayerDetailsForAdmin(Long playerId) {
-        Player player = getPlayerById(playerId);
-        return PlayerMapper.toAdminPlayerDTO(player);
-    }
-
     private Player getPlayerById(Long playerId) {
         return playerRepository.findById(playerId)
                 .orElseThrow(() -> new PlayerNotFoundException("Player not found with id: " + playerId));
     }
+
+
 }

@@ -7,12 +7,22 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 
+/**
+ * This class is responsible for initializing default admin accounts in the database.
+ * It runs on application startup to check if any admins already exist and creates default admin accounts if not.
+ */
 @Component
 public class DataInitializer implements CommandLineRunner {
 
     @Autowired
     private AdminRepository adminRepository;
 
+    /**
+     * This method is called when the application starts. It checks if there are existing admin accounts
+     * in the database. If there are no admins, it initializes default admin accounts.
+     *
+     * @param args command line arguments
+     */
     @Override
     public void run(String... args) throws Exception {
         // Check if admins already exist to avoid duplicate entries
@@ -27,6 +37,13 @@ public class DataInitializer implements CommandLineRunner {
         }
     }
 
+    /**
+     * Creates and saves an admin account with the given username and email.
+     * A default password is set for all admins, which should be securely hashed in a real application.
+     *
+     * @param username the username for the admin account
+     * @param email the email for the admin account
+     */
     private void createAdmin(String username, String email) {
         Admin admin = new Admin();
         admin.setUsername(username); // Set the username

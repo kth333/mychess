@@ -1,5 +1,6 @@
 package com.g1.mychess.tournament.service;
 
+import com.g1.mychess.tournament.dto.PlayerDTO;
 import com.g1.mychess.tournament.dto.TournamentDTO;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.ResponseEntity;
@@ -31,4 +32,6 @@ public interface TournamentService {
     ResponseEntity<String> prepareNextRound(Long tournamentId, HttpServletRequest request);
 
     ResponseEntity<String> completeTournament(Long tournamentId, HttpServletRequest request);
+
+    ResponseEntity<List<PlayerDTO>> getPlayersByTournament(Long tournamentId);
 }
