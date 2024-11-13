@@ -24,6 +24,8 @@ class CreateTournament extends Component {
       region: '',
       city: '',
       address: '',
+      maxRounds: '',
+      maxPlayers: '',
       timeControlBase: 10, // Default value for base time in minutes
       timeControlIncrement: 5, // Default value for increment in seconds
       countries: countryList().getData(), // Generate country list
@@ -66,6 +68,8 @@ class CreateTournament extends Component {
         baseTimeMinutes: timeControlBase,
         incrementSeconds: timeControlIncrement,
       },
+      maxRounds: this.state.maxRounds,
+      maxPlayers: this.state.maxPlayers,
     };
 
     console.log('Tournament => ' + JSON.stringify(tournament));
@@ -75,10 +79,12 @@ class CreateTournament extends Component {
         if (res.data) {
           console.log('Tournament created successfully');
           console.log(res.data);
+          alert('Tournament created successfully');
         }
       });
     } catch (error) {
       console.error('Error creating tournament:', error.response ? error.response.data : error.message);
+      alert('Failed to create tournament. Please try again. Reason: ' + error.response ? error.response.data : error.message);
     }
   };
 
@@ -104,17 +110,16 @@ class CreateTournament extends Component {
       registrationStartDate, registrationEndDate, format, 
       status, minRating, maxRating, affectsRating, minAge, 
       maxAge, requiredGender, country, region, city, address, 
-      timeControlBase, timeControlIncrement, countries 
+      timeControlBase, timeControlIncrement, countries, maxRounds, maxPlayers,
     } = this.state;
 
     return (
       <div className="flex justify-center items-center min-h-screen">
-        <div className="relative w-full max-w-md">
-
+        <div className="relative w-full max-w-5xl">
           {/* Create Tournament Form */}
-          <form className="p-8 rounded-lg border border-accent shadow-lg bg-secondary" onSubmit={this.handleSubmit}>
-            <h2 className="text-2xl font-bold text-center mb-6">Create Tournament</h2>
-
+          <form className="p-8 rounded-lg border border-accent shadow-lg bg-secondary grid grid-cols-1 md:grid-cols-2 gap-8" onSubmit={this.handleSubmit}>
+            <h2 className="text-2xl font-bold text-center mb-6 col-span-full">Create Tournament</h2>
+    
             <div className="mb-4">
               <label className="block text-primary text-sm font-bold mb-2">Name</label>
               <input
@@ -126,7 +131,7 @@ class CreateTournament extends Component {
                 className="w-full px-3 py-2 border border-accent rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
-
+    
             <div className="mb-4">
               <label className="block text-primary text-sm font-bold mb-2">Description</label>
               <textarea
@@ -137,7 +142,7 @@ class CreateTournament extends Component {
                 className="w-full px-3 py-2 border border-accent rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
-
+    
             <div className="mb-4">
               <label className="block text-primary text-sm font-bold mb-2">Start Date & Time</label>
               <input
@@ -149,7 +154,7 @@ class CreateTournament extends Component {
                 className="w-full px-3 py-2 border border-accent rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
-
+    
             <div className="mb-4">
               <label className="block text-primary text-sm font-bold mb-2">End Date & Time</label>
               <input
@@ -161,7 +166,7 @@ class CreateTournament extends Component {
                 className="w-full px-3 py-2 border border-accent rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
-
+    
             <div className="mb-4">
               <label className="block text-primary text-sm font-bold mb-2">Registration Start Date</label>
               <input
@@ -173,7 +178,7 @@ class CreateTournament extends Component {
                 className="w-full px-3 py-2 border border-accent rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
-
+    
             <div className="mb-4">
               <label className="block text-primary text-sm font-bold mb-2">Registration End Date</label>
               <input
@@ -185,7 +190,7 @@ class CreateTournament extends Component {
                 className="w-full px-3 py-2 border border-accent rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
-
+    
             <div className="mb-4">
               <label className="block text-primary text-sm font-bold mb-2">Format</label>
               <select
@@ -201,7 +206,7 @@ class CreateTournament extends Component {
                 <option value="SWISS">Swiss</option>
               </select>
             </div>
-
+    
             <div className="mb-4">
               <label className="block text-primary text-sm font-bold mb-2">Status</label>
               <select
@@ -218,6 +223,31 @@ class CreateTournament extends Component {
             </div>
 
             <div className="mb-4">
+              <label className="block text-primary text-sm font-bold mb-2">Max Rounds</label>
+                <input
+                  type="number"
+                  name="maxRounds"
+                  value={maxRounds}
+                  onChange={this.handleInputChange}
+                  required
+                  className="w-full px-3 py-2 border border-accent rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+            </div>
+
+            <div className="mb-4">
+              <label className="block text-primary text-sm font-bold mb-2">Max Players</label>
+              <input
+                type="number"
+                name="maxPlayers"
+                value={maxPlayers}
+                onChange={this.handleInputChange}
+                required
+                className="w-full px-3 py-2 border border-accent rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+
+    
+            <div className="mb-4">
               <label className="block text-primary text-sm font-bold mb-2">Minimum Rating</label>
               <input
                 type="number"
@@ -229,7 +259,7 @@ class CreateTournament extends Component {
                 className="w-full px-3 py-2 border border-accent rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
-
+    
             <div className="mb-4">
               <label className="block text-primary text-sm font-bold mb-2">Maximum Rating</label>
               <input
@@ -242,8 +272,8 @@ class CreateTournament extends Component {
                 className="w-full px-3 py-2 border border-accent rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
-
-            <div className="mb-4 flex items-center">
+    
+            <div className="mb-4 flex items-center col-span-full">
               <input
                 type="checkbox"
                 name="affectsRating"
@@ -253,7 +283,7 @@ class CreateTournament extends Component {
               />
               <label className="text-primary text-sm font-bold">Affects Rating</label>
             </div>
-
+    
             <div className="mb-4">
               <label className="block text-primary text-sm font-bold mb-2">Minimum Age</label>
               <input
@@ -265,7 +295,7 @@ class CreateTournament extends Component {
                 className="w-full px-3 py-2 border border-accent rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
-
+    
             <div className="mb-4">
               <label className="block text-primary text-sm font-bold mb-2">Maximum Age</label>
               <input
@@ -277,7 +307,7 @@ class CreateTournament extends Component {
                 className="w-full px-3 py-2 border border-accent rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
-
+    
             <div className="mb-4">
               <label className="block text-primary text-sm font-bold mb-2">Required Gender</label>
               <select
@@ -293,7 +323,7 @@ class CreateTournament extends Component {
                 <option value="OTHERS">Others</option>
               </select>
             </div>
-
+    
             {/* Country Dropdown */}
             <div className="mb-4">
               <label className="block text-primary text-sm font-bold mb-2">Country</label>
@@ -312,7 +342,7 @@ class CreateTournament extends Component {
                 ))}
               </select>
             </div>
-
+    
             <div className="mb-4">
               <label className="block text-primary text-sm font-bold mb-2">Region</label>
               <input
@@ -324,7 +354,7 @@ class CreateTournament extends Component {
                 className="w-full px-3 py-2 border border-accent rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
-
+    
             <div className="mb-4">
               <label className="block text-primary text-sm font-bold mb-2">City</label>
               <input
@@ -348,43 +378,42 @@ class CreateTournament extends Component {
                 className="w-full px-3 py-2 border border-accent rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
-            
+
             <div className="mb-4">
-              <label className="block text-primary text-sm font-bold mb-2">Time Control Base Time (minutes)</label>
+              <label className="block text-primary text-sm font-bold mb-2">Time Control Base</label>
               <input
                 type="number"
                 name="timeControlBase"
                 value={timeControlBase}
-                onChange={this.handleTimeControlChange}
-                min="1"
+                onChange={this.handleInputChange}
                 required
                 className="w-full px-3 py-2 border border-accent rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
 
             <div className="mb-4">
-              <label className="block text-primary text-sm font-bold mb-2">Time Control Increment (seconds)</label>
+              <label className="block text-primary text-sm font-bold mb-2">Time Control Increment</label>
               <input
                 type="number"
                 name="timeControlIncrement"
                 value={timeControlIncrement}
-                onChange={this.handleTimeControlChange}
-                min="0"
+                onChange={this.handleInputChange}
                 required
                 className="w-full px-3 py-2 border border-accent rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
-
-            <button
-              type="submit"
-              className="btn btn-primary w-full font-bold"
-            >
-              Create Tournament
-            </button>
+    
+            <div className="col-span-full flex justify-center">
+              <button type="submit" className="btn btn-primary">
+                Create Tournament
+              </button>
+            </div>
           </form>
         </div>
       </div>
     );
+    
+    
   }
 }
 

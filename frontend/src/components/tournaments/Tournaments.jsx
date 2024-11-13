@@ -108,7 +108,7 @@ class Tournaments extends Component {
                 <input
                     type="text"
                     placeholder="Search tournaments..."
-                    className="p-2 border rounded-md w-full max-w-md mx-auto"
+                    className="input input-bordered w-full max-w-md mx-auto text-neutral bg-white"
                     value={searchQuery}
                     onChange={this.handleSearchChange}
                 />
