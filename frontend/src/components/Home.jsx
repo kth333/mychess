@@ -60,8 +60,6 @@ class Home extends Component {
   render() {
     const { mouseX, mouseY, leaderboardData, upcomingTournaments } = this.state;
     const theme = sessionStorage.getItem('theme');
-    console.log(this.state.upcomingTournaments);
-
     // Define gradients based on the theme
     let gradient;
 

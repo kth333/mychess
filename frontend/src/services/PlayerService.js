@@ -23,6 +23,10 @@ class PlayerService {
         return PlayerAPI.get("/profile/leaderboard");
     }
 
+    async reportPlayer(report){
+        return ProtectedPlayerAPI.post("/player/reports", report);
+    }
+
 }
 
 export default new PlayerService();

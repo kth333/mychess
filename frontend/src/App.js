@@ -18,6 +18,7 @@ import PasswordReset from './components/PasswordReset';
 import ContactUs from './components/ContactUs';
 import ScheduleMatches from './components/tournaments/ScheduleMatches';
 import VerifyEmail from './components/VerifyEmail';
+import Report from './components/Report';
 
 function App() {
   return (
@@ -35,6 +36,7 @@ function App() {
               <Route exact path="/verify-email/:email" element={<VerifyEmail />} />
 
               <Route element={<ProtectedRoute />}>
+                <Route exact path="/report" element={<Report />} />
                 <Route exact path="/schedule-matches/:id" element={<ScheduleMatches />} />
                 <Route exact path="/create-tournament" element={<CreateTournament />} />
                 <Route exact path="/update-tournament/:name" element={<UpdateTournament />} />

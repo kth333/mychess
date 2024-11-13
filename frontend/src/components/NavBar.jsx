@@ -94,6 +94,14 @@ class NavBar extends Component {
                       )}
 
                       {role === 'ROLE_PLAYER' && (
+                        <>
+                          <NavigationMenuItem>
+                            <NavigationMenuLink asChild>
+                              <Link className="text-primary text-lg hover:bg-accent hover:text-accent-foreground px-4 py-2 rounded-md" to={`/report`}>
+                                Report
+                              </Link>
+                            </NavigationMenuLink>
+                          </NavigationMenuItem>
                           <NavigationMenuItem>
                             <NavigationMenuLink asChild>
                               <Link className="text-primary text-lg hover:bg-accent hover:text-accent-foreground px-4 py-2 rounded-md" to={`/profile/${playerId}`}>
@@ -101,6 +109,7 @@ class NavBar extends Component {
                               </Link>
                             </NavigationMenuLink>
                           </NavigationMenuItem>
+                        </>
                       )}
 
                       <NavigationMenuItem>
