@@ -16,4 +16,7 @@ public interface TournamentRepository extends JpaRepository<Tournament, Long>{
     Optional<Tournament> findById(Long id);
     List<Tournament> findByRegistrationStartDateBeforeAndStatus(LocalDateTime dateTime, Tournament.TournamentStatus status);
     Page<Tournament> findByStartDateTimeAfterOrderByStartDateTimeAsc(LocalDateTime date, Pageable pageable);
+    Page<Tournament> findAllByOrderByStartDateTimeAsc(Pageable pageable);
+
+
 }

@@ -82,7 +82,7 @@ public class TournamentServiceImpl implements TournamentService {
 
     @Override
     public ResponseEntity<Page<TournamentDTO>> getAllTournaments(Pageable pageable) {
-        Page<Tournament> tournaments = tournamentRepository.findAll(pageable);
+        Page<Tournament> tournaments = tournamentRepository.findAllByOrderByStartDateTimeAsc(pageable);
         Page<TournamentDTO> tournamentDTOs = tournaments.map(TournamentMapper::toDTO);
         return ResponseEntity.ok(tournamentDTOs);
     }
