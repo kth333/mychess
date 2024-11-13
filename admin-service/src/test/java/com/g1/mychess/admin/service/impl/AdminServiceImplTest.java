@@ -3,10 +3,11 @@ package com.g1.mychess.admin.service.impl;
 
 import com.g1.mychess.admin.client.EmailServiceClient;
 import com.g1.mychess.admin.client.PlayerServiceClient;
-import com.g1.mychess.admin.dto.AdminPlayerDTO;
+import com.g1.mychess.admin.dto.PlayerDTO;
 import com.g1.mychess.admin.dto.BlacklistDTO;
 import com.g1.mychess.admin.dto.UserDTO;
 import com.g1.mychess.admin.dto.WhitelistDTO;
+import com.g1.mychess.admin.exception.AdminNotFoundException;
 import com.g1.mychess.admin.exception.InvalidBlacklistOperationException;
 import com.g1.mychess.admin.model.Admin;
 import com.g1.mychess.admin.repository.AdminRepository;
@@ -83,7 +84,7 @@ public class AdminServiceImplTest {
 
         when(adminRepository.findByUsername(username)).thenReturn(Optional.empty());
 
-        Exception expectedException = assertThrows(IllegalArgumentException.class, () ->
+        Exception expectedException = assertThrows(AdminNotFoundException.class, () ->
                 adminService.findAdminByUsername("NotExist"));
 
         verify(adminRepository, times(1)).findByUsername(username);
@@ -94,10 +95,10 @@ public class AdminServiceImplTest {
     void test_blacklistPlayer_AlreadyBlacklisted() {
         BlacklistDTO blacklistDTO = mock(BlacklistDTO.class);
 
-        AdminPlayerDTO adminPlayerDTO = mock(AdminPlayerDTO.class);
+        PlayerDTO playerDTO = mock(PlayerDTO.class);
 
-        when(playerServiceClient.fetchPlayerDetails(1L)).thenReturn(adminPlayerDTO);
-        when(adminPlayerDTO.isBlacklisted()).thenReturn(true);
+        when(playerServiceClient.getPlayerDetails(1L)).thenReturn(playerDTO);
+        when(playerDTO.isBlacklisted()).thenReturn(true);
         when(blacklistDTO.getPlayerId()).thenReturn(1L);
 
         Exception expectedThrow = assertThrows(InvalidBlacklistOperationException.class, () ->
@@ -111,23 +112,23 @@ public class AdminServiceImplTest {
         BlacklistDTO blacklistDTO = mock(BlacklistDTO.class);
 
         when(blacklistDTO.getPlayerId()).thenReturn(1L);
-        when(playerServiceClient.fetchPlayerDetails(1L)).thenReturn(null);
+        when(playerServiceClient.getPlayerDetails(1L)).thenReturn(null);
 
         Exception expectedThrow = assertThrows(IllegalArgumentException.class, () ->
                 adminService.blacklistPlayer(blacklistDTO,request));
 
-        assertEquals( "Player not found with username: 1",expectedThrow.getMessage());
+        assertEquals( "Player not found with ID: 1",expectedThrow.getMessage());
     }
 
     @Test
     void test_whitelistPlayer_NotBlacklisted_ShouldThrowException() {
         WhitelistDTO whitelistDTO = mock(WhitelistDTO.class);
         long playerId = 1L;
-        AdminPlayerDTO adminPlayerDTO = mock(AdminPlayerDTO.class);
+        PlayerDTO playerDTO = mock(PlayerDTO.class);
 
         when(whitelistDTO.getPlayerId()).thenReturn(playerId);
-        when(playerServiceClient.fetchPlayerDetails(playerId)).thenReturn(adminPlayerDTO);
-        when(adminPlayerDTO.isBlacklisted()).thenReturn(false);
+        when(playerServiceClient.getPlayerDetails(playerId)).thenReturn(playerDTO);
+        when(playerDTO.isBlacklisted()).thenReturn(false);
 
         Exception expectedThrow = assertThrows(InvalidBlacklistOperationException.class, () ->
                 adminService.whitelistPlayer(whitelistDTO,request));
@@ -135,6 +136,4 @@ public class AdminServiceImplTest {
         assertEquals("Player with ID 1 is not blacklisted.",expectedThrow.getMessage());
 
     }
-
-
 }
