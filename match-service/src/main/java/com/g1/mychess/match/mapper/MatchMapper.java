@@ -10,12 +10,27 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+/**
+ * Utility class for converting Match entities to MatchDTOs.
+ */
 public class MatchMapper {
 
+    /**
+     * Converts a Match entity to a MatchDTO.
+     *
+     * @param match the Match entity to convert.
+     * @return the resulting MatchDTO.
+     */
     public static MatchDTO toDTO(Match match) {
         return MatchDTO.fromEntity(match);
     }
 
+    /**
+     * Converts a list of Match entities to a list of MatchDTOs.
+     *
+     * @param matches the list of Match entities to convert.
+     * @return the list of resulting MatchDTOs.
+     */
     public static List<MatchDTO> toDTOList(List<Match> matches) {
         return matches.stream()
                 .map(MatchMapper::toDTO)

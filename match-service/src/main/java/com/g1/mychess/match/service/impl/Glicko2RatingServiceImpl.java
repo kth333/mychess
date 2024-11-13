@@ -6,29 +6,44 @@ import com.g1.mychess.match.service.Glicko2RatingService;
 import org.springframework.stereotype.Service;
 import java.util.List;
 
+/**
+ * This service class implements the Glicko-2 rating system to calculate new player ratings
+ * after a match. It applies the Glicko-2 algorithm, which adjusts the player's rating based on
+ * the results of their games and the ratings of their opponents.
+ */
 @Service
 public class Glicko2RatingServiceImpl implements Glicko2RatingService {
 
-    private static final double GLICKO_SCALE = 173.7178;
-    private static final double BASE_RATING = 1500;
-    private static final double TAU = 0.5;
+    private static final double GLICKO_CONSTANT = 173.7178;
+    private static final double GLICKO_BASE_RATING = 1500;
+    private static final double PI = Math.PI;
+    private static final double VOLATILITY_TAU = 0.5;
+    private static final double CONVERGENCE_TOLERANCE = 0.000001;
 
+    /**
+     * Calculates the updated player ratings using the Glicko-2 system.
+     *
+     * @param player The player whose rating is being calculated.
+     * @param opponents List of the player's opponents in the match.
+     * @param result An array of results where 1.0 is a win, 0.5 is a draw, and 0.0 is a loss.
+     * @return A DTO containing the updated player rating, rating deviation, and volatility.
+     */
     public PlayerRatingUpdateDTO calculatePlayerRatings(MatchPlayer player, List<MatchPlayer> opponents, double[] result) {
         // Converting to Glicko-2 scale
-        double R = convertToGlicko2Scale(player.getGlickoRating());
-        double RD = convertDeviationToGlicko2Scale(player.getRatingDeviation());
+        double R = convertToGlickoScale(player.getGlickoRating() - GLICKO_BASE_RATING);
+        double RD = convertToGlickoScale(player.getRatingDeviation());
 
-        double[] opponents_rating = new double[opponents.size()];
-        double[] opponents_RD = new double[opponents.size()];
+        double[] opponentsRating = new double[opponents.size()];
+        double[] opponentsRD = new double[opponents.size()];
 
         for (int j = 0; j < opponents.size(); j++) {
-            opponents_rating[j] = (opponents.get(j).getGlickoRating() - BASE_RATING) / GLICKO_SCALE;
-            opponents_RD[j] = opponents.get(j).getRatingDeviation() / GLICKO_SCALE;
+            opponentsRating[j] = convertToGlickoScale(opponents.get(j).getGlickoRating() - GLICKO_BASE_RATING);
+            opponentsRD[j] = convertToGlickoScale(opponents.get(j).getRatingDeviation());
         }
 
         // Calculate Glicko-2 rating changes
-        double delta = calculate_delta(R, opponents_rating, opponents_RD, result);
-        double v = calculate_v(R, opponents_rating, opponents_RD);
+        double delta = calculate_delta(R, opponentsRating, opponentsRD, result);
+        double v = calculate_v(R, opponentsRating, opponentsRD);
         double newVolatility = calculate_volatility(RD, player.getVolatility(), v, delta * delta);
         double newRatingDeviation = calculateNewRatingDeviation(RD, newVolatility, v);
         double newRating = calculateNewRating(R, newRatingDeviation, delta, v);
@@ -36,35 +51,57 @@ public class Glicko2RatingServiceImpl implements Glicko2RatingService {
         // Convert back to Glicko scale and round values for final DTO
         return new PlayerRatingUpdateDTO(
                 player.getPlayerId(),
-                Math.round(convertFromGlicko2Scale(newRating)),              // Glicko scale rating
-                Math.round(convertFromGlicko2Scale(newRatingDeviation) * 10) / 10.0, // Glicko scale RD, 1 decimal place
+                Math.round(convertFromGlickoScale(newRating + GLICKO_BASE_RATING)),              // Glicko scale rating
+                Math.round(convertFromGlickoScale(newRatingDeviation) * 10) / 10.0, // Glicko scale RD, 1 decimal place
                 Math.round(newVolatility * 1000) / 1000.0             // Volatility, 3 decimal places
         );
     }
 
-    // Convert ratings to Glicko-2 scale
-    private double convertToGlicko2Scale(double rating) {
-        return (rating - BASE_RATING) / GLICKO_SCALE;
-    }
-
-    // Convert rating deviation to Glicko-2 scale
-    private double convertDeviationToGlicko2Scale(double deviation) {
-        return deviation / GLICKO_SCALE;
+    /**
+     * Converts a rating from the Glicko scale to the Glicko-2 scale.
+     *
+     * @param value The value to be converted.
+     * @return The converted rating in Glicko-2 scale.
+     */
+    private double convertToGlickoScale(double value) {
+        return value / GLICKO_CONSTANT;
     }
 
     // Convert from Glicko-2 scale to standard Glicko scale
-    private double convertFromGlicko2Scale(double value) {
-        return GLICKO_SCALE * value + BASE_RATING;
+    private double convertFromGlickoScale(double value) {
+        return GLICKO_CONSTANT * value;
     }
 
+    /**
+     * Calculates the "g" function used in the Glicko-2 system, which scales the rating deviation.
+     *
+     * @param RD The rating deviation of the player.
+     * @return The value of "g(RD)".
+     */
     public static double calculate_g(double RD) {
         return 1.0 / Math.sqrt(1.0 + (3.0 * RD * RD) / (Math.PI * Math.PI));
     }
 
+    /**
+     * Calculates the expected probability of the player winning against an opponent.
+     *
+     * @param R The rating of the player.
+     * @param Rj The rating of the opponent.
+     * @param RDj The rating deviation of the opponent.
+     * @return The expected probability of the player winning.
+     */
     public static double calculate_E(double R, double Rj, double RDj) {
         return 1.0 / (1.0 + Math.exp(-calculate_g(RDj) * (R - Rj)));
     }
 
+    /**
+     * Calculates the "v" function, which represents the total variance for a set of opponents.
+     *
+     * @param R The rating of the player.
+     * @param opponents_rating The ratings of the opponents.
+     * @param opponents_RD The rating deviations of the opponents.
+     * @return The calculated value of "v".
+     */
     public static double calculate_v(double R, double[] opponents_rating, double[] opponents_RD) {
         double v_inverse = 0;
         for (int j = 0; j < opponents_rating.length; j++) {
@@ -77,6 +114,16 @@ public class Glicko2RatingServiceImpl implements Glicko2RatingService {
         return 1 / v_inverse;
     }
 
+    /**
+     * Calculates the delta, which is the difference between the current and expected ratings,
+     * weighted by the variance.
+     *
+     * @param R The rating of the player.
+     * @param opponents_rating The ratings of the opponents.
+     * @param opponents_RD The rating deviations of the opponents.
+     * @param results The results of the match (1.0 for win, 0.5 for draw, 0.0 for loss).
+     * @return The calculated delta.
+     */
     public static double calculate_delta(double R, double[] opponents_rating, double[] opponents_RD, double[] results) {
         double temp = 0;
         for (int j = 0; j < opponents_rating.length; j++) {
@@ -89,6 +136,17 @@ public class Glicko2RatingServiceImpl implements Glicko2RatingService {
         return calculate_v(R, opponents_rating, opponents_RD) * temp;
     }
 
+    /**
+     * A helper function used in the calculation of volatility. It models the relationship
+     * between the volatility, rating deviation, and variance.
+     *
+     * @param x The current volatility guess.
+     * @param delta_squared The squared delta value.
+     * @param RD_squared The squared rating deviation.
+     * @param v The total variance.
+     * @param A The initial guess for the volatility.
+     * @return The result of the function.
+     */
     public static double calculate_function(double x, double delta_squared, double RD_squared, double v, double A) {
         double expX = Math.exp(x);
 
@@ -96,11 +154,20 @@ public class Glicko2RatingServiceImpl implements Glicko2RatingService {
         double denominator = Math.pow(RD_squared + v + expX, 2);
 
         double firstPart = numerator / denominator;
-        double secondPart = (x - A) / (TAU * TAU);
+        double secondPart = (x - A) / (VOLATILITY_TAU * VOLATILITY_TAU);
 
         return firstPart - secondPart;
     }
 
+    /**
+     * Calculates the volatility of a player's rating, which measures the degree of uncertainty in the player's performance.
+     *
+     * @param RD The rating deviation of the player.
+     * @param volatility The current volatility of the player.
+     * @param v The total variance.
+     * @param delta_squared The squared delta value.
+     * @return The updated volatility.
+     */
     public static double calculate_volatility(double RD, double volatility, double v, double delta_squared) {
         double A = Math.log(Math.pow(volatility, 2));
         double B;
@@ -110,16 +177,16 @@ public class Glicko2RatingServiceImpl implements Glicko2RatingService {
             B = Math.log(delta_squared - (RD * RD) - v);
         } else {
             int k = 1;
-            while (calculate_function(A - k * TAU, delta_squared, RD * RD, v, A) < 0) { // tau is set at 0.5
+            while (calculate_function(A - k * VOLATILITY_TAU, delta_squared, RD * RD, v, A) < 0) { // tau is set at 0.5
                 k++;
             }
-            B = A - k * TAU;
+            B = A - k * VOLATILITY_TAU;
         }
 
         double f_A = calculate_function(A, delta_squared, RD * RD, v, A);
         double f_B = calculate_function(B, delta_squared, RD * RD, v, A);
 
-        while (Math.abs(B - A) > convergence_tolerance) {
+        while (Math.abs(B - A) > CONVERGENCE_TOLERANCE) {
             double C = A + ((A - B) * f_A) / (f_B - f_A);
             double f_C = calculate_function(C, delta_squared, RD * RD, v, A);
 
