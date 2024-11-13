@@ -3,7 +3,6 @@ package com.g1.mychess.auth.config;
 import com.g1.mychess.auth.filter.JwtRequestFilter;
 
 import java.util.Arrays;
-import java.util.Collections;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

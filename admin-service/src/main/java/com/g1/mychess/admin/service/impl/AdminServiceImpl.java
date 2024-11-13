@@ -83,7 +83,7 @@ public class AdminServiceImpl implements AdminService {
     @Transactional
     public void blacklistPlayer(BlacklistDTO blacklistDTO, HttpServletRequest request) {
         validatePlayerNotBlacklisted(blacklistDTO);
-        PlayerDTO playerDTO = playerServiceClient.getPlayerDetails(blacklistDTO.getPlayerId());
+        PlayerDTO playerDTO = getPlayerOrThrow(blacklistDTO.getPlayerId());
 
         populateBlacklistDTOWithPlayerInfo(blacklistDTO, playerDTO);
 
@@ -116,7 +116,7 @@ public class AdminServiceImpl implements AdminService {
 
         validatePlayerIsBlacklisted(whitelistDTO);
 
-        PlayerDTO playerDTO = playerServiceClient.getPlayerDetails(whitelistDTO.getPlayerId());
+        PlayerDTO playerDTO = getPlayerOrThrow(whitelistDTO.getPlayerId());
 
         populateWhitelistDTOWithPlayerInfo(whitelistDTO, playerDTO);
 
@@ -265,6 +265,9 @@ public class AdminServiceImpl implements AdminService {
      */
     private void validatePlayerNotBlacklisted(BlacklistDTO blacklistDTO) {
         PlayerDTO playerDTO = playerServiceClient.getPlayerDetails(blacklistDTO.getPlayerId());
+        if (playerDTO == null) {
+            throw new IllegalArgumentException("Player not found with ID: " + blacklistDTO.getPlayerId());
+        }
         if (playerDTO.isBlacklisted()) {
             throw new InvalidBlacklistOperationException(
                     "Player with ID " + blacklistDTO.getPlayerId() + " is already blacklisted.");
@@ -279,9 +282,28 @@ public class AdminServiceImpl implements AdminService {
      */
     private void validatePlayerIsBlacklisted(WhitelistDTO whitelistDTO) {
         PlayerDTO playerDTO = playerServiceClient.getPlayerDetails(whitelistDTO.getPlayerId());
+        if (playerDTO == null) {
+            throw new IllegalArgumentException("Player not found with ID: " + whitelistDTO.getPlayerId());
+        }
         if (!playerDTO.isBlacklisted()) {
             throw new InvalidBlacklistOperationException(
                     "Player with ID " + whitelistDTO.getPlayerId() + " is not blacklisted.");
         }
+    }
+
+    /**
+     * Retrieves the player details for the given player ID.
+     * If the player does not exist, throws an {@link IllegalArgumentException}.
+     *
+     * @param playerId the ID of the player to retrieve
+     * @return the {@link PlayerDTO} containing player details
+     * @throws IllegalArgumentException if no player is found with the given ID
+     */
+    private PlayerDTO getPlayerOrThrow(Long playerId) {
+        PlayerDTO playerDTO = playerServiceClient.getPlayerDetails(playerId);
+        if (playerDTO == null) {
+            throw new IllegalArgumentException("Player not found with ID: " + playerId);
+        }
+        return playerDTO;
     }
 }
