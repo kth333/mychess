@@ -46,7 +46,7 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(Arrays.asList("http://54.251.32.169", "http://localhost:3000", "https://mychesss.com"));
+        configuration.setAllowedOrigins(Arrays.asList("http://54.251.32.169", "http://localhost:3000", "https://www.mychesss.com", "https://mychesss.com", "http://mychesss.com", "http://www.mychesss.com", "https://54.251.32.169", "http://52.221.193.231", "https://52.221.193.231"));
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(Arrays.asList("*"));
         configuration.setAllowCredentials(true);
