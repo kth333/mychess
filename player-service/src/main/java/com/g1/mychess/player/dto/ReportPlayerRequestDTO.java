@@ -1,25 +1,25 @@
 package com.g1.mychess.player.dto;
 
 public class ReportPlayerRequestDTO {
-    private Long reportedPlayerId;
-    private Long reporterPlayerId;
+    private String reportedPlayerUsername;
+    private String reporterPlayerUsername;
     private String reason;
     private String description;
 
-    public Long getReportedPlayerId() {
-        return reportedPlayerId;
+    public String getReportedPlayerUsername() {
+        return reportedPlayerUsername;
     }
 
-    public void setReportedPlayerId(Long reportedPlayerId) {
-        this.reportedPlayerId = reportedPlayerId;
+    public void setReportedPlayerUsername(String reportedPlayerUsername) {
+        this.reportedPlayerUsername = reportedPlayerUsername;
     }
 
-    public Long getReporterPlayerId() {
-        return reporterPlayerId;
+    public String getReporterPlayerUsername() {
+        return reporterPlayerUsername;
     }
 
-    public void setReporterPlayerId(Long reporterPlayerId) {
-        this.reporterPlayerId = reporterPlayerId;
+    public void setReporterPlayerUsername(String reporterPlayerUsername) {
+        this.reporterPlayerUsername = reporterPlayerUsername;
     }
 
     public String getReason() {

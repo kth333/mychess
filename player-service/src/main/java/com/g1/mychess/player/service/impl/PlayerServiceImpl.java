@@ -138,12 +138,10 @@ public class PlayerServiceImpl implements PlayerService {
 
     @Override
     public ResponseEntity<String> reportPlayer(ReportPlayerRequestDTO reportRequestDTO) {
-        UserDTO reporter = findPlayerById(reportRequestDTO.getReporterPlayerId());
-        UserDTO reportedPlayer = findPlayerById(reportRequestDTO.getReportedPlayerId());
 
         ReportEmailDTO reportEmailDTO = createReportEmailDTO(
-                reporter.getUsername(),
-                reportedPlayer.getUsername(),
+                reportRequestDTO.getReporterPlayerUsername(),
+                reportRequestDTO.getReportedPlayerUsername(),
                 reportRequestDTO.getReason(),
                 reportRequestDTO.getDescription()
         );
