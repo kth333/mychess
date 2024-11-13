@@ -7,14 +7,18 @@ const PlayerSearch = () => {
     const [results, setResults] = useState([]);
     const [currentPage, setCurrentPage] = useState(0);
     const [totalPages, setTotalPages] = useState(0);
+    const [notification, setNotification] = useState('');
     const pageSize = 10;
+
+    const role = sessionStorage.getItem('role');
+    const currentPlayerId = sessionStorage.getItem('currentPlayerId');
 
     const handleSearch = async (page = 0) => {
         try {
             const response = await PlayerService.searchPlayers(query, page, pageSize);
-            setResults(response.data.content); // Adjust based on your backend response
+            setResults(response.data.content);
             setCurrentPage(page);
-            setTotalPages(response.data.totalPages); // Total pages from backend response
+            setTotalPages(response.data.totalPages);
         } catch (error) {
             console.error('Search error:', error);
         }
@@ -36,8 +40,10 @@ const PlayerSearch = () => {
 
     const handleFollow = async (playerId) => {
         try {
-            await PlayerService.followPlayer(playerId);
+            await PlayerService.followPlayer(currentPlayerId, playerId);
+            setNotification('Followed successfully!');
             handleSearch(currentPage); // Refresh results to reflect follow status
+            setTimeout(() => setNotification(''), 3000); // Clear notification after 3 seconds
         } catch (error) {
             console.error('Follow error:', error);
         }
@@ -45,8 +51,10 @@ const PlayerSearch = () => {
 
     const handleUnfollow = async (playerId) => {
         try {
-            await PlayerService.unfollowPlayer(playerId);
+            await PlayerService.unfollowPlayer(currentPlayerId, playerId);
+            setNotification('Unfollowed successfully!');
             handleSearch(currentPage); // Refresh results to reflect unfollow status
+            setTimeout(() => setNotification(''), 3000); // Clear notification after 3 seconds
         } catch (error) {
             console.error('Unfollow error:', error);
         }
@@ -86,6 +94,12 @@ const PlayerSearch = () => {
                 </button>
             </div>
 
+            {notification && (
+                <div style={{ marginBottom: '20px', padding: '10px', backgroundColor: '#28a745', color: 'white', borderRadius: '4px', textAlign: 'center' }}>
+                    {notification}
+                </div>
+            )}
+
             <ul style={{ listStyleType: 'none', padding: 0 }}>
                 {results.map(player => (
                     <li key={player.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 0', borderBottom: '1px solid #eee' }}>
@@ -95,38 +109,40 @@ const PlayerSearch = () => {
                         >
                             {player.username}
                         </Link>
-                        {player.isFollowing ? (
-                            <button
-                                onClick={() => handleUnfollow(player.id)}
-                                style={{
-                                    padding: '6px 12px',
-                                    fontSize: '14px',
-                                    backgroundColor: '#dc3545',
-                                    color: 'white',
-                                    border: 'none',
-                                    borderRadius: '4px',
-                                    cursor: 'pointer',
-                                    transition: 'background-color 0.3s',
-                                }}
-                            >
-                                Unfollow
-                            </button>
-                        ) : (
-                            <button
-                                onClick={() => handleFollow(player.id)}
-                                style={{
-                                    padding: '6px 12px',
-                                    fontSize: '14px',
-                                    backgroundColor: '#28a745',
-                                    color: 'white',
-                                    border: 'none',
-                                    borderRadius: '4px',
-                                    cursor: 'pointer',
-                                    transition: 'background-color 0.3s',
-                                }}
-                            >
-                                Follow
-                            </button>
+                        {role !== 'ROLE_ADMIN' && (
+                            <div>
+                                <button
+                                    onClick={() => handleFollow(player.id)}
+                                    style={{
+                                        padding: '6px 12px',
+                                        fontSize: '14px',
+                                        backgroundColor: '#28a745',
+                                        color: 'white',
+                                        border: 'none',
+                                        borderRadius: '4px',
+                                        cursor: 'pointer',
+                                        marginRight: '5px',
+                                        transition: 'background-color 0.3s',
+                                    }}
+                                >
+                                    Follow
+                                </button>
+                                <button
+                                    onClick={() => handleUnfollow(player.id)}
+                                    style={{
+                                        padding: '6px 12px',
+                                        fontSize: '14px',
+                                        backgroundColor: '#dc3545',
+                                        color: 'white',
+                                        border: 'none',
+                                        borderRadius: '4px',
+                                        cursor: 'pointer',
+                                        transition: 'background-color 0.3s',
+                                    }}
+                                >
+                                    Unfollow
+                                </button>
+                            </div>
                         )}
                     </li>
                 ))}
