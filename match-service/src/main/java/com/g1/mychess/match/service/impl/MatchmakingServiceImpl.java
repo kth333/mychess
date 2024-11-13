@@ -2,6 +2,7 @@ package com.g1.mychess.match.service.impl;
 
 import com.g1.mychess.match.dto.MatchmakingDTO;
 import com.g1.mychess.match.dto.TournamentPlayerDTO;
+import com.g1.mychess.match.exception.TournamentRoundNotFoundException;
 import com.g1.mychess.match.model.Match;
 import com.g1.mychess.match.model.MatchPlayer;
 import com.g1.mychess.match.repository.MatchPlayerRepository;
@@ -38,23 +39,25 @@ public class MatchmakingServiceImpl implements MatchmakingService {
     }
 
     /**
-     * Main method that runs the matchmaking process. It initializes players,
-     * creates Swiss system matches, and saves them to the database.
-     *
-     * @param matchmakingDTO Data transfer object containing tournament details, current round, and participants
+     * Runs matchmaking based on the specified tournament type.
+     * @param matchmakingDTO Data transfer object containing tournament details, current round, and participants.
+     * @param tournamentFormat The type of tournament (e.g., "SWISS", "KNOCKOUT", "ROUND_ROBIN").
      */
     @Override
     @Transactional
-    public void runMatchmaking(MatchmakingDTO matchmakingDTO) {
-        Long tournamentId = matchmakingDTO.getTournamentId();
-        int currentRound = matchmakingDTO.getCurrentRound();
-        Set<TournamentPlayerDTO> participants = matchmakingDTO.getParticipants();
-
-        List<MatchPlayer> players = initializePlayers(participants, currentRound);
-        List<Match> newMatches = createSwissSystemMatches(players, tournamentId, currentRound);
-
-        matchRepository.saveAll(newMatches);
-        saveMatchPlayers(newMatches);
+    public void runMatchmaking(MatchmakingDTO matchmakingDTO, String tournamentFormat) {
+        switch (tournamentFormat.toUpperCase()) {
+            case "KNOCKOUT":
+                generateKnockoutMatches(matchmakingDTO);
+                break;
+            case "ROUND_ROBIN":
+                generateRoundRobinMatches(matchmakingDTO);
+                break;
+            case "SWISS":
+            default:
+                generateSwissMatches(matchmakingDTO);
+                break;
+        }
     }
 
     /**
@@ -107,6 +110,100 @@ public class MatchmakingServiceImpl implements MatchmakingService {
                 participant.getPlayerId(), participant.getTournamentId(), currentRound - 1);
 
         return (previousRoundPlayer != null) ? previousRoundPlayer.getPoints() : 0;
+    }
+
+    /**
+     * Runs the Swiss-system matchmaking, pairing players by points and ratings.
+     */
+    private void generateSwissMatches(MatchmakingDTO matchmakingDTO) {
+        Long tournamentId = matchmakingDTO.getTournamentId();
+        int currentRound = matchmakingDTO.getCurrentRound();
+        Set<TournamentPlayerDTO> participants = matchmakingDTO.getParticipants();
+
+        List<MatchPlayer> players = initializePlayers(participants, currentRound);
+        List<Match> newMatches = createSwissSystemMatches(players, tournamentId, currentRound);
+
+        matchRepository.saveAll(newMatches);
+        saveMatchPlayers(newMatches);
+    }
+
+    /**
+     * Generates matches for the knockout stage of a tournament.
+     */
+    private void generateKnockoutMatches(MatchmakingDTO matchmakingDTO) {
+        Long tournamentId = matchmakingDTO.getTournamentId();
+        int currentRound = matchmakingDTO.getCurrentRound();
+        List<Match> currentRoundMatches = matchRepository.findByTournamentIdAndRoundNumber(tournamentId, currentRound)
+                .orElseThrow(() -> new TournamentRoundNotFoundException("Tournament with id = " + tournamentId + " does not have round = " + currentRound));
+
+        if (!isRoundComplete(currentRoundMatches)) return;
+
+        List<MatchPlayer> winners = getWinnersFromMatches(currentRoundMatches);
+        if (winners.size() == 1) return;
+
+        int nextRound = currentRound + 1;
+        for (int i = 0; i < winners.size(); i += 2) {
+            if (i + 1 < winners.size()) {
+                createMatch(tournamentId, nextRound, winners.get(i).getPlayerId(), winners.get(i + 1).getPlayerId());
+            }
+        }
+    }
+
+    /**
+     * Generates all possible matches for a round-robin tournament.
+     */
+    private void generateRoundRobinMatches(MatchmakingDTO matchmakingDTO) {
+        Long tournamentId = matchmakingDTO.getTournamentId();
+        List<Long> playerIds = new ArrayList<>();
+        matchmakingDTO.getParticipants().forEach(player -> playerIds.add(player.getPlayerId()));
+
+        for (int i = 0; i < playerIds.size(); i++) {
+            for (int j = i + 1; j < playerIds.size(); j++) {
+                createMatch(tournamentId, 1, playerIds.get(i), playerIds.get(j));
+            }
+        }
+    }
+
+    /**
+     * Helper method to check if all matches in a round are completed.
+     */
+    private boolean isRoundComplete(List<Match> matches) {
+        return matches.stream().allMatch(match -> matchPlayerRepository.findByMatchId(match.getId())
+                .stream().allMatch(player -> player.getResult() != null));
+    }
+
+    private List<MatchPlayer> getWinnersFromMatches(List<Match> matches) {
+        List<MatchPlayer> winners = new ArrayList<>();
+        for (Match match : matches) {
+            matchPlayerRepository.findByMatchId(match.getId()).stream()
+                    .filter(player -> player.getResult() == MatchPlayer.Result.WIN)
+                    .findFirst()
+                    .ifPresent(winners::add);
+        }
+        return winners;
+    }
+
+    /**
+     * Helper method to create a match between two players.
+     */
+    private Match createMatch(Long tournamentId, int roundNumber, Long player1Id, Long player2Id) {
+        Match match = new Match();
+        match.setTournamentId(tournamentId);
+        match.setRoundNumber(roundNumber);
+
+        MatchPlayer player1 = new MatchPlayer();
+        player1.setPlayerId(player1Id);
+        player1.setMatch(match);
+
+        MatchPlayer player2 = new MatchPlayer();
+        player2.setPlayerId(player2Id);
+        player2.setMatch(match);
+
+        matchRepository.save(match);
+        matchPlayerRepository.save(player1);
+        matchPlayerRepository.save(player2);
+
+        return match;
     }
 
     /**

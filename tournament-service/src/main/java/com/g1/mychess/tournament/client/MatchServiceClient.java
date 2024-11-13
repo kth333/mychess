@@ -14,7 +14,7 @@ public class MatchServiceClient {
         this.webClient = webClientBuilder.baseUrl(matchServiceUrl).build();
     }
 
-    public void runMatchmaking(MatchmakingDTO matchmakingDTO, String jwtToken) {
+    public void runMatchmaking(MatchmakingDTO matchmakingDTO, String tournamentFormat, String jwtToken) {
         webClient.post()
                 .uri("/api/v1/matches/admin/{tournamentId}/matchmaking", matchmakingDTO.getTournamentId())
                 .header(HttpHeaders.AUTHORIZATION, "Bearer " + jwtToken)
