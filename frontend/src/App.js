@@ -17,6 +17,7 @@ import PasswordResetRequest from "./components/PasswordResetRequest";
 import PasswordReset from './components/PasswordReset';
 import ContactUs from './components/ContactUs';
 import ScheduleMatches from './components/tournaments/ScheduleMatches';
+import VerifyEmail from './components/VerifyEmail';
 
 function App() {
   return (
@@ -31,6 +32,7 @@ function App() {
               <Route exact path="/password-reset-request" element={<PasswordResetRequest/>} />
               <Route exact path="/password-reset/:token" element={<PasswordReset/>} />
               <Route exact path="/contact-us" element={<ContactUs />} />
+              <Route exact path="/verify-email/:email" element={<VerifyEmail />} />
 
               <Route element={<ProtectedRoute />}>
                 <Route exact path="/schedule-matches/:id" element={<ScheduleMatches />} />

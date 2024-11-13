@@ -124,10 +124,12 @@ class AuthPage extends Component {
           showAlert: true,
           alertType: 'success',
           alertMessage: 'Registration successful! Please check your email to verify your account.',
-        });
+        })
+  
         setTimeout(() => {
-          this.setState({ showAlert: false });
-          this.props.navigate('/login');
+            this.setState({ showAlert: false });
+            console.log("Registration success");
+            this.props.navigate('/verify-email/' + user.email);
         }, 3000);
       }
     } catch (error) {
@@ -151,7 +153,6 @@ class AuthPage extends Component {
 
   render() {
     const { username, password, email, gender, country, region, city, birthDate, countries, showAlert, alertType, alertMessage, showLogin } = this.state;
-
     return (
       <div className="flex min-h-screen justify-center items-center bg-base-100">
         <div className="relative w-full max-w-2xl h-auto p-8 bg-primary-content rounded-xl shadow-lg overflow-hidden">

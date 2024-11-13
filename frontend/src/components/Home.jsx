@@ -6,6 +6,7 @@ import { CalendarIcon, TrophyIcon, UsersIcon } from "lucide-react";
 import withNavigateandLocation from './withNavigateandLocation';
 import TournamentRoulette from './tournaments/TournamentRoulette';
 import PlayerService from '../services/PlayerService';
+import TournamentService from '../services/TournamentService';
 
 class Home extends Component {
   constructor(props) {
@@ -14,6 +15,7 @@ class Home extends Component {
       mouseX: 0,
       mouseY: 0,
       leaderboardData: [], // Add state for leaderboard data
+      upcomingTournaments: [],
     };
   }
 
@@ -22,6 +24,7 @@ class Home extends Component {
 
     // Fetch leaderboard data
     this.fetchLeaderboardData();
+    this.fetchUpcomingTournaments();
   }
 
   componentWillUnmount() {
@@ -38,16 +41,26 @@ class Home extends Component {
   fetchLeaderboardData = async () => {
     try {
       const res = await PlayerService.getLeaderboard();
-      console.log(res.data);
       this.setState({ leaderboardData: res.data });
     } catch (error) {
       console.error("Error fetching leaderboard data:", error);
     }
   };
 
+  fetchUpcomingTournaments = async () => {
+    try {
+      const res = await TournamentService.getUpcomingTournaments(1);
+      this.setState({ upcomingTournaments: res.data.content });
+      console.log(res.data);
+    } catch (error) {
+      console.error("Error fetching upcoming tournaments:", error);
+    }
+  }
+
   render() {
-    const { mouseX, mouseY, leaderboardData } = this.state;
+    const { mouseX, mouseY, leaderboardData, upcomingTournaments } = this.state;
     const theme = sessionStorage.getItem('theme');
+    console.log(this.state.upcomingTournaments);
 
     // Define gradients based on the theme
     let gradient;
@@ -122,29 +135,35 @@ class Home extends Component {
           <section className="py-16 px-6">
             <h2 className="text-3xl font-bold text-center mb-12">Upcoming Tournaments</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {[
-                { title: "Summer Blitz (Test)", date: "July 15-16, 2023", players: 64 },
-                { title: "Grandmaster Open (Test)", date: "August 5-7, 2023", players: 128 },
-                { title: "Junior Championship (Test)", date: "September 1-3, 2023", players: 32 },
-              ].map((tournament, index) => (
-                <Card key={index}>
+              {upcomingTournaments.map((tournament, index) => (
+                <Card key={index} className="flex flex-col h-full">
                   <CardHeader>
-                    <CardTitle>{tournament.title}</CardTitle>
+                    <CardTitle>{tournament.name}</CardTitle>
                     <CardDescription>
                       <CalendarIcon className="inline-block mr-2 h-4 w-4" />
-                      {tournament.date}
+                      {new Date(tournament.startDateTime).toLocaleString(undefined, {
+                        year: 'numeric',
+                        month: 'long',
+                        day: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit',
+                      })}
                     </CardDescription>
                   </CardHeader>
-                  <CardContent>
-                    <p className="flex items-center">
+                  
+                  <CardContent className="flex flex-col flex-grow">
+                    <p className="flex items-center mb-4">
                       <UsersIcon className="mr-2 h-4 w-4" />
-                      {tournament.players} players
+                      {tournament.maxPlayers} players
                     </p>
-                    <Link className="mt-4 btn btn-primary w-auto font-bold" to={`/tournaments/${index + 1}`} variant="outline" asChild>
-                      View Details
-                    </Link>
+                    <div className="mt-auto">
+                      <Link className="btn btn-primary w-auto font-bold" to={`/tournaments/${tournament.id}`} variant="outline" asChild>
+                        View Details
+                      </Link>
+                    </div>
                   </CardContent>
                 </Card>
+              
               ))}
             </div>
           </section>

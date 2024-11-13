@@ -11,8 +11,11 @@ class TournamentService {
     }
 
     async getAllTournaments(page) {
-        console.log("/tournaments/all?page=" + page);
       return await TournamentAPI.get("/tournaments/all?page=" + page);
+    }
+
+    async getUpcomingTournaments(page) {
+      return await TournamentAPI.get("/tournaments/upcoming?page=" + page);
     }
 
     async getTournamentByName(tournamentName) {

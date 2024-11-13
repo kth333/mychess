@@ -97,7 +97,7 @@ class ContactUs extends Component {
                     {responseMessage && <p className="text-center text-sm text-green-500 mt-4">{responseMessage}</p>}
 
                     <div className="flex justify-between mt-4">
-                        <Link to="/home" className="text-blue-500">
+                        <Link to="/" className="text-blue-500">
                             Back to Home
                         </Link>
                     </div>
