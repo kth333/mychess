@@ -69,7 +69,7 @@ public class AuthServiceImpl implements AuthService {
         RegisterRequestDTO playerDTO = mapToPlayerDTO(registerRequestDTO);
         ResponseEntity<PlayerCreationResponseDTO> playerServiceResponse = playerServiceClient.createPlayer(playerDTO);
 
-        if (playerServiceResponse.getStatusCode().is2xxSuccessful()) {
+        if (!playerServiceResponse.getStatusCode().is2xxSuccessful()) {
             handlePlayerServiceError(playerServiceResponse);
         }
 
