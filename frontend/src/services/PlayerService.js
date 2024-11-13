@@ -27,6 +27,25 @@ class PlayerService {
         return ProtectedPlayerAPI.post("/player/reports", report);
     }
 
+    async searchPlayers(query) {
+        return ProtectedPlayerAPI.get(`/player/search?query=${query}`);
+    }
+
+    async followPlayer(followerId, followedId) {
+        return ProtectedPlayerAPI.post(`/player/${followerId}/follow/${followedId}`);
+    }
+
+    async unfollowPlayer(followerId, followedId) {
+        return ProtectedPlayerAPI.delete(`/player/${followerId}/unfollow/${followedId}`);
+    }
+
+    async getFollowers(playerId) {
+        return ProtectedPlayerAPI.get(`/player/${playerId}/followers`);
+    }
+
+    async getFollowing(playerId) {
+        return ProtectedPlayerAPI.get(`/player/${playerId}/following`);
+    }
 }
 
 export default new PlayerService();

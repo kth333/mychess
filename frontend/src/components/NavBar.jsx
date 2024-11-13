@@ -112,6 +112,16 @@ class NavBar extends Component {
                         </>
                       )}
 
+                      {isLoggedIn && (
+                          <NavigationMenuItem>
+                            <NavigationMenuLink asChild>
+                              <Link className="text-primary text-lg hover:bg-accent hover:text-accent-foreground px-4 py-2 rounded-md" to="/search">
+                                Search Players
+                              </Link>
+                            </NavigationMenuLink>
+                          </NavigationMenuItem>
+                      )}
+
                       <NavigationMenuItem>
                         <NavigationMenuLink asChild>
                           <Link

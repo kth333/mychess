@@ -6,10 +6,12 @@ import com.g1.mychess.player.util.JwtUtil;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
-import org.springframework.http.HttpStatus;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.data.domain.Page;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/player")
@@ -73,6 +75,43 @@ public class PlayerController {
     @PostMapping("/reports")
     public ResponseEntity<String> reportPlayer(@RequestBody ReportPlayerRequestDTO reportPlayerRequestDTO) {
         return playerService.reportPlayer(reportPlayerRequestDTO);
+    }
+
+    @GetMapping("/search")
+    public ResponseEntity<Page<PlayerDTO>> searchPlayers(
+            @RequestParam String query,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+        Page<PlayerDTO> result = playerService.searchPlayers(query, page, size);
+        return ResponseEntity.ok(result);
+    }
+
+    @PostMapping("/{followerId}/follow/{followedId}")
+    public ResponseEntity<String> followPlayer(@PathVariable Long followerId, @PathVariable Long followedId) {
+        return playerService.followPlayer(followerId, followedId);
+    }
+
+    @DeleteMapping("/{followerId}/unfollow/{followedId}")
+    public ResponseEntity<String> unfollowPlayer(@PathVariable Long followerId, @PathVariable Long followedId) {
+        return playerService.unfollowPlayer(followerId, followedId);
+    }
+
+    @GetMapping("/{playerId}/followers")
+    public ResponseEntity<Page<PlayerDTO>> getFollowers(
+            @PathVariable Long playerId,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+        Page<PlayerDTO> followers = playerService.getFollowers(playerId, page, size);
+        return ResponseEntity.ok(followers);
+    }
+
+    @GetMapping("/{playerId}/following")
+    public ResponseEntity<Page<PlayerDTO>> getFollowing(
+            @PathVariable Long playerId,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+        Page<PlayerDTO> following = playerService.getFollowedPlayers(playerId, page, size);
+        return ResponseEntity.ok(following);
     }
 
     @GetMapping("/health")

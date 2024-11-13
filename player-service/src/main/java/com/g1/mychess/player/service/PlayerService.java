@@ -1,6 +1,8 @@
 package com.g1.mychess.player.service;
 
 import com.g1.mychess.player.dto.*;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
 
 import java.util.List;
@@ -24,4 +26,14 @@ public interface PlayerService {
     void blacklistPlayer(Long playerId);
 
     void whitelistPlayer(Long playerId);
+
+    Page<PlayerDTO> searchPlayers(String query, int page, int size);
+
+    ResponseEntity<String> followPlayer(Long followerId, Long followedId);
+
+    ResponseEntity<String> unfollowPlayer(Long followerId, Long followedId);
+
+    Page<PlayerDTO> getFollowedPlayers(Long followerId, int page, int size);
+
+    Page<PlayerDTO> getFollowers(Long playerId, int page, int size);
 }

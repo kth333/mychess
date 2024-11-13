@@ -1,11 +1,16 @@
 package com.g1.mychess.player.service.impl;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import com.g1.mychess.player.dto.*;
 import com.g1.mychess.player.exception.PlayerNotFoundException;
 import com.g1.mychess.player.mapper.PlayerMapper;
+import com.g1.mychess.player.model.Follow;
 import com.g1.mychess.player.model.Player;
 import com.g1.mychess.player.model.PlayerRatingHistory;
 import com.g1.mychess.player.model.Profile;
+import com.g1.mychess.player.repository.FollowRepository;
 import com.g1.mychess.player.repository.PlayerRatingHistoryRepository;
 import com.g1.mychess.player.repository.PlayerRepository;
 import com.g1.mychess.player.repository.ProfileRepository;
@@ -18,6 +23,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Service
 public class PlayerServiceImpl implements PlayerService {
@@ -26,17 +32,20 @@ public class PlayerServiceImpl implements PlayerService {
     private final ProfileRepository profileRepository;
     private final PlayerRatingHistoryRepository playerRatingHistoryRepository;
     private final EmailServiceClient emailServiceClient;
+    private final FollowRepository followRepository;
 
     public PlayerServiceImpl(
             PlayerRepository playerRepository,
             ProfileRepository profileRepository,
             PlayerRatingHistoryRepository playerRatingHistoryRepository,
-            EmailServiceClient emailServiceClient
+            EmailServiceClient emailServiceClient,
+            FollowRepository followRepositoru
     ) {
         this.playerRepository = playerRepository;
         this.profileRepository = profileRepository;
         this.playerRatingHistoryRepository = playerRatingHistoryRepository;
         this.emailServiceClient = emailServiceClient;
+        this.followRepository = followRepositoru;
     }
 
     @Override
@@ -176,6 +185,54 @@ public class PlayerServiceImpl implements PlayerService {
         Player player = getPlayerById(playerId);
         player.setBlacklisted(false);
         playerRepository.save(player);
+    }
+
+    @Override
+    public Page<PlayerDTO> searchPlayers(String query, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        return playerRepository.findByUsernameContainingIgnoreCase(query, pageable)
+                .map(PlayerMapper::toPlayerDTO);
+    }
+
+    @Override
+    public ResponseEntity<String> followPlayer(Long followerId, Long followedId) {
+        if (followerId.equals(followedId)) {
+            throw new IllegalArgumentException("You cannot follow yourself.");
+        }
+
+        Player follower = getPlayerById(followerId);
+        Player followed = getPlayerById(followedId);
+
+        if (followRepository.findByFollowerAndFollowed(follower, followed).isPresent()) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).body("Already following this player.");
+        }
+
+        followRepository.save(new Follow(follower, followed));
+        return ResponseEntity.ok("Successfully followed the player.");
+    }
+
+    @Override
+    public ResponseEntity<String> unfollowPlayer(Long followerId, Long followedId) {
+        Player follower = getPlayerById(followerId);
+        Player followed = getPlayerById(followedId);
+        Follow follow = followRepository.findByFollowerAndFollowed(follower, followed)
+                .orElseThrow(() -> new IllegalArgumentException("Not following this player."));
+        followRepository.delete(follow);
+        return ResponseEntity.ok("Successfully unfollowed the player.");
+    }
+
+    @Override
+    public Page<PlayerDTO> getFollowedPlayers(Long followerId, int page, int size) {
+        Player follower = getPlayerById(followerId);
+        Pageable pageable = PageRequest.of(page, size);
+        return followRepository.findByFollower(follower, pageable).map(follow -> PlayerMapper.toPlayerDTO(follow.getFollowed()));
+    }
+
+    @Override
+    public Page<PlayerDTO> getFollowers(Long playerId, int page, int size) {
+        Player followed = getPlayerById(playerId);
+        Pageable pageable = PageRequest.of(page, size);
+        return followRepository.findByFollowed(followed, pageable).map(follow -> PlayerMapper.toPlayerDTO(follow.getFollower()));
     }
 
     private Player getPlayerById(Long playerId) {
