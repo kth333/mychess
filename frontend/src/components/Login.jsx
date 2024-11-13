@@ -62,6 +62,7 @@ class AuthPage extends Component {
             console.log(`Role: ${role}, Player ID: ${playerId || "N/A"}`);
 
             sessionStorage.setItem("role", role);
+            sessionStorage.setItem("username", this.state.username);
           }
 
           this.setState({
