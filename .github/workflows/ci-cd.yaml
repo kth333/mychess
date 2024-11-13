@@ -185,11 +185,20 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Deploy Frontend
+      - name: Deploy Frontend to First Instance
         run: |
           echo "${{ secrets.EC2_SSH_KEY }}" > ec2_key.pem
           chmod 600 ec2_key.pem
           ssh -o StrictHostKeyChecking=no -i ec2_key.pem ec2-user@${{ secrets.EC2_FRONTEND_DNS }} "
+          docker pull ppv1/frontend:latest &&
+          docker stop frontend || true &&
+          docker rm frontend || true &&
+          docker run -d --name frontend -p 80:80 -p 443:443 ppv1/frontend:latest
+          "
+
+      - name: Deploy Frontend to Second Instance
+        run: |
+          ssh -o StrictHostKeyChecking=no -i ec2_key.pem ec2-user@${{ secrets.EC2_FRONTEND_2_DNS }} "
           docker pull ppv1/frontend:latest &&
           docker stop frontend || true &&
           docker rm frontend || true &&
