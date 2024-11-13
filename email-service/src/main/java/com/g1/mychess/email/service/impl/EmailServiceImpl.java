@@ -1,5 +1,6 @@
 package com.g1.mychess.email.service.impl;
 
+import com.g1.mychess.email.dto.ReportEmailDTO;
 import com.g1.mychess.email.service.EmailService;
 import com.g1.mychess.email.util.EmailContentBuilder;
 
@@ -131,6 +132,18 @@ public class EmailServiceImpl implements EmailService {
         String subject = "MyChess - Match Reminder for Tournament:" + tournamentName;
         String content = EmailContentBuilder.buildMatchReminderEmailContent(tournamentName, scheduledTime);
         sendEmail(to, subject, content);
+    }
+
+    @Override
+    public void sendPlayerReportEmail(ReportEmailDTO reportEmailDTO) {
+        String subject = "Player Report: " + reportEmailDTO.getReportedPlayerUsername();
+        String content = EmailContentBuilder.buildPlayerReportEmailContent(
+                reportEmailDTO.getReporterUsername(),
+                reportEmailDTO.getReportedPlayerUsername(),
+                reportEmailDTO.getReason(),
+                reportEmailDTO.getDescription()
+        );
+        sendEmail(feedbackEmailAddress, subject, content);
     }
 
     /**

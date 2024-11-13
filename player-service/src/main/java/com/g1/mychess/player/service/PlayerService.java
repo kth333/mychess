@@ -19,6 +19,8 @@ public interface PlayerService {
 
     PlayerDTO getPlayerDetails(Long playerId);
 
+    ResponseEntity<String> reportPlayer(ReportPlayerRequestDTO reportPlayerRequestDTO);
+
     void blacklistPlayer(Long playerId);
 
     void whitelistPlayer(Long playerId);
