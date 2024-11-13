@@ -70,6 +70,11 @@ public class PlayerController {
         return ResponseEntity.ok(playerDTO);
     }
 
+    @PostMapping("/reports")
+    public ResponseEntity<String> reportPlayer(@RequestBody ReportPlayerRequestDTO reportPlayerRequestDTO) {
+        return playerService.reportPlayer(reportPlayerRequestDTO);
+    }
+
     @GetMapping("/health")
     public ResponseEntity<String> healthCheck() {
         return ResponseEntity.ok("Service is up and running");

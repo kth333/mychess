@@ -156,6 +156,22 @@ public class EmailController {
     }
 
     /**
+     * Sends a player report email to the feedback address.
+     * @param reportEmailDTO contains the reporter's and reported player's details and report message
+     * @return ResponseEntity indicating success or failure
+     */
+    @PostMapping("/reports")
+    public ResponseEntity<String> sendPlayerReportEmail(@RequestBody @Valid ReportEmailDTO reportEmailDTO) {
+        try {
+            emailService.sendPlayerReportEmail(reportEmailDTO);
+            return ResponseEntity.ok("Player report email sent successfully.");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Failed to send player report email.");
+        }
+    }
+
+    /**
      * Health check endpoint to verify if the email service is running.
      * @return ResponseEntity containing a message indicating the service is up and running
      */

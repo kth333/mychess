@@ -91,4 +91,16 @@ public class EmailContentBuilder {
                 + "Please be ready and good luck!\n\n"
                 + "Thank you,\nMyChess Team";
     }
+
+    public static String buildPlayerReportEmailContent(String reporterUsername, String reportedUsername, String reason, String description) {
+        return String.format(
+                "Player Report\n\n" +
+                        "Reported Player: %s\n" +
+                        "Reporter: %s\n" +
+                        "Reason: %s\n\n" +
+                        "Description:\n%s\n\n" +
+                        "Please review this report and take appropriate action.",
+                reportedUsername, reporterUsername, reason, description
+        );
+    }
 }

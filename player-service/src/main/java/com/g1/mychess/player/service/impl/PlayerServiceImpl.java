@@ -10,6 +10,7 @@ import com.g1.mychess.player.repository.PlayerRatingHistoryRepository;
 import com.g1.mychess.player.repository.PlayerRepository;
 import com.g1.mychess.player.repository.ProfileRepository;
 import com.g1.mychess.player.service.PlayerService;
+import com.g1.mychess.player.client.EmailServiceClient;
 import jakarta.transaction.Transactional;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -17,7 +18,6 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.List;
 
 @Service
 public class PlayerServiceImpl implements PlayerService {
@@ -25,15 +25,18 @@ public class PlayerServiceImpl implements PlayerService {
     private final PlayerRepository playerRepository;
     private final ProfileRepository profileRepository;
     private final PlayerRatingHistoryRepository playerRatingHistoryRepository;
+    private final EmailServiceClient emailServiceClient;
 
     public PlayerServiceImpl(
             PlayerRepository playerRepository,
             ProfileRepository profileRepository,
-            PlayerRatingHistoryRepository playerRatingHistoryRepository
+            PlayerRatingHistoryRepository playerRatingHistoryRepository,
+            EmailServiceClient emailServiceClient
     ) {
         this.playerRepository = playerRepository;
         this.profileRepository = profileRepository;
         this.playerRatingHistoryRepository = playerRatingHistoryRepository;
+        this.emailServiceClient = emailServiceClient;
     }
 
     @Override
@@ -134,6 +137,32 @@ public class PlayerServiceImpl implements PlayerService {
     }
 
     @Override
+    public ResponseEntity<String> reportPlayer(ReportPlayerRequestDTO reportRequestDTO) {
+
+        ReportEmailDTO reportEmailDTO = createReportEmailDTO(
+                reportRequestDTO.getReporterPlayerUsername(),
+                reportRequestDTO.getReportedPlayerUsername(),
+                reportRequestDTO.getReason(),
+                reportRequestDTO.getDescription()
+        );
+
+        return sendReportEmail(reportEmailDTO);
+    }
+
+    private ReportEmailDTO createReportEmailDTO(String reporterUsername, String reportedUsername, String reason, String description) {
+        return new ReportEmailDTO(reporterUsername, reportedUsername, reason, description);
+    }
+
+    private ResponseEntity<String> sendReportEmail(ReportEmailDTO reportEmailDTO) {
+        try {
+            emailServiceClient.sendPlayerReportEmail(reportEmailDTO);
+            return ResponseEntity.ok("Report email sent successfully.");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to send report email.");
+        }
+    }
+
+    @Override
     @Transactional
     public void blacklistPlayer(Long playerId) {
         Player player = getPlayerById(playerId);
@@ -153,6 +182,4 @@ public class PlayerServiceImpl implements PlayerService {
         return playerRepository.findById(playerId)
                 .orElseThrow(() -> new PlayerNotFoundException("Player not found with id: " + playerId));
     }
-
-
 }
