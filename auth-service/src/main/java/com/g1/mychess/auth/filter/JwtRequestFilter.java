@@ -14,74 +14,92 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.List;
+import java.util.Optional;
 
 /**
- * JwtRequestFilter is a Spring Security filter that processes incoming HTTP requests
- * to validate JWT tokens in the Authorization header. If the token is valid, the filter
- * extracts the username and roles from the token and sets the authentication context for
- * the current request.
- * <p>
- * This filter is executed once per request and ensures that the JWT token is validated
- * and the user is authenticated before proceeding with the request.
- * </p>
+ * JwtRequestFilter is a custom filter responsible for JWT authentication.
+ * It processes the incoming HTTP requests to check for a valid JWT token,
+ * validates it, extracts the user's information, and sets the authentication context
+ * for Spring Security.
  */
 @Component
 public class JwtRequestFilter extends OncePerRequestFilter {
 
+    /**
+     * JwtUtil is a utility class used for handling JWT operations, including
+     * extracting user information and validating the token.
+     */
     private final JwtUtil jwtUtil;
 
     /**
-     * Constructs a new JwtRequestFilter with the provided JwtUtil.
+     * Constructor to initialize the JwtRequestFilter with JwtUtil dependency.
      *
-     * @param jwtUtil The utility class responsible for handling JWT token operations.
+     * @param jwtUtil The JwtUtil instance used for JWT operations.
      */
     public JwtRequestFilter(JwtUtil jwtUtil) {
         this.jwtUtil = jwtUtil;
     }
 
     /**
-     * This method filters the incoming HTTP request, extracting and validating the JWT token
-     * from the Authorization header. If the token is valid, it sets the authentication context
-     * for the current user based on the extracted username and roles.
+     * Filters the incoming HTTP requests to extract and validate the JWT token.
+     * If a valid token is found, it extracts the username and roles, and sets
+     * the authentication context for Spring Security.
      *
      * @param request The incoming HTTP request.
-     * @param response The outgoing HTTP response.
-     * @param chain The filter chain to pass the request along.
-     * @throws ServletException If an error occurs during filtering.
-     * @throws IOException If an I/O error occurs during filtering.
+     * @param response The HTTP response to be sent.
+     * @param chain The filter chain to continue processing the request.
+     * @throws ServletException If an error occurs while processing the request.
+     * @throws IOException If an input/output error occurs.
      */
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
             throws ServletException, IOException {
 
-        final String authorizationHeader = request.getHeader("Authorization");
+        Optional<String> jwtOpt = extractJwt(request);
 
-        String username = null;
-        String jwt = null;
+        // If JWT is present and valid, set authentication context
+        if (jwtOpt.isPresent() && jwtUtil.validateToken(jwtOpt.get())) {
+            String username = jwtUtil.extractUsername(jwtOpt.get());
 
-        // Extract the JWT from the Authorization header
-        if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
-            jwt = authorizationHeader.substring(7);
-            username = jwtUtil.extractUsername(jwt); // Extract username from token
-        }
-
-        // Check if username is not null and there is no existing authentication
-        if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-            // Validate JWT token
-            if (jwtUtil.validateToken(jwt)) {
-                // Extract roles/authorities from the JWT
-                List<GrantedAuthority> authorities = jwtUtil.extractRoles(jwt);
-
-                // Create the authentication token with extracted authorities and set it in the context
-                UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
-                        username, null, authorities); // No need for password here
-                authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-
-                SecurityContextHolder.getContext().setAuthentication(authToken);
+            // Set authentication context if not already set
+            if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+                List<GrantedAuthority> authorities = jwtUtil.extractRoles(jwtOpt.get());
+                setAuthenticationContext(username, request, authorities);
             }
         }
 
+        // Continue processing the request
         chain.doFilter(request, response);
+    }
+
+    /**
+     * Extracts the JWT token from the Authorization header of the HTTP request.
+     * If the header contains a valid "Bearer" token, it returns the token;
+     * otherwise, it returns an empty Optional.
+     *
+     * @param request The HTTP request containing the Authorization header.
+     * @return An Optional containing the JWT if present, otherwise empty.
+     */
+    private Optional<String> extractJwt(HttpServletRequest request) {
+        String authorizationHeader = request.getHeader("Authorization");
+        if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
+            return Optional.of(authorizationHeader.substring(7));  // Extract JWT token
+        }
+        return Optional.empty();  // Return empty if no valid token found
+    }
+
+    /**
+     * Sets the authentication context by creating an authentication token with
+     * the username and roles/authorities extracted from the JWT token.
+     *
+     * @param username The username extracted from the JWT token.
+     * @param request The incoming HTTP request.
+     * @param authorities The list of granted authorities for the user.
+     */
+    private void setAuthenticationContext(String username, HttpServletRequest request, List<GrantedAuthority> authorities) {
+        UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(username, null, authorities);
+        authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));  // Set request details
+        SecurityContextHolder.getContext().setAuthentication(authToken);  // Set the authentication in the context
     }
 }
 
