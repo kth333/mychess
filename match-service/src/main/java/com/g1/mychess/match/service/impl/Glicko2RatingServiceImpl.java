@@ -7,13 +7,12 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 
 @Service
+public class Glicko2RatingServiceImpl implements Glicko2RatingService {
 
-    // constants
     private static final double GLICKO_SCALE = 173.7178;
     private static final double BASE_RATING = 1500;
     private static final double TAU = 0.5;
 
-public class Glicko2RatingServiceImpl implements Glicko2RatingService {
     public PlayerRatingUpdateDTO calculatePlayerRatings(MatchPlayer player, List<MatchPlayer> opponents, double[] result) {
         // Converting to Glicko-2 scale
         double R = convertToGlicko2Scale(player.getGlickoRating());
