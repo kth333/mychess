@@ -86,8 +86,6 @@ public class PlayerMapper {
 
     private static String extractUsernameFromProfile(Profile profile) {
         Player player = profile.getPlayer();
-        System.out.println(player.getUsername());
-        System.out.println(player);
         return player != null ? player.getUsername() : null;
     }
 }

@@ -4,11 +4,7 @@ import { PlayerAPI } from "./PlayerAPI";
 class PlayerService {
 
     async getProfile(playerId) {
-        if (playerId) {
-            return ProtectedPlayerAPI.get(`/profile/${playerId}`);
-        } else {
-            return ProtectedPlayerAPI.get("/profile"); // Endpoint to get the authenticated user
-        }
+        return ProtectedPlayerAPI.get(`/profile/${playerId}`);
     }
 
     async updateProfile(playerId, profile) {

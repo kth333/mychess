@@ -20,8 +20,13 @@ class UpdateProfile extends Component {
   }
 
   componentDidMount() {
-    const { playerId } = this.props.params;
-    this.getProfile(playerId);
+    const currentPlayerId = sessionStorage.getItem("currentPlayerId");
+    if (currentPlayerId) {
+      this.getProfile(currentPlayerId);
+    } else {
+      console.error("No currentPlayerId found in sessionStorage.");
+      this.props.navigate("/login"); // Redirect to login if no player ID is found
+    }
   }
 
   async getProfile(playerId) {
@@ -48,17 +53,9 @@ class UpdateProfile extends Component {
   // Handle form submission
   handleSubmit = async (e) => {
     e.preventDefault();
-    const { id } = this.state;
-    
-    const profile = {
-      fullName: this.state.fullName,
-      bio: this.state.bio,
-      avatarUrl: this.state.avatarUrl,
-      country: this.state.country,
-      region: this.state.region,
-      city: this.state.city,
-      isPublic: this.state.isPublic,
-    };
+    const { id, fullName, bio, avatarUrl, country, region, city, isPublic } = this.state;
+
+    const profile = { fullName, bio, avatarUrl, country, region, city, isPublic };
 
     console.log('Updating profile with data:', profile);
 
@@ -89,113 +86,113 @@ class UpdateProfile extends Component {
     const { fullName, bio, avatarUrl, country, region, city, isPublic, countries } = this.state;
 
     return (
-      <div className="flex justify-center items-center min-h-screen">
-        <div className="relative w-full max-w-md">
+        <div className="flex justify-center items-center min-h-screen">
+          <div className="relative w-full max-w-md">
 
-          {/* Update Profile Form */}
-          <form className="p-8 rounded-lg border border-accent shadow-lg bg-secondary" onSubmit={this.handleSubmit}>
-            <h2 className="text-2xl font-bold text-center mb-6">Update Profile</h2>
+            {/* Update Profile Form */}
+            <form className="p-8 rounded-lg border border-accent shadow-lg bg-secondary" onSubmit={this.handleSubmit}>
+              <h2 className="text-2xl font-bold text-center mb-6">Update Profile</h2>
 
-            {/* Name */}
-            <div className="mb-4">
-              <label className="block text-primary text-sm font-bold mb-2">Full Name</label>
-              <input
-                type="text"
-                name="fullName"
-                value={fullName}
-                onChange={this.handleInputChange}
-                className="w-full px-3 py-2 border border-accent rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-            </div>
-
-            {/* Bio */}
-            <div className="mb-4">
-              <label className="block text-primary text-sm font-bold mb-2">Bio</label>
-              <textarea
-                name="bio"
-                value={bio}
-                onChange={this.handleInputChange}
-                className="w-full px-3 py-2 border border-accent rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-            </div>
-
-            {/* Avatar URL */}
-            <div className="mb-4">
-              <label className="block text-primary text-sm font-bold mb-2">Avatar URL</label>
-              <input
-                type="text"
-                name="avatarUrl"
-                value={avatarUrl}
-                onChange={this.handleInputChange}
-                className="w-full px-3 py-2 border border-accent rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-            </div>
-
-            {/* Country */}
-            <div className="mb-4">
-              <label className="block text-primary text-sm font-bold mb-2">Country</label>
-              <select
-                name="country"
-                value={country}
-                onChange={this.handleInputChange}
-                className="w-full px-3 py-2 border border-accent rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              >
-                <option value="">Select Country</option>
-                {countries.map((country) => (
-                  <option key={country.value} value={country.value}>
-                    {country.label}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            {/* Region */}
-            <div className="mb-4">
-              <label className="block text-primary text-sm font-bold mb-2">Region</label>
-              <input
-                type="text"
-                name="region"
-                value={region}
-                onChange={this.handleInputChange}
-                className="w-full px-3 py-2 border border-accent rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-            </div>
-
-            {/* City */}
-            <div className="mb-4">
-              <label className="block text-primary text-sm font-bold mb-2">City</label>
-              <input
-                type="text"
-                name="city"
-                value={city}
-                onChange={this.handleInputChange}
-                className="w-full px-3 py-2 border border-accent rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-            </div>
-
-            {/* Profile Visibility */}
-            <div className="mb-4">
-              <label className="inline-flex items-center">
+              {/* Name */}
+              <div className="mb-4">
+                <label className="block text-primary text-sm font-bold mb-2">Full Name</label>
                 <input
-                  type="checkbox"
-                  name="isPublic"
-                  checked={isPublic}
-                  onChange={this.handleCheckboxChange}
-                  className="form-checkbox h-5 w-5 text-blue-600"
+                    type="text"
+                    name="fullName"
+                    value={fullName}
+                    onChange={this.handleInputChange}
+                    className="w-full px-3 py-2 border border-accent rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
-                <span className="ml-2 text-primary">Profile is Public</span>
-              </label>
-            </div>
+              </div>
 
-            <button
-              type="submit"
-              className="w-full bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-600 focus:outline-none"
-            >
-              Update Profile
-            </button>
-          </form>
+              {/* Bio */}
+              <div className="mb-4">
+                <label className="block text-primary text-sm font-bold mb-2">Bio</label>
+                <textarea
+                    name="bio"
+                    value={bio}
+                    onChange={this.handleInputChange}
+                    className="w-full px-3 py-2 border border-accent rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+
+              {/* Avatar URL */}
+              <div className="mb-4">
+                <label className="block text-primary text-sm font-bold mb-2">Avatar URL</label>
+                <input
+                    type="text"
+                    name="avatarUrl"
+                    value={avatarUrl}
+                    onChange={this.handleInputChange}
+                    className="w-full px-3 py-2 border border-accent rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+
+              {/* Country */}
+              <div className="mb-4">
+                <label className="block text-primary text-sm font-bold mb-2">Country</label>
+                <select
+                    name="country"
+                    value={country}
+                    onChange={this.handleInputChange}
+                    className="w-full px-3 py-2 border border-accent rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  <option value="">Select Country</option>
+                  {countries.map((country) => (
+                      <option key={country.value} value={country.value}>
+                        {country.label}
+                      </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Region */}
+              <div className="mb-4">
+                <label className="block text-primary text-sm font-bold mb-2">Region</label>
+                <input
+                    type="text"
+                    name="region"
+                    value={region}
+                    onChange={this.handleInputChange}
+                    className="w-full px-3 py-2 border border-accent rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+
+              {/* City */}
+              <div className="mb-4">
+                <label className="block text-primary text-sm font-bold mb-2">City</label>
+                <input
+                    type="text"
+                    name="city"
+                    value={city}
+                    onChange={this.handleInputChange}
+                    className="w-full px-3 py-2 border border-accent rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+
+              {/* Profile Visibility */}
+              <div className="mb-4">
+                <label className="inline-flex items-center">
+                  <input
+                      type="checkbox"
+                      name="isPublic"
+                      checked={isPublic}
+                      onChange={this.handleCheckboxChange}
+                      className="form-checkbox h-5 w-5 text-blue-600"
+                  />
+                  <span className="ml-2 text-primary">Profile is Public</span>
+                </label>
+              </div>
+
+              <button
+                  type="submit"
+                  className="w-full bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-600 focus:outline-none"
+              >
+                Update Profile
+              </button>
+            </form>
+          </div>
         </div>
-      </div>
     );
   }
 }
