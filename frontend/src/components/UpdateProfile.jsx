@@ -20,12 +20,13 @@ class UpdateProfile extends Component {
   }
 
   componentDidMount() {
-    this.getProfile();
+    const { playerId } = this.props.params;
+    this.getProfile(playerId);
   }
 
-  async getProfile() {
+  async getProfile(playerId) {
     try {
-      const response = await ProfileService.getProfile(); // Fetch profile data
+      const response = await ProfileService.getProfile(playerId);
       const profile = response.data;
       console.log('Profile data:', profile);
 
@@ -103,7 +104,6 @@ class UpdateProfile extends Component {
                 name="fullName"
                 value={fullName}
                 onChange={this.handleInputChange}
-                required
                 className="w-full px-3 py-2 border border-accent rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
