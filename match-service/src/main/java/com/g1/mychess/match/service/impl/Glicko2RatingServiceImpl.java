@@ -7,18 +7,24 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 
 @Service
+
+    // constants
+    private static final double GLICKO_SCALE = 173.7178;
+    private static final double BASE_RATING = 1500;
+    private static final double TAU = 0.5;
+
 public class Glicko2RatingServiceImpl implements Glicko2RatingService {
     public PlayerRatingUpdateDTO calculatePlayerRatings(MatchPlayer player, List<MatchPlayer> opponents, double[] result) {
         // Converting to Glicko-2 scale
-        double R = (player.getGlickoRating() - 1500) / 173.7178;
-        double RD = player.getRatingDeviation() / 173.7178;
+        double R = convertToGlicko2Scale(player.getGlickoRating());
+        double RD = convertDeviationToGlicko2Scale(player.getRatingDeviation());
 
         double[] opponents_rating = new double[opponents.size()];
         double[] opponents_RD = new double[opponents.size()];
 
         for (int j = 0; j < opponents.size(); j++) {
-            opponents_rating[j] = (opponents.get(j).getGlickoRating() - 1500) / 173.7178;
-            opponents_RD[j] = opponents.get(j).getRatingDeviation() / 173.7178;
+            opponents_rating[j] = (opponents.get(j).getGlickoRating() - BASE_RATING) / GLICKO_SCALE;
+            opponents_RD[j] = opponents.get(j).getRatingDeviation() / GLICKO_SCALE;
         }
 
         // Calculate Glicko-2 rating changes
@@ -31,10 +37,25 @@ public class Glicko2RatingServiceImpl implements Glicko2RatingService {
         // Convert back to Glicko scale and round values for final DTO
         return new PlayerRatingUpdateDTO(
                 player.getPlayerId(),
-                Math.round(173.7178 * newRating + 1500),              // Glicko scale rating
-                Math.round(173.7178 * newRatingDeviation * 10) / 10.0, // Glicko scale RD, 1 decimal place
+                Math.round(convertFromGlicko2Scale(newRating)),              // Glicko scale rating
+                Math.round(convertFromGlicko2Scale(newRatingDeviation) * 10) / 10.0, // Glicko scale RD, 1 decimal place
                 Math.round(newVolatility * 1000) / 1000.0             // Volatility, 3 decimal places
         );
+    }
+
+    // Convert ratings to Glicko-2 scale
+    private double convertToGlicko2Scale(double rating) {
+        return (rating - BASE_RATING) / GLICKO_SCALE;
+    }
+
+    // Convert rating deviation to Glicko-2 scale
+    private double convertDeviationToGlicko2Scale(double deviation) {
+        return deviation / GLICKO_SCALE;
+    }
+
+    // Convert from Glicko-2 scale to standard Glicko scale
+    private double convertFromGlicko2Scale(double value) {
+        return GLICKO_SCALE * value + BASE_RATING;
     }
 
     public static double calculate_g(double RD) {
@@ -76,7 +97,7 @@ public class Glicko2RatingServiceImpl implements Glicko2RatingService {
         double denominator = Math.pow(RD_squared + v + expX, 2);
 
         double firstPart = numerator / denominator;
-        double secondPart = (x - A) / (0.5 * 0.5);
+        double secondPart = (x - A) / (TAU * TAU);
 
         return firstPart - secondPart;
     }
@@ -90,10 +111,10 @@ public class Glicko2RatingServiceImpl implements Glicko2RatingService {
             B = Math.log(delta_squared - (RD * RD) - v);
         } else {
             int k = 1;
-            while (calculate_function(A - k * 0.5, delta_squared, RD * RD, v, A) < 0) { // tau is set at 0.5
+            while (calculate_function(A - k * TAU, delta_squared, RD * RD, v, A) < 0) { // tau is set at 0.5
                 k++;
             }
-            B = A - k * 0.5;
+            B = A - k * TAU;
         }
 
         double f_A = calculate_function(A, delta_squared, RD * RD, v, A);
