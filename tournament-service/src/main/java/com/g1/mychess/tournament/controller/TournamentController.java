@@ -44,6 +44,11 @@ public class TournamentController {
         return tournamentService.getAllTournaments(pageable);
     }
 
+    @GetMapping("/upcoming")
+    public ResponseEntity<Page<TournamentDTO>> getUpcomingTournaments(@PageableDefault(size = 3) Pageable pageable) {
+        return tournamentService.getUpcomingTournaments(pageable);
+    }
+
     @PutMapping("/admin")
     public ResponseEntity<TournamentDTO> updateTournament(@Valid @RequestBody TournamentDTO tournamentDTO, HttpServletRequest request) {
         return tournamentService.updateTournament(tournamentDTO, request);

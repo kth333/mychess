@@ -88,6 +88,14 @@ public class TournamentServiceImpl implements TournamentService {
     }
 
     @Override
+    public ResponseEntity<Page<TournamentDTO>> getUpcomingTournaments(Pageable pageable) {
+        LocalDateTime now = LocalDateTime.now();
+        Page<Tournament> upcomingTournaments = tournamentRepository.findByStartDateTimeAfterOrderByStartDateTimeAsc(now, pageable);
+        Page<TournamentDTO> tournamentDTOs = upcomingTournaments.map(TournamentMapper::toDTO);
+        return ResponseEntity.ok(tournamentDTOs);
+    }
+
+    @Override
     public ResponseEntity<TournamentDTO> updateTournament(TournamentDTO tournamentDTO, HttpServletRequest request) {
         Tournament tournament = getTournamentById(tournamentDTO.getId());
         verifyAdminAccess(tournament.getAdminId(), request);

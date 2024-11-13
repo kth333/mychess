@@ -19,6 +19,8 @@ public interface TournamentService {
 
     ResponseEntity<Page<TournamentDTO>> getAllTournaments(Pageable pageable);
 
+    ResponseEntity<Page<TournamentDTO>> getUpcomingTournaments(Pageable pageable);
+
     ResponseEntity<TournamentDTO> updateTournament(TournamentDTO tournamentDTO, HttpServletRequest request);
 
     ResponseEntity<String> signUpToTournament(Long tournamentId, Long playerId);
