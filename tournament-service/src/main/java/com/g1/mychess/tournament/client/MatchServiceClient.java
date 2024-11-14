@@ -16,7 +16,10 @@ public class MatchServiceClient {
 
     public void runMatchmaking(MatchmakingDTO matchmakingDTO, String tournamentFormat, String jwtToken) {
         webClient.post()
-                .uri("/api/v1/matches/admin/{tournamentId}/matchmaking", matchmakingDTO.getTournamentId())
+                .uri(uriBuilder -> uriBuilder
+                        .path("/api/v1/matches/admin/{tournamentId}/matchmaking")
+                        .queryParam("tournamentFormat", tournamentFormat)
+                        .build(matchmakingDTO.getTournamentId()))
                 .header(HttpHeaders.AUTHORIZATION, "Bearer " + jwtToken)
                 .bodyValue(matchmakingDTO)
                 .retrieve()
