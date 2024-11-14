@@ -418,6 +418,7 @@ class TournamentDetails extends Component {
                                 <button className="btn btn-primary" onClick={this.startTournament}>Start
                                     Tournament</button>
                                 <button className="btn btn-primary" onClick={this.startNextRound}>Next Round</button>
+                                <button className="btn btn-primary" onClick={this.completeTournament}>Complete
                                     Tournament</button>
                             </>
                         )}
