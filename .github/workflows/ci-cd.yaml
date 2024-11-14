@@ -10,6 +10,10 @@ on:
       - main
   workflow_dispatch:
     inputs:
+      commit_sha:
+        description: 'Commit SHA to run the workflow on'
+        required: true
+        default: 'latest_commit_sha'
       skip_backend:
         description: 'Skip Backend Build and Deploy Steps'
         required: false
