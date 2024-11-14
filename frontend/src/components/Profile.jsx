@@ -175,44 +175,42 @@ class Profile extends React.Component {
                     />
                 </div>
                 <div className="container w-3/4 p-4">
-                    <Card className="bg-base-200 shadow-md flex-column">
-                        <CardHeader className="flex-row">
-                            <Card className="bg-base-200 shadow md flex-row justify-start w-1/3">
-                                <div className="flex justify-start">
-                                    <div className="flex flex-col items-center ml-4">
-                                        <h2 className="text-2xl font-semibold text-primary text-center">
-                                            {username || 'Unknown'}
-                                            <p className="text-sm text-red-500 text-secondary ml-2 inline">
-                                                {rank || 'Unranked'}
-                                            </p>
-                                        </h2>
-                                        <Avatar className="w-96 h-64 justify-center">
-                                            <AvatarImage
-                                                src={avatarUrl}
-                                                alt={`${username}'s avatar`}
-                                                size="large"
-                                                className="w-full h-full"
-                                            />
-                                        </Avatar>
+                    <Card className="bg-base-200 shadow-md flex flex-col space-y-4">
+                        <CardHeader className="flex flex-col md:flex-row md:space-x-4">
+                            {/* Player Card Section */}
+                            <Card className="bg-base-200 shadow md:w-1/3 flex flex-col justify-start p-4">
+                                <div className="flex flex-col items-center">
+                                    <h2 className="text-2xl font-semibold text-primary text-center">
+                                        {username || 'Unknown'}
+                                        <p className="text-sm text-red-500 text-secondary ml-2 inline">
+                                            {rank || 'Unranked'}
+                                        </p>
+                                    </h2>
+                                    <Avatar className="w-32 h-32 md:w-48 md:h-48 mt-4">
+                                        <AvatarImage
+                                            src={avatarUrl}
+                                            alt={`${username}'s avatar`}
+                                            size="large"
+                                            className="w-full h-full"
+                                        />
+                                    </Avatar>
+                                    <div className="mt-4 p-4 shadow-md rounded-md">
+                                        <h3 className="text-xl font-bold border-b pb-2 mb-4">Player Information</h3>
+                                        <p><strong>Name:</strong> {fullName || "Unknown"}</p>
+                                        <p><strong>Bio:</strong> {bio || "No bio available"}</p>
+                                    </div>
+                                    <div className="p-4 shadow-md rounded-md">
+                                        <h4 className="text-lg font-semibold">Location Information</h4>
+                                        <p><strong>Country:</strong> {country || "Unknown"}</p>
+                                        <p><strong>Region:</strong> {region || "Unknown"}</p>
+                                        <p><strong>City:</strong> {city || "Unknown"}</p>
                                     </div>
                                 </div>
-                                <CardContent>
-                                    <div className="mr-4 flex flex-col w-96">
-                                        <div className="p-4 shadow-md rounded-md">
-                                            <h3 className="text-xl font-bold border-b pb-2 mb-4">Player Information</h3>
-                                            <p><strong>Name:</strong> {fullName || "Unknown"}</p>
-                                            <p><strong>Bio:</strong> {bio || "No bio available"}</p>
-                                        </div>
-                                        <div className="p-4 shadow-md rounded-md">
-                                            <h4 className="text-lg font-semibold">Location Information</h4>
-                                            <p><strong>Country:</strong> {country || "Unknown"}</p>
-                                            <p><strong>Region:</strong> {region || "Unknown"}</p>
-                                            <p><strong>City:</strong> {city || "Unknown"}</p>
-                                        </div>
-                                    </div>
-                                </CardContent>
                             </Card>
-                            <EloChart ratingHistory={ratingHistory} />
+                            {/* EloChart Section */}
+                            
+                                <EloChart ratingHistory={ratingHistory} />
+                            
                         </CardHeader>
                         <div className="mt-4 flex justify-between">
                             <Button onClick={() => this.toggleModal('followers')}>Followers ({followers.length})</Button>
