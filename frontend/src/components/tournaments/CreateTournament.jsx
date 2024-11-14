@@ -91,7 +91,8 @@ class CreateTournament extends Component {
   // Handle input change
   handleInputChange = (e) => {
     const { name, value } = e.target;
-    this.setState({ [name]: value === "null" ? null : value });
+    // Set requiredGender to null if "Any" is selected, otherwise use the value as-is
+    this.setState({ [name]: name === "requiredGender" && value === "Any" ? null : value });
   };
 
   // Handle checkbox change for affectsRating
@@ -307,36 +308,37 @@ class CreateTournament extends Component {
                 className="w-full px-3 py-2 border border-accent rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
-    
+
             <div className="mb-4">
               <label className="block text-primary text-sm font-bold mb-2">Required Gender</label>
               <select
-                name="requiredGender"
-                value={requiredGender}
-                onChange={this.handleInputChange}
-                required
-                className="w-full px-3 py-2 border border-accent rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  name="requiredGender"
+                  value={requiredGender || "Any"} // Default to "Any" if null
+                  onChange={this.handleInputChange}
+                  required
+                  className="w-full px-3 py-2 border border-accent rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
-                <option value="null">Any</option>
+                <option value="Any">Any</option>
+                {/* Update this value to represent null */}
                 <option value="MALE">Male</option>
                 <option value="FEMALE">Female</option>
                 <option value="OTHERS">Others</option>
               </select>
             </div>
-    
+
             {/* Country Dropdown */}
             <div className="mb-4">
               <label className="block text-primary text-sm font-bold mb-2">Country</label>
               <select
-                name="country"
-                value={country}
-                onChange={this.handleInputChange}
-                required
-                className="w-full px-3 py-2 border border-accent rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  name="country"
+                  value={country}
+                  onChange={this.handleInputChange}
+                  required
+                  className="w-full px-3 py-2 border border-accent rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
                 <option value="">Select a country</option>
                 {countries.map((country) => (
-                  <option key={country.value} value={country.label}>
+                    <option key={country.value} value={country.label}>
                     {country.label}
                   </option>
                 ))}
