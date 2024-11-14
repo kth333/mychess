@@ -147,22 +147,22 @@ jobs:
               --spring.profiles.active=docker
           EOF
 
-      - name: Deploy Player Service
-        if: ${{ inputs.skip_backend != 'true' }}
-        run: |
-          echo "${{ secrets.EC2_SSH_KEY }}" > ec2_key.pem
-          chmod 600 ec2_key.pem
-          ssh -o StrictHostKeyChecking=no -o ServerAliveInterval=30 -i ec2_key.pem ec2-user@${{ secrets.EC2_PLAYER_SERVICE_DNS }} << 'EOF'
-            docker pull ppv1/player-service:latest &&
-            docker stop player-service || true &&
-            docker rm player-service || true &&
-            docker run -d \
-              --name player-service \
-              -p 8081:8081 \
-              --env-file /home/ec2-user/.env \
-              ppv1/player-service:latest \
-              --spring.profiles.active=docker
-          EOF
+#      - name: Deploy Player Service
+#        if: ${{ inputs.skip_backend != 'true' }}
+#        run: |
+#          echo "${{ secrets.EC2_SSH_KEY }}" > ec2_key.pem
+#          chmod 600 ec2_key.pem
+#          ssh -o StrictHostKeyChecking=no -o ServerAliveInterval=30 -i ec2_key.pem ec2-user@${{ secrets.EC2_PLAYER_SERVICE_DNS }} << 'EOF'
+#            docker pull ppv1/player-service:latest &&
+#            docker stop player-service || true &&
+#            docker rm player-service || true &&
+#            docker run -d \
+#              --name player-service \
+#              -p 8081:8081 \
+#              --env-file /home/ec2-user/.env \
+#              ppv1/player-service:latest \
+#              --spring.profiles.active=docker
+#          EOF
 
       - name: Deploy Email Service
         if: ${{ inputs.skip_backend != 'true' }}
