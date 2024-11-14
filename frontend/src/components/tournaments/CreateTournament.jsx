@@ -91,7 +91,7 @@ class CreateTournament extends Component {
   // Handle input change
   handleInputChange = (e) => {
     const { name, value } = e.target;
-    this.setState({ [name]: value });
+    this.setState({ [name]: value === "null" ? null : value });
   };
 
   // Handle checkbox change for affectsRating
@@ -317,7 +317,7 @@ class CreateTournament extends Component {
                 required
                 className="w-full px-3 py-2 border border-accent rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
-                <option value="ANY">Any</option>
+                <option value="null">Any</option>
                 <option value="MALE">Male</option>
                 <option value="FEMALE">Female</option>
                 <option value="OTHERS">Others</option>

@@ -19,7 +19,7 @@ const EloChart = ({ ratingHistory }) => {
     ];
 
     return (
-        <div style={{ height: '100%', width: '100%' }}>
+        <div style={{ height: '600px', width: '600px' }}>
             <ResponsiveLine
                 data={chartData}
                 margin={{ top: 50, right: 110, bottom: 50, left: 60 }}
