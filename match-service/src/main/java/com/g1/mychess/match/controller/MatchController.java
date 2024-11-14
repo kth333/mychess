@@ -53,8 +53,8 @@ public class MatchController {
      * @return A response indicating the success of the matchmaking process.
      */
     @PostMapping("/admin/{tournamentId}/matchmaking")
-    public ResponseEntity<String> runMatchmaking(@PathVariable Long tournamentId, @Valid @RequestBody MatchmakingDTO matchmakingDTO, @Valid @RequestParam String tournamentFormat) {
-        matchmakingService.runMatchmaking(matchmakingDTO, tournamentFormat);
+    public ResponseEntity<String> runMatchmaking(@PathVariable Long tournamentId, @Valid @RequestBody MatchmakingDTO matchmakingDTO) {
+        matchmakingService.runMatchmaking(matchmakingDTO);
         return ResponseEntity.status(HttpStatus.OK).body("Matchmaking for tournament " + tournamentId + " started successfully.");
     }
 

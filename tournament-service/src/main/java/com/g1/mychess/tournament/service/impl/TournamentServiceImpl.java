@@ -269,8 +269,7 @@ public class TournamentServiceImpl implements TournamentService {
 
     private void runMatchmakingForTournament(Tournament tournament, String jwtToken) {
         MatchmakingDTO matchmakingDTO = createMatchmakingDTO(tournament);
-        String tournamentFormat = tournament.getFormat().toString();
-        matchServiceClient.runMatchmaking(matchmakingDTO, jwtToken, tournamentFormat);
+        matchServiceClient.runMatchmaking(matchmakingDTO, jwtToken);
     }
 
     private void progressTournamentRound(Tournament tournament) {
@@ -283,8 +282,7 @@ public class TournamentServiceImpl implements TournamentService {
 
     private void prepareMatchmakingForNextRound(Tournament tournament, String jwtToken) {
         MatchmakingDTO matchmakingDTO = createMatchmakingDTO(tournament);
-        String tournamentFormat = tournament.getFormat().toString();
-        matchServiceClient.runMatchmaking(matchmakingDTO, jwtToken, tournamentFormat);
+        matchServiceClient.runMatchmaking(matchmakingDTO, jwtToken);
     }
 
     private Tournament getTournamentById(Long tournamentId) {

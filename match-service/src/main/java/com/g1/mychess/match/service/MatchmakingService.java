@@ -20,5 +20,5 @@ public interface MatchmakingService {
      * @param matchmakingDTO The data transfer object containing tournament details,
      *                       the current round, and the list of participants.
      */
-    void runMatchmaking(MatchmakingDTO matchmakingDTO, String tournamentFormat);
+    void runMatchmaking(MatchmakingDTO matchmakingDTO);
 }

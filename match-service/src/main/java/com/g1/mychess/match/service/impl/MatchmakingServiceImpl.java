@@ -45,19 +45,14 @@ public class MatchmakingServiceImpl implements MatchmakingService {
      */
     @Override
     @Transactional
-    public void runMatchmaking(MatchmakingDTO matchmakingDTO, String tournamentFormat) {
-        switch (tournamentFormat.toUpperCase()) {
-            case "KNOCKOUT":
-                generateKnockoutMatches(matchmakingDTO);
-                break;
-            case "ROUND_ROBIN":
-                generateRoundRobinMatches(matchmakingDTO);
-                break;
-            case "SWISS":
-            default:
-                generateSwissMatches(matchmakingDTO);
-                break;
-        }
+    public void runMatchmaking(MatchmakingDTO matchmakingDTO) {
+        Long tournamentId = matchmakingDTO.getTournamentId();
+        int currentRound = matchmakingDTO.getCurrentRound();
+        Set<TournamentPlayerDTO> participants = matchmakingDTO.getParticipants();
+        List<MatchPlayer> players = initializePlayers(participants, currentRound);
+        List<Match> newMatches = createSwissSystemMatches(players, tournamentId, currentRound);
+        matchRepository.saveAll(newMatches);
+        saveMatchPlayers(newMatches);
     }
 
     /**
