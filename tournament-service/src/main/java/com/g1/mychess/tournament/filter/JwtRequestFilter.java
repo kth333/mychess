@@ -15,15 +15,34 @@ import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.List;
 
+/**
+ * This filter intercepts incoming HTTP requests to extract and validate JWT tokens.
+ * It sets the authentication context if the token is valid, allowing secure access to the application.
+ */
 @Component
 public class JwtRequestFilter extends OncePerRequestFilter {
 
     private final JwtUtil jwtUtil;
 
+    /**
+     * Constructs a new JwtRequestFilter with the specified JwtUtil.
+     *
+     * @param jwtUtil the utility class for extracting and validating JWT tokens
+     */
     public JwtRequestFilter(JwtUtil jwtUtil) {
         this.jwtUtil = jwtUtil;
     }
 
+    /**
+     * This method is executed for each HTTP request. It extracts the JWT from the Authorization header,
+     * validates the token, and sets the authentication in the security context if the token is valid.
+     *
+     * @param request the HTTP request
+     * @param response the HTTP response
+     * @param chain the filter chain
+     * @throws ServletException if an exception occurs during the filtering process
+     * @throws IOException if an input or output exception occurs during the filtering process
+     */
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
             throws ServletException, IOException {
@@ -58,4 +77,3 @@ public class JwtRequestFilter extends OncePerRequestFilter {
         chain.doFilter(request, response);
     }
 }
-

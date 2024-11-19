@@ -9,6 +9,11 @@ import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
 
+/**
+ * Represents a chess tournament, containing information such as tournament details,
+ * participants, time control settings, and status.
+ * This class is mapped to the "tournaments" table in the database.
+ */
 @Entity
 @Table(name = "tournaments")
 public class Tournament {
@@ -122,22 +127,33 @@ public class Tournament {
     @OneToMany(mappedBy = "tournament", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<TournamentPlayer> participants = new HashSet<>();
 
+    /**
+     * Returns the type of time control for the tournament based on the time control settings.
+     *
+     * @return the {@link TimeControlSetting.TimeControlType} for this tournament
+     */
     public TimeControlSetting.TimeControlType getTimeControlType() {
         return timeControlSetting.getTimeControlType();
     }
 
+    /**
+     * Enum representing the format of the tournament, such as knockout, round robin, or Swiss.
+     */
     public enum TournamentFormat {
-        KNOCKOUT,
-        ROUND_ROBIN,
-        SWISS
+        KNOCKOUT,     // Knockout tournament format
+        ROUND_ROBIN,  // Round robin tournament format
+        SWISS         // Swiss tournament format
     }
 
+    /**
+     * Enum representing the status of the tournament.
+     */
     public enum TournamentStatus {
-        UPCOMING,
-        ONGOING,
-        COMPLETED,
-        CANCELED,
-        PAUSED
+        UPCOMING,     // Tournament is scheduled but has not started yet
+        ONGOING,      // Tournament is currently in progress
+        COMPLETED,    // Tournament has finished
+        CANCELED,     // Tournament has been canceled
+        PAUSED        // Tournament is temporarily paused
     }
 
     // Getters and Setters
@@ -230,21 +246,13 @@ public class Tournament {
 
     public void setAddress(String address) { this.address = address; }
 
-    public int getCurrentRound() {
-        return currentRound;
-    }
+    public int getCurrentRound() { return currentRound; }
 
-    public void setCurrentRound(int currentRound) {
-        this.currentRound = currentRound;
-    }
+    public void setCurrentRound(int currentRound) { this.currentRound = currentRound; }
 
-    public int getMaxRounds() {
-        return maxRounds;
-    }
+    public int getMaxRounds() { return maxRounds; }
 
-    public void setMaxRounds(int maxRounds) {
-        this.maxRounds = maxRounds;
-    }
+    public void setMaxRounds(int maxRounds) { this.maxRounds = maxRounds; }
 
     public Set<TournamentPlayer> getParticipants() { return participants; }
 

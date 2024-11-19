@@ -8,7 +8,18 @@ import com.g1.mychess.tournament.model.TournamentPlayer;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+/**
+ * A utility class to map between {@link Tournament} entities and their corresponding {@link TournamentDTO}
+ * objects, as well as {@link TournamentPlayer} entities and their {@link TournamentPlayerDTO} counterparts.
+ */
 public class TournamentMapper {
+
+    /**
+     * Converts a {@link Tournament} entity to a {@link TournamentDTO}.
+     *
+     * @param tournament the tournament entity to convert
+     * @return the corresponding {@link TournamentDTO}
+     */
     public static TournamentDTO toDTO(Tournament tournament) {
         Set<TournamentPlayerDTO> participantDTOs = tournament.getParticipants().stream()
                 .map(TournamentMapper::toTournamentPlayerDTO)
@@ -43,6 +54,12 @@ public class TournamentMapper {
         );
     }
 
+    /**
+     * Converts a {@link TournamentPlayer} entity to a {@link TournamentPlayerDTO}.
+     *
+     * @param player the tournament player entity to convert
+     * @return the corresponding {@link TournamentPlayerDTO}
+     */
     public static TournamentPlayerDTO toTournamentPlayerDTO(TournamentPlayer player) {
         return new TournamentPlayerDTO(
                 player.getTournament().getId(),
@@ -57,12 +74,24 @@ public class TournamentMapper {
         );
     }
 
+    /**
+     * Converts a {@link TournamentDTO} to a {@link Tournament} entity.
+     *
+     * @param dto the DTO to convert
+     * @return the corresponding {@link Tournament} entity
+     */
     public static Tournament toEntity(TournamentDTO dto) {
         Tournament tournament = new Tournament();
         updateEntityFromDTO(tournament, dto);
         return tournament;
     }
 
+    /**
+     * Updates an existing {@link Tournament} entity with data from a {@link TournamentDTO}.
+     *
+     * @param tournament the tournament entity to update
+     * @param dto        the DTO containing the data to update
+     */
     public static void updateEntityFromDTO(Tournament tournament, TournamentDTO dto) {
         tournament.setName(dto.getName());
         tournament.setDescription(dto.getDescription());

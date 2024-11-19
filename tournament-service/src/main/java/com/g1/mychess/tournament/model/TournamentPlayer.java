@@ -6,6 +6,11 @@ import jakarta.validation.constraints.NotNull;
 
 import java.time.LocalDateTime;
 
+/**
+ * Represents a player participating in a tournament. Contains information about the player's 
+ * registration, rating, progress, and status within the tournament.
+ * This class is mapped to the "tournament_player" table in the database.
+ */
 @Entity
 @Table(name = "tournament_player")
 public class TournamentPlayer {
@@ -52,6 +57,9 @@ public class TournamentPlayer {
     @NotNull
     private TournamentPlayerStatus status;
 
+    /**
+     * Enum representing the possible statuses of a player in the tournament.
+     */
     public enum TournamentPlayerStatus {
         ACTIVE,         // Currently participating
         ELIMINATED,     // Eliminated from the tournament
@@ -63,9 +71,13 @@ public class TournamentPlayer {
         FINALIST        // Reached the final round
     }
 
-
     // Getters and Setters
 
+    /**
+     * Gets the unique identifier for this tournament player.
+     *
+     * @return the player's ID
+     */
     public Long getId() {
         return id;
     }
@@ -74,6 +86,11 @@ public class TournamentPlayer {
         this.id = id;
     }
 
+    /**
+     * Gets the tournament this player is participating in.
+     *
+     * @return the associated {@link Tournament} object
+     */
     public Tournament getTournament() {
         return tournament;
     }
@@ -82,6 +99,11 @@ public class TournamentPlayer {
         this.tournament = tournament;
     }
 
+    /**
+     * Gets the unique identifier of the player.
+     *
+     * @return the player ID
+     */
     public Long getPlayerId() {
         return playerId;
     }
@@ -90,6 +112,11 @@ public class TournamentPlayer {
         this.playerId = playerId;
     }
 
+    /**
+     * Gets the date and time when the player signed up for the tournament.
+     *
+     * @return the sign-up date and time
+     */
     public LocalDateTime getSignUpDateTime() {
         return signUpDateTime;
     }
@@ -98,6 +125,11 @@ public class TournamentPlayer {
         this.signUpDateTime = signUpDateTime;
     }
 
+    /**
+     * Gets the player's Glicko rating.
+     *
+     * @return the Glicko rating
+     */
     public double getGlickoRating() {
         return glickoRating;
     }
@@ -106,24 +138,63 @@ public class TournamentPlayer {
         this.glickoRating = glickoRating;
     }
 
-    public double getRatingDeviation() { return ratingDeviation; }
+    /**
+     * Gets the player's rating deviation.
+     *
+     * @return the rating deviation
+     */
+    public double getRatingDeviation() { 
+        return ratingDeviation; 
+    }
 
-    public void setRatingDeviation(double ratingDeviation) { this.ratingDeviation = ratingDeviation; }
+    public void setRatingDeviation(double ratingDeviation) { 
+        this.ratingDeviation = ratingDeviation; 
+    }
 
-    public double getVolatility() { return volatility; }
+    /**
+     * Gets the player's volatility in rating.
+     *
+     * @return the volatility
+     */
+    public double getVolatility() { 
+        return volatility; 
+    }
 
-    public void setVolatility(double volatility) { this.volatility = volatility; }
+    public void setVolatility(double volatility) { 
+        this.volatility = volatility; 
+    }
 
-    public double getPoints() { return points; }
+    /**
+     * Gets the total points the player has accumulated in the tournament.
+     *
+     * @return the points
+     */
+    public double getPoints() { 
+        return points; 
+    }
 
-    public void setPoints(double points) { this.points = points; }
+    public void setPoints(double points) { 
+        this.points = points; 
+    }
 
-    public int getRoundsPlayed() { return roundsPlayed; }
+    /**
+     * Gets the number of rounds the player has participated in.
+     *
+     * @return the rounds played
+     */
+    public int getRoundsPlayed() { 
+        return roundsPlayed; 
+    }
 
     public void setRoundsPlayed(int roundsPlayed) {
         this.roundsPlayed = roundsPlayed;
     }
 
+    /**
+     * Gets the current status of the player in the tournament.
+     *
+     * @return the player's status
+     */
     public TournamentPlayerStatus getStatus() {
         return status;
     }

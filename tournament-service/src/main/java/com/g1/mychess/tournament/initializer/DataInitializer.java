@@ -16,6 +16,11 @@ import org.springframework.stereotype.Component;
 import java.time.LocalDateTime;
 import java.util.HashSet;
 
+/**
+ * Initializes tournament data when the application starts. This class is responsible for
+ * creating and saving dummy tournament records to the database for demonstration, testing
+ * and development purposes.
+ */
 @Component
 public class DataInitializer implements CommandLineRunner {
 
@@ -25,6 +30,12 @@ public class DataInitializer implements CommandLineRunner {
     @Autowired
     private TournamentPlayerRepository tournamentPlayerRepository;
 
+    /**
+     * Runs the initialization process. It checks if there are any existing tournaments in the
+     * database and initializes the tournament data if none are found.
+     *
+     * @param args command line arguments (unused)
+     */
     @Override
     public void run(String... args) {
         // Check if tournaments already exist to avoid duplicate entries
@@ -34,12 +45,13 @@ public class DataInitializer implements CommandLineRunner {
         } else {
             System.out.println("Tournaments already exist in the database.");
         }
-
     }
 
+    /**
+     * Creates and saves tournament data to the repository.
+     * This method generates multiple tournaments, including a series of 100 tournaments with incremented years.
+     */
     private void createTournaments() {
-        
-    
         // Save the other 3 tournaments
         Tournament tournament2 = new Tournament();
         tournament2.setAdminId(2L);
@@ -166,6 +178,12 @@ public class DataInitializer implements CommandLineRunner {
     }
     
 
+    /**
+     * Signs up players for a specific tournament.
+     * This method creates 8 players for the given tournament and saves them to the repository.
+     *
+     * @param tournament the tournament to sign up players for
+     */
     private void signUpPlayersForTournament(Tournament tournament) {
         LocalDateTime signUpDateTime = LocalDateTime.now();
 
