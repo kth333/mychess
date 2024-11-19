@@ -1,0 +1,14 @@
+com.g1.mychess.match
+com.g1.mychess.match.client
+com.g1.mychess.match.config
+com.g1.mychess.match.controller
+com.g1.mychess.match.dto
+com.g1.mychess.match.exception
+com.g1.mychess.match.filter
+com.g1.mychess.match.global
+com.g1.mychess.match.mapper
+com.g1.mychess.match.model
+com.g1.mychess.match.repository
+com.g1.mychess.match.service
+com.g1.mychess.match.service.impl
+com.g1.mychess.match.util

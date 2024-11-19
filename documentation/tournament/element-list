@@ -1,0 +1,16 @@
+com.g1.mychess.tournament
+com.g1.mychess.tournament.client
+com.g1.mychess.tournament.config
+com.g1.mychess.tournament.controller
+com.g1.mychess.tournament.dto
+com.g1.mychess.tournament.exception
+com.g1.mychess.tournament.filter
+com.g1.mychess.tournament.global
+com.g1.mychess.tournament.initializer
+com.g1.mychess.tournament.mapper
+com.g1.mychess.tournament.model
+com.g1.mychess.tournament.repository
+com.g1.mychess.tournament.service
+com.g1.mychess.tournament.service.impl
+com.g1.mychess.tournament.util
+com.g1.mychess.tournament.validation

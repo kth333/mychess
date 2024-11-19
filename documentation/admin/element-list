@@ -1,0 +1,15 @@
+com.g1.mychess.admin
+com.g1.mychess.admin.client
+com.g1.mychess.admin.config
+com.g1.mychess.admin.controller
+com.g1.mychess.admin.dto
+com.g1.mychess.admin.exception
+com.g1.mychess.admin.filter
+com.g1.mychess.admin.global
+com.g1.mychess.admin.initializer
+com.g1.mychess.admin.mapper
+com.g1.mychess.admin.model
+com.g1.mychess.admin.repository
+com.g1.mychess.admin.service
+com.g1.mychess.admin.service.impl
+com.g1.mychess.admin.util

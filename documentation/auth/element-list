@@ -1,0 +1,14 @@
+com.g1.mychess.auth
+com.g1.mychess.auth.client
+com.g1.mychess.auth.config
+com.g1.mychess.auth.controller
+com.g1.mychess.auth.dto
+com.g1.mychess.auth.exception
+com.g1.mychess.auth.filter
+com.g1.mychess.auth.global
+com.g1.mychess.auth.initializer
+com.g1.mychess.auth.model
+com.g1.mychess.auth.repository
+com.g1.mychess.auth.service
+com.g1.mychess.auth.service.impl
+com.g1.mychess.auth.util

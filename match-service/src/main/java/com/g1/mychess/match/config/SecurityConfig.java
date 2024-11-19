@@ -22,14 +22,12 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 /**
  * Security configuration class for the application.
  *
- * <p>This class handles the security configurations for the web application, including:
- * <ul>
- *     <li>Defining roles and access control for specific endpoints.</li>
- *     <li>Setting up JWT authentication filter.</li>
- *     <li>Configuring CORS (Cross-Origin Resource Sharing) for the application.</li>
- *     <li>Ensuring stateless sessions with JWT tokens for authentication.</li>
- * </ul>
- * </p>
+ * This class handles the security configurations for the web application, including:
+ *
+ *     Defining roles and access control for specific endpoints.
+ *     Setting up JWT authentication filter.
+ *     Configuring CORS (Cross-Origin Resource Sharing) for the application.
+ *     Ensuring stateless sessions with JWT tokens for authentication.
  *
  * <p>It integrates with the Spring Security framework to secure the application from unauthorized access
  * and to ensure that requests are properly authenticated and authorized before access is granted to

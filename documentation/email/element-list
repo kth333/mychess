@@ -1,0 +1,7 @@
+com.g1.mychess.email
+com.g1.mychess.email.config
+com.g1.mychess.email.controller
+com.g1.mychess.email.dto
+com.g1.mychess.email.service
+com.g1.mychess.email.service.impl
+com.g1.mychess.email.util

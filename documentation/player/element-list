@@ -1,0 +1,15 @@
+com.g1.mychess.player
+com.g1.mychess.player.client
+com.g1.mychess.player.config
+com.g1.mychess.player.controller
+com.g1.mychess.player.dto
+com.g1.mychess.player.exception
+com.g1.mychess.player.filter
+com.g1.mychess.player.global
+com.g1.mychess.player.initializer
+com.g1.mychess.player.mapper
+com.g1.mychess.player.model
+com.g1.mychess.player.repository
+com.g1.mychess.player.service
+com.g1.mychess.player.service.impl
+com.g1.mychess.player.util
