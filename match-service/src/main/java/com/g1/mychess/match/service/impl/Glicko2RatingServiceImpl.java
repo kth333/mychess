@@ -51,7 +51,7 @@ public class Glicko2RatingServiceImpl implements Glicko2RatingService {
         // Convert back to Glicko scale and round values for final DTO
         return new PlayerRatingUpdateDTO(
                 player.getPlayerId(),
-                Math.round(convertFromGlickoScale(newRating + GLICKO_BASE_RATING)),              // Glicko scale rating
+                Math.round(convertFromGlickoScale(newRating) + GLICKO_BASE_RATING),              // Glicko scale rating
                 Math.round(convertFromGlickoScale(newRatingDeviation) * 10) / 10.0, // Glicko scale RD, 1 decimal place
                 Math.round(newVolatility * 1000) / 1000.0             // Volatility, 3 decimal places
         );
