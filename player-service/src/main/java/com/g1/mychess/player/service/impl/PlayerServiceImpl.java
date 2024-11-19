@@ -39,13 +39,13 @@ public class PlayerServiceImpl implements PlayerService {
             ProfileRepository profileRepository,
             PlayerRatingHistoryRepository playerRatingHistoryRepository,
             EmailServiceClient emailServiceClient,
-            FollowRepository followRepositoru
+            FollowRepository followRepository
     ) {
         this.playerRepository = playerRepository;
         this.profileRepository = profileRepository;
         this.playerRatingHistoryRepository = playerRatingHistoryRepository;
         this.emailServiceClient = emailServiceClient;
-        this.followRepository = followRepositoru;
+        this.followRepository = followRepository;
     }
 
     @Override
