@@ -19,16 +19,31 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 
+/**
+ * The DataInitializer class is responsible for initializing player accounts, profiles,
+ * and player rating history data into the database at the application startup.
+ * It checks if any player data already exists in the database, and if not, populates the database
+ * with a mix of regular players and grandmasters, with realistic information.
+ */
 @Component
 public class DataInitializer implements CommandLineRunner {
 
     @Autowired
     private PlayerRepository playerRepository;
+
     @Autowired
     private ProfileRepository profileRepository;
+
     @Autowired
     private PlayerRatingHistoryRepository playerRatingHistoryRepository;
 
+    /**
+     * This method is called when the application starts.
+     * It checks if there are existing player records in the database.
+     * If no players exist, it initializes player data and saves it to the database.
+     *
+     * @param args command line arguments
+     */
     @Override
     public void run(String... args) {
         if (playerRepository.count() == 0) {
@@ -39,6 +54,11 @@ public class DataInitializer implements CommandLineRunner {
         }
     }
 
+    /**
+     * Initializes the player data, including both regular players and grandmasters.
+     * Regular players are created with random data, while grandmasters are created
+     * with predefined names, countries, and high ratings.
+     */
     private void initializePlayers() {
         List<Player> players = new ArrayList<>();
         List<Profile> profiles = new ArrayList<>();
@@ -104,6 +124,14 @@ public class DataInitializer implements CommandLineRunner {
         playerRatingHistoryRepository.saveAll(playerRatingHistories);
     }
 
+    /**
+     * Creates a regular player with random data.
+     *
+     * @param index the index of the player
+     * @param genders the list of gender options
+     * @param random the Random instance used for generating random data
+     * @return the created Player object
+     */
     private Player createRegularPlayer(int index, List<String> genders, Random random) {
         Player player = new Player();
         player.setUsername("player" + index);
@@ -137,6 +165,17 @@ public class DataInitializer implements CommandLineRunner {
         return player;
     }
 
+    /**
+     * Creates a grandmaster player with specified details.
+     *
+     * @param fullName the full name of the grandmaster
+     * @param username the username of the grandmaster
+     * @param country the country of the grandmaster
+     * @param glickoRating the Glicko rating of the grandmaster
+     * @param gender the gender of the grandmaster
+     * @param random the Random instance used for generating random data
+     * @return the created Player object
+     */
     private Player createGrandmaster(String fullName, String username, String country, int glickoRating, String gender, Random random) {
         Player player = new Player();
         player.setUsername(username);
@@ -170,6 +209,12 @@ public class DataInitializer implements CommandLineRunner {
         return player;
     }
 
+    /**
+     * Creates a rating history entry for a player.
+     *
+     * @param player the player for whom the rating history is to be created
+     * @return the created PlayerRatingHistory object
+     */
     private PlayerRatingHistory createRatingHistory(Player player) {
         PlayerRatingHistory playerRatingHistory = new PlayerRatingHistory();
         playerRatingHistory.setPlayer(player);
@@ -177,6 +222,8 @@ public class DataInitializer implements CommandLineRunner {
         playerRatingHistory.setRatingDeviation(player.getProfile().getRatingDeviation());
         playerRatingHistory.setVolatility(player.getProfile().getVolatility());
         playerRatingHistory.setDate(LocalDateTime.now());
+        playerRatingHistory.setVolatility(player.getProfile().getVolatility());
+        playerRatingHistory.setRatingDeviation(player.getProfile().getRatingDeviation());
         return playerRatingHistory;
     }
 }
