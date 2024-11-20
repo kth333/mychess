@@ -6,6 +6,7 @@ import com.g1.mychess.tournament.client.PlayerServiceClient;
 import com.g1.mychess.tournament.dto.MatchmakingDTO;
 import com.g1.mychess.tournament.dto.PlayerDTO;
 import com.g1.mychess.tournament.dto.TournamentDTO;
+import com.g1.mychess.tournament.dto.TournamentNotificationDTO;
 import com.g1.mychess.tournament.exception.*;
 import com.g1.mychess.tournament.mapper.TournamentMapper;
 import com.g1.mychess.tournament.model.TimeControlSetting;
@@ -34,8 +35,6 @@ import static org.mockito.Mockito.*;
 @ExtendWith(SpringExtension.class)
 public class TournamentServiceImplTest {
 
-    @InjectMocks
-    private TournamentServiceImpl tournamentService;
 
     @Mock
     private TournamentRepository tournamentRepository;
@@ -58,12 +57,35 @@ public class TournamentServiceImplTest {
     @Mock
     private HttpServletRequest mockRequest;
 
+    @InjectMocks
+    private TournamentServiceImpl tournamentService;
+
+    /**
+     * Sets up the testing environment before each test case is executed.
+     *
+     * This method mocks the `sendTournamentNotification` method of the
+     * `emailServiceClient` to return an empty `Mono`. This ensures that the
+     * email service interactions do not actually execute during tests,
+     * isolating the tests from external dependencies.
+     */
+
     @BeforeEach
     void setUp() {
         // Mock email service client to return a non-null Mono
         when(emailServiceClient.sendTournamentNotification(any(TournamentNotificationDTO.class)))
                 .thenReturn(Mono.empty());
     }
+
+    /**
+     * Tests the successful creation of a tournament.
+     *
+     * This test prepares a TournamentDTO with valid tournament details,
+     * mocks necessary repository and service methods, and verifies that
+     * the tournament is created successfully. The test asserts that the
+     * response status is HTTP 201 Created, the response body contains the
+     * expected tournament details, and the saved tournament has the
+     * correct attributes.
+     */
 
     @Test
     public void testCreateTournament_Success() {
@@ -114,30 +136,68 @@ public class TournamentServiceImplTest {
         assertEquals(timeControlSetting, savedTournament.getTimeControlSetting());
     }
 
+    /**
+     * Tests the scenario where a tournament is not found by its name.
+     *
+     * This test verifies that the service method `findTournamentByName` correctly throws a
+     * `TournamentNotFoundException` when the given tournament name does not exist in the repository.
+     *
+     * Steps:
+     * 1. Define a tournament name that does not exist.
+     * 2. Mock the repository method `findByName` to return an empty `Optional`.
+     * 3. Call the service method and assert that a `TournamentNotFoundException` is thrown.
+     * 4. Verify that the exception message matches the expected message.
+     *
+     * Expected Outcome:
+     * The test should pass if the `findTournamentByName` method throws a
+     * `TournamentNotFound*/
     @Test
     void findTournamentByName_NotFound(){
         String tournamentName = "Non-Existent Tournament";
 
         when(tournamentRepository.findByName(tournamentName)).thenReturn(Optional.empty());
 
-        Exception expectedException = assertThrows(IllegalArgumentException.class, () ->
+        Exception expectedException = assertThrows(TournamentNotFoundException.class, () ->
                 tournamentService.findTournamentByName(tournamentName));
 
         assertEquals("Tournament not found with name: " + tournamentName, expectedException.getMessage());
     }
 
+    /**
+     * Tests the scenario where a tournament is not found by its ID.
+     *
+     * This test verifies that the service method `findTournamentById` correctly throws a
+     * `TournamentNotFoundException` when the given tournament ID does not exist in the repository.
+     *
+     * Steps:
+     * 1. Define a tournament ID that does not exist.
+     * 2. Mock the repository method `findById` to return an empty `Optional`.
+     * 3. Call the service method and assert that a `TournamentNotFoundException` is thrown.
+     * 4. Verify that the exception message matches the expected message.
+     *
+     * Expected Outcome:
+     * The test should pass if the `findTournamentById` method throws a `TournamentNotFoundException` with the correct message.
+     */
     @Test
     void findTournamentById_NotFound(){
         long tournamentId = 999L;
 
         when(tournamentRepository.findById(tournamentId)).thenReturn(Optional.empty());
 
-        Exception expectedException = assertThrows(IllegalArgumentException.class, () ->
+        Exception expectedException = assertThrows(TournamentNotFoundException.class, () ->
                 tournamentService.findTournamentById(tournamentId));
 
-        assertEquals("Tournament not found with tournament id: " + tournamentId, expectedException.getMessage());
+        assertEquals("Tournament not found with id: " + tournamentId, expectedException.getMessage());
     }
 
+    /**
+     * Tests the successful scenario of signing up a player to a tournament.
+     *
+     * This test performs the following steps:
+     * 1. Sets up a tournament with a valid registration period and rating range.
+     * 2. Mocks tournament and player repository behaviors to return valid details.
+     * 3. Constructs a PlayerDTO
+     * */
     @Test
     void testSignUpToTournament_Success() {
         // Arrange
@@ -177,6 +237,19 @@ public class TournamentServiceImplTest {
         assertEquals("Player successfully signed up to the tournament", response.getBody());
     }
 
+    /**
+     * Tests the scenario where a player tries to sign up for a tournament but the eligibility
+     * check fails because the player is blacklisted.
+     *
+     * This test does the following:
+     * 1. Sets up a tournament with valid registration dates and initializes it with no participants.
+     * 2. Mocks repository and service methods:
+     *    - `tournamentRepository.findById` to return the tournament.
+     *    - `tournamentPlayerRepository.existsByTournamentIdAndPlayerId` to return false, indicating the player hasn't signed up yet.
+     *    - `playerServiceClient.getPlayerDetails` to return a PlayerDTO where the player is blacklisted.
+     * 3. Calls the `signUpToTournament` service method and expects a `PlayerBlacklistedException` to be thrown.
+     * 4. Asserts that the exception message matches the expected "Player is blacklisted from participating in tournaments."
+     */
     @Test
     void testSignUpToTournament_PlayerEligibilityCheck_FailsDueToBlacklisted() {
         // Arrange
@@ -214,6 +287,19 @@ public class TournamentServiceImplTest {
         assertEquals("Player is blacklisted from participating in tournaments.", exception.getMessage());
     }
 
+    /**
+     * Tests the scenario where a player tries to sign up for a tournament they are already signed up for.
+     *
+     * This test performs the following steps:
+     * 1. Sets up a tournament with a valid registration period.
+     * 2. Confirms that the player has already signed up for the tournament.
+     * 3. Constructs a PlayerDTO with relevant player details.
+     * 4. Calls the service method `signUpToTournament` and expects a `PlayerAlreadySignedUpException` to be thrown.
+     * 5. Asserts that the exception message matches the expected "Player is already signed up for this tournament."
+     *
+     * Expected Outcome:
+     * The test should pass if the `signUpToTournament` method throws a `PlayerAlreadySignedUpException` with the correct message.
+     */
     @Test
     void testSignUpToTournament_AlreadySignedUp() {
         // Arrange
@@ -225,21 +311,27 @@ public class TournamentServiceImplTest {
         tournament.setParticipants(new HashSet<>());
         tournament.setMinRating(1000); // Add this line
         tournament.setMaxRating(2000); // Add this line
+        LocalDateTime registrationStartDate = LocalDateTime.now().minusDays(1); // registration opened
+        tournament.setRegistrationStartDate(registrationStartDate);
+        LocalDateTime registrationEndDate = LocalDateTime.now().plusDays(1);
+        tournament.setRegistrationEndDate(registrationEndDate);     // registration closes tmr
+        LocalDateTime now = LocalDateTime.now();
 
         when(tournamentRepository.findById(tournamentId)).thenReturn(Optional.of(tournament));
+        when(tournamentPlayerRepository.existsByTournamentIdAndPlayerId(tournamentId, playerId)).thenReturn(true);
         when(tournamentPlayerRepository.existsByTournamentIdAndPlayerId(tournamentId, playerId)).thenReturn(true);
 
         PlayerDTO playerDTO = new PlayerDTO(
                 playerId,
                 false,
                 "playerUsername",
+                "email@domain.com",
                 25,
                 "MALE",
                 1500.0,
                 200.0,
                 0.06
         );
-
 
         // Assert
         Exception expectedException = assertThrows(PlayerAlreadySignedUpException.class, () ->
@@ -248,7 +340,16 @@ public class TournamentServiceImplTest {
         assertEquals("Player is already signed up for this tournament.", expectedException.getMessage());
     }
 
-
+    /**
+     * Tests the successful update of a tournament.
+     *
+     * This test performs the following steps:
+     * 1. Sets up a TournamentDTO with updated tournament details.
+     * 2. Mocks necessary repository and service methods to simulate the update scenario.
+     * 3. Verifies that the tournament update process completes successfully.
+     * 4. Asserts that the response status is HTTP 200 OK.
+     * 5. Asserts that the updated tournament details in the response body are correct.
+     */
     @Test
     public void testUpdateTournament_Success() {
         // Arrange
@@ -279,6 +380,19 @@ public class TournamentServiceImplTest {
         assertEquals(timeControlSetting, response.getBody().getTimeControlSetting());
     }
 
+    /**
+     * Tests the scenario where an attempt is made to update a non-existent tournament.
+     *
+     * This test performs the following steps:
+     * 1. Sets up a `TournamentDTO` object with updated tournament details.
+     * 2. Sets up a `Tournament` object to simulate the tournament to be updated.
+     * 3. Mocks the repository method `findById` to return an empty `Optional`, indicating the tournament does not exist.
+     * 4. Calls the `updateTournament` method and expects a `TournamentNotFoundException` to be thrown.
+     * 5. Asserts that the exception message matches the expected message "Tournament not found with id: {id}".
+     *
+     * Expected Outcome:
+     * The test should pass if the `updateTournament` method throws a `TournamentNotFoundException` with the correct message.
+     */
     @Test
     public void testUpdateTournament_NotExist() {
         // Arrange
@@ -299,11 +413,25 @@ public class TournamentServiceImplTest {
         when(tournamentRepository.findById(1L)).thenReturn(Optional.empty());
 
         // Assert
-        Exception expectedException = assertThrows(IllegalArgumentException.class, () ->
+        Exception expectedException = assertThrows(TournamentNotFoundException.class, () ->
                 tournamentService.updateTournament(tournamentDTO, mockRequest));
-        assertEquals("Tournament not found with ID: " + tournamentDTO.getId(), expectedException.getMessage());
+        assertEquals("Tournament not found with id: " + tournamentDTO.getId(), expectedException.getMessage());
     }
 
+    /**
+     * Tests the scenario where an non-admin attempts to update a tournament.
+     *
+     * This test follows these steps:
+     * 1. Prepares a `TournamentDTO` object with updated tournament details.
+     * 2. Mocks the necessary repository and service interactions:
+     *    - `tournamentRepository.findById` to return an existing tournament.
+     *    - `authenticationService.getUserIdFromRequest` to simulate the user making the request.
+     * 3. Calls the `updateTournament` method with the unauthorized user's details and expects an `UnauthorizedActionException` to be thrown.
+     * 4. Asserts that the exception message matches the expected message "Only the tournament admin can perform this action."
+     *
+     * Expected Outcome:
+     * The test should pass if the `updateTournament` method throws an `UnauthorizedActionException` with the correct message when an unauthorized user attempts to update a tournament.
+     */
     @Test
     public void testUpdateTournament_Unauthorized() {
         // Arrange
@@ -329,12 +457,21 @@ public class TournamentServiceImplTest {
         // Assert
         Exception expectedException = assertThrows(UnauthorizedActionException.class, () ->
                 tournamentService.updateTournament(tournamentDTO, mockRequest));
-        assertEquals("Only the tournament admin can update the tournament.", expectedException.getMessage());
+        assertEquals("Only the tournament admin can perform this action.", expectedException.getMessage());
     }
 
-    // ... (Include other test methods, adjusting them similarly)
-
-    // Example for testCompleteTournament_Success
+    /**
+     * Tests the successful completion of a tournament.
+     *
+     * This test performs the following steps:
+     * 1. Sets up a tournament with the status ONGOING and mocks the repository to return this tournament.
+     * 2. Mocks the authentication service to simulate the admin user who is making the completion request.
+     * 3. Calls the completeTournament method in the tournament service.
+     * 4. Verifies that the HTTP response status is OK.
+     * 5. Verifies that the response body contains the message "Tournament completed successfully."
+     * 6. Asserts that the tournament status has been updated to COMPLETED.
+     * 7. Verifies that the match service client is called to finalize the tournament.
+     */
     @Test
     void testCompleteTournament_Success() {
         // Arrange

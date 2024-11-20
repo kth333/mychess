@@ -23,7 +23,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
 @EnableAutoConfiguration(exclude = {DataSourceAutoConfiguration.class})
-public class PlayerServiceClientTest {
+public class PlayerServiceClientIntegrationTest {
 
     private MockWebServer mockWebServer;
 
@@ -40,6 +40,13 @@ public class PlayerServiceClientTest {
 
     private static final String baseUrl = "/api/v1/player/";
 
+    /**
+     * This is an integration test focusing on the PlayerServiceClient
+     * This tests the end-points.
+     * The test environment is a MockWebServer and a real PlayerServiceClient instance.
+     *
+     * @throws IOException if an I/O error occurs when starting the MockWebServer
+     */
     @BeforeEach
     void setUp() throws IOException {
         mockWebServer = new MockWebServer();
@@ -53,13 +60,22 @@ public class PlayerServiceClientTest {
         mockWebServer.shutdown();
     }
 
+    /**
+     * Tests the `getPlayerDetails` method of the `PlayerServiceClient` class.
+     *
+     * This test verifies that the `getPlayerDetails` method returns the expected player details
+     * for a given player ID. The test sets up a mock server response, executes the client call,
+     * and asserts that the returned `PlayerDTO` object matches the expected values.
+     *
+     * @throws Exception if any errors occur during test execution.
+     */
     @Test
     public void testGetPlayerDetails() throws Exception {
         long playerId = 1L;
 
         // Create a PlayerDTO object
         PlayerDTO playerDTO = new PlayerDTO(playerId,false,"chessMaster",
-                25,"MALE",1500.0,200.0,0.06);
+                "email@domain.com", 25,"MALE",1500.0,200.0,0.06);
 
         // Serialize PlayerDTO to JSON using ObjectMapper
         ObjectMapper objectMapper = new ObjectMapper();

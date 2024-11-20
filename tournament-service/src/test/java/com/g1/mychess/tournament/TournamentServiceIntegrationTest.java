@@ -37,8 +37,13 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 
+import static com.g1.mychess.tournament.model.Tournament.TournamentStatus.UPCOMING;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+
+/**
+ *
+ */
 
 @SpringBootTest(classes = TournamentServiceApplication.class,
         webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -85,22 +90,6 @@ public class TournamentServiceIntegrationTest {
 
     }
 
-
-//    ationImpl{interpolatedMessage='must be greater than or equal to 1', propertyPath=maxRounds, rootBeanClass=class com.g1.mychess.tournament.model.Tournament, messageTemplate='{jakarta.validation.constraints.Min.message}'}
-//    ConstraintViolationImpl{interpolatedMessage='must not be null', propertyPath=startDateTime, rootBeanClass=class com.g1.mychess.tournament.model.Tournament, messageTemplate='{jakarta.validation.constraints.NotNull.message}'}
-//    ConstraintViolationImpl{interpolatedMessage='must not be null', propertyPath=status, rootBeanClass=class com.g1.mychess.tournament.model.Tournament, messageTemplate='{jakarta.validation.constraints.NotNull.message}'}
-//    ConstraintViolationImpl{interpolatedMessage='must not be null', propertyPath=address, rootBeanClass=class com.g1.mychess.tournament.model.Tournament, messageTemplate='{jakarta.validation.constraints.NotNull.message}'}
-//    ConstraintViolationImpl{interpolatedMessage='must not be null', propertyPath=format, rootBeanClass=class com.g1.mychess.tournament.model.Tournament, messageTemplate='{jakarta.validation.constraints.NotNull.message}'}
-//    ConstraintViolationImpl{interpolatedMessage='must not be null', propertyPath=region, rootBeanClass=class com.g1.mychess.tournament.model.Tournament, messageTemplate='{jakarta.validation.constraints.NotNull.message}'}
-//    ConstraintViolationImpl{interpolatedMessage='must not be null', propertyPath=country, rootBeanClass=class com.g1.mychess.tournament.model.Tournament, messageTemplate='{jakarta.validation.constraints.NotNull.message}'}
-//    ConstraintViolationImpl{interpolatedMessage='must not be null', propertyPath=registrationStartDate, rootBeanClass=class com.g1.mychess.tournament.model.Tournament, messageTemplate='{jakarta.validation.constraints.NotNull.message}'}
-//    ConstraintViolationImpl{interpolatedMessage='must not be null', propertyPath=registrationEndDate, rootBeanClass=class com.g1.mychess.tournament.model.Tournament, messageTemplate='{jakarta.validation.constraints.NotNull.message}'}
-//    ConstraintViolationImpl{interpolatedMessage='must not be null', propertyPath=adminId, rootBeanClass=class com.g1.mychess.tournament.model.Tournament, messageTemplate='{jakarta.validation.constraints.NotNull.message}'}
-//    ConstraintViolationImpl{interpolatedMessage='must not be null', propertyPath=endDateTime, rootBeanClass=class com.g1.mychess.tournament.model.Tournament, messageTemplate='{jakarta.validation.constraints.NotNull.message}'}
-//    ConstraintViolationImpl{interpolatedMessage='must not be null', propertyPath=maxAge, rootBeanClass=class com.g1.mychess.tournament.model.Tournament, messageTemplate='{jakarta.validation.constraints.NotNull.message}'}
-//    ConstraintViolationImpl{interpolatedMessage='must not be null', propertyPath=description, rootBeanClass=class com.g1.mychess.tournament.model.Tournament, messageTemplate='{jakarta.validation.constraints.NotNull.message}'}
-//    ConstraintViolationImpl{interpolatedMessage='must not be null', propertyPath=minAge, rootBeanClass=class com.g1.mychess
-
     @AfterEach
     void tearDown() {
         tournamentRepository.deleteAll();
@@ -108,25 +97,39 @@ public class TournamentServiceIntegrationTest {
     }
 
 
-//    @Test
-//    void findTournamentById_Success() {
-//        Tournament tournament = new Tournament();
-//        tournament.setName("Test-Tournament");
-//        tournament.setMaxPlayers(100);
-//        tournament.setMaxRounds(1);
-//        tournament.setStartDateTime(new LocalDate(1,1,2024),new LocalTime(0,0,0,0));
-//        // Set other necessary fields...
-//
-//        tournamentRepository.save(tournament);
-//
-//        // Perform the HTTP request using WebTestClient
-//        webTestClient.get().uri(baseUrl+port+"/api/v1/tournaments", tournament.getId())
-//                .exchange()
-//                .expectStatus().isOk() // Expect 200 OK status
-//                .expectBody() // Expect the body to contain the correct data
-//                .jsonPath("$.name").isEqualTo("Test Tournament")
-//                .jsonPath("$.maxPlayers").isEqualTo(100);
-//    }
+    @Test
+    void findTournamentById_Success() {
+        Tournament tournament = new Tournament();
+        tournament.setId(6969L);
+        tournament.setName("Test-Tournament");
+        tournament.setMaxPlayers(100);
+        tournament.setMaxRounds(1);
+        tournament.setStartDateTime(LocalDateTime.now().plusDays(1));
+        tournament.setEndDateTime(LocalDateTime.now().plusDays(2));
+        tournament.setStatus(Tournament.TournamentStatus.UPCOMING);
+        tournament.setAddress("Test-Address");
+        tournament.setFormat(Tournament.TournamentFormat.SWISS);
+        tournament.setRegion("Test-Region");
+        tournament.setCountry("Test-Country");
+        tournament.setAdminId(1L);
+        tournament.setMaxAge(100);
+        tournament.setMinAge(10);
+        tournament.setDescription("Test-Description");
+        tournament.setRegistrationStartDate(LocalDateTime.now());
+        tournament.setRegistrationEndDate(LocalDateTime.now().plusDays(1));
+        tournament.setMinRating(1500);
+        tournament.setMaxRating(2000);
+
+        tournamentRepository.save(tournament);
+
+        // Perform the HTTP request using WebTestClient
+        webTestClient.get().uri(baseUrl+port+"/api/v1/tournaments/id/", tournament.getId())
+                .header("Authorization", "Bearer " + token)
+                .exchange()
+                .expectStatus().isOk() // Expect 200 OK status
+                .expectBody() // Expect the body to contain the correct data
+                .jsonPath("$.name").isEqualTo("Test Tournament");
+    }
 
 
 }
