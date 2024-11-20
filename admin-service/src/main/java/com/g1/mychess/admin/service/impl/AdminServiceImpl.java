@@ -85,7 +85,7 @@ public class AdminServiceImpl implements AdminService {
         validatePlayerNotBlacklisted(blacklistDTO);
         PlayerDTO playerDTO = getPlayerOrThrow(blacklistDTO.getPlayerId());
 
-        populateDTOWithPlayerInfo(playerDTO, blacklistDTO);
+        populateBlacklistDTOWithPlayerInfo(blacklistDTO, playerDTO);
 
         Blacklist blacklist = blacklistRepository.findByPlayerId(blacklistDTO.getPlayerId())
                 .orElse(new Blacklist());
@@ -118,7 +118,7 @@ public class AdminServiceImpl implements AdminService {
 
         PlayerDTO playerDTO = getPlayerOrThrow(whitelistDTO.getPlayerId());
 
-        populateDTOWithPlayerInfo(playerDTO, whitelistDTO);
+        populateWhitelistDTOWithPlayerInfo(whitelistDTO, playerDTO);
 
         Blacklist blacklist = blacklistRepository.findByPlayerId(whitelistDTO.getPlayerId())
                 .orElseThrow(() -> new InvalidBlacklistOperationException(
@@ -177,24 +177,25 @@ public class AdminServiceImpl implements AdminService {
     }
 
     /**
-     * Populates the specified BlacklistDTO/WhitelistDTO with player information.
+     * Populates a BlacklistDTO with player information.
      *
      * @param blacklistDTO The DTO to be populated
      * @param playerDTO The player details
+     */
+    private void populateBlacklistDTOWithPlayerInfo(BlacklistDTO blacklistDTO, PlayerDTO playerDTO) {
+        blacklistDTO.setUsername(playerDTO.getUsername());
+        blacklistDTO.setEmail(playerDTO.getEmail());
+    }
+
+    /**
+     * Populates a WhitelistDTO with player information.
+     *
      * @param whitelistDTO The DTO to be populated
      * @param playerDTO The player details
      */
-
-    private void populateDTOWithPlayerInfo(PlayerDTO playerDTO, Object dto) {
-        if (dto instanceof BlacklistDTO) {
-            BlacklistDTO blacklistDTO = (BlacklistDTO) dto;
-            blacklistDTO.setUsername(playerDTO.getUsername());
-            blacklistDTO.setEmail(playerDTO.getEmail());
-        } else if (dto instanceof WhitelistDTO) {
-            WhitelistDTO whitelistDTO = (WhitelistDTO) dto;
-            whitelistDTO.setUsername(playerDTO.getUsername());
-            whitelistDTO.setEmail(playerDTO.getEmail());
-        }
+    private void populateWhitelistDTOWithPlayerInfo(WhitelistDTO whitelistDTO, PlayerDTO playerDTO) {
+        whitelistDTO.setUsername(playerDTO.getUsername());
+        whitelistDTO.setEmail(playerDTO.getEmail());
     }
 
     /**
