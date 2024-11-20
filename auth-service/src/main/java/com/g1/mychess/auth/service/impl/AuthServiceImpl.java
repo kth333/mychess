@@ -67,23 +67,44 @@ public class AuthServiceImpl implements AuthService {
         validateRegistrationData(registerRequestDTO);
 
         RegisterRequestDTO playerDTO = mapToPlayerDTO(registerRequestDTO);
-        ResponseEntity<PlayerCreationResponseDTO> playerServiceResponse = playerServiceClient.createPlayer(playerDTO);
+        ResponseEntity<PlayerCreationResponseDTO> playerServiceResponse = createPlayerInPlayerService(playerDTO);
 
-        if (!playerServiceResponse.getStatusCode().is2xxSuccessful()) {
-            handlePlayerServiceError(playerServiceResponse);
-        }
-
-        String verificationToken = tokenService.generateToken(
-                playerServiceResponse.getBody().getPlayerId(),
-                "ROLE_PLAYER",
-                UserToken.TokenType.EMAIL_VERIFICATION,
-                LocalDateTime.now().plusDays(1)
-        );
+        String verificationToken = generateVeriticationToken(playerServiceResponse.getBody());
         sendVerificationEmail(registerRequestDTO.getEmail(), registerRequestDTO.getUsername(), verificationToken);
 
         return ResponseEntity.ok("Registration successful! Check your email to verify your account.");
     }
 
+    /**
+     * Creates a new player in the Player Service.
+     * 
+     * @param playerDTO The DTO containing the player registration details
+     * @return A {@link ResponseEntity} containing the {@link PlayerCreationResponseDTO} with player creation details
+     * @throws PlayerServiceException If an error occurs in the Player Service
+     */
+    private ResponseEntity<PlayerCreationResponseDTO> createPlayerInPlayerService(RegisterRequestDTO playerDTO) {
+        ResponseEntity<PlayerCreationResponseDTO> response = playerServiceClient.createPlayer(playerDTO);
+        if (!response.getStatusCode().is2xxSuccessful()) {
+            handlePlayerServiceError(response);
+        }
+
+        return response;
+    }
+
+    /**
+     * Generates an email verification token for a newly created player.
+     *
+     * @param playerCreationResponseDTO The DTO containing details of the newly created player
+     * @return A string representing the generated email verification token
+     */
+    private String generateVeriticationToken(PlayerCreationResponseDTO playerCreationResponseDTO) {
+        return tokenService.generateToken(
+            playerCreationResponseDTO.getPlayerId(), 
+            "ROEL_PLAYER", 
+            UserToken.TokenType.EMAIL_VERIFICATION, 
+            LocalDateTime.now().plusDays(1)
+        );
+    }
     /**
      * Logs in the user by validating credentials, checking for email verification, and generating a JWT token.
      *
@@ -306,15 +327,41 @@ public class AuthServiceImpl implements AuthService {
     private UserDTO fetchUserByUsernameAndRole(String username, String role) {
         UserDTO userDTO;
         if ("ROLE_PLAYER".equals(role)) {
-            userDTO = playerServiceClient.fetchPlayerByUsername(username);
+            return fetchUserByUsernameFromPlayerService(username);
         } else if ("ROLE_ADMIN".equals(role)) {
-            userDTO = adminServiceClient.fetchAdminByUsername(username);
-        } else {
-            throw new InvalidRoleException("Invalid role provided.");
+            return fetchUserByUsernameFromAdminService(username);
         }
+        
+        throw new InvalidRoleException("Invalid role provided.");
+    }
 
+    /**
+     * Fetches a user by username from the Player Service.
+     * 
+     * @param username the username of the player to retrieve
+     * @return a {@link UserDTO} object containing user details
+     * @throws UserNotFoundException if the player is not found in the Player Service
+     */
+    private UserDTO fetchUserByUsernameFromPlayerService(String username) {
+        UserDTO userDTO = playerServiceClient.fetchPlayerByUsername(username);
         if (userDTO == null) {
-            throw new UserNotFoundException("User not found.");
+            throw new UserNotFoundException("Player not found.");
+        }
+        
+        return userDTO;
+    }
+
+    /**
+     * Fetches a user by username from the Admin Service.
+     * 
+     * @param username the username of the admin to retrieve
+     * @return a {@link UserDTO} object containing user details
+     * @throws UserNotFoundException if the admin is not found in the Admin Service
+     */
+    private UserDTO fetchUserByUsernameFromAdminService(String username) {
+        UserDTO userDTO = adminServiceClient.fetchAdminByUsername(username);
+        if (userDTO == null) {
+            throw new UserNotFoundException("Admin not found.");
         }
 
         return userDTO;
