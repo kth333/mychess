@@ -49,6 +49,7 @@ public class EmailServiceIntegrationTest {
      *
      * Existence of username and email already in db, is handled by player-service.
      * We'll just test the "end-points"
+     *
      */
 
     @BeforeEach

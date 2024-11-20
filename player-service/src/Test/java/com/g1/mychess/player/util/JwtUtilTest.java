@@ -10,7 +10,7 @@
 //
 ///**
 // * Tests wasn't compiling, JwtUtil was throwing exceptions even though the code was correct
-// * turns out it was unable to locate .env
+// * turns out it was unable to locate .env.
 // */
 //
 //@SpringBootTest(classes = PlayerServiceApplication.class)
