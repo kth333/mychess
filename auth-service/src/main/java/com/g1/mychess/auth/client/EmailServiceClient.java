@@ -2,6 +2,7 @@ package com.g1.mychess.auth.client;
 
 import com.g1.mychess.auth.dto.EmailRequestDTO;
 import com.g1.mychess.auth.exception.EmailSendFailedException;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -19,6 +20,7 @@ public class EmailServiceClient {
      * @param emailServiceUrl the URL of the Email Service (from application properties)
      * @param webClientBuilder the WebClient builder to create the WebClient instance
      */
+    @Autowired
     public EmailServiceClient(@Value("${email.service.url}") String emailServiceUrl, WebClient.Builder webClientBuilder) {
         this.webClient = webClientBuilder.baseUrl(emailServiceUrl).build();
     }

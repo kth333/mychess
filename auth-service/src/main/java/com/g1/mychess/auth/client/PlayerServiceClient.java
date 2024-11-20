@@ -5,6 +5,7 @@ import com.g1.mychess.auth.dto.PlayerCreationResponseDTO;
 import com.g1.mychess.auth.dto.UpdatePasswordRequestDTO;
 import com.g1.mychess.auth.dto.UserDTO;
 import com.g1.mychess.auth.exception.PlayerServiceException;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -23,6 +24,7 @@ public class PlayerServiceClient {
      * @param playerServiceUrl the URL of the Player Service (from application properties)
      * @param webClientBuilder the WebClient builder to create the WebClient instance
      */
+    @Autowired
     public PlayerServiceClient(@Value("${player.service.url}") String playerServiceUrl, WebClient.Builder webClientBuilder) {
         this.webClient = webClientBuilder.baseUrl(playerServiceUrl).build();
     }
