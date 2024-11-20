@@ -52,11 +52,11 @@ public class EmailServiceIntegrationTest {
         }
     }
 
-    /*
-    * Email Service Layer is relatively simple without many failure cases.
-    * As such we only need to check for correctness in username, recipient and email subject and content.
-    *
-    *  */
+    /**
+     * Email Service Layer is relatively simple without many failure cases.
+     * Validity of local and domain part of email covered in auth service unit tests.
+     * Checks for whether username and email already exist in db, handled by player-service.
+     */
 
     @Test
     public void test_SendVerificationEmail_Success() throws MessagingException, IOException {
@@ -83,24 +83,24 @@ public class EmailServiceIntegrationTest {
         String username = "username";
         String reason = "This is a legitimate reason";
         Long banDuration = 50L;
-        emailService.sendBlacklistEmail(to, username, reason,banDuration);
+        emailService.sendBlacklistEmail(to, username, reason, banDuration);
 
-    MimeMessage[] receivedMessages = smtpServer.getReceivedMessages();
-    // assert email sent to correct recipient
-    assertEquals(to, receivedMessages[0].getRecipients(MimeMessage.RecipientType.TO)[0].toString(), "Recipient does not match.");
-    // assert email content & body
-    String emailContent = (String) receivedMessages[0].getContent();
-    assertTrue(emailContent.contains(banDuration.toString()), "Email body does not contain the verification token.");
-    String emailSubject = receivedMessages[0].getSubject();
-    assertTrue(emailSubject.contains("Blacklist"), "Email body does not contain \"Blacklist\".");
-    assertTrue(emailSubject.contains("MyChess"), "Email Subject does not contain \"MyChess\".");
+        MimeMessage[] receivedMessages = smtpServer.getReceivedMessages();
+        // assert email sent to correct recipient
+        assertEquals(to, receivedMessages[0].getRecipients(MimeMessage.RecipientType.TO)[0].toString(), "Recipient does not match.");
+        // assert email content & body
+        String emailContent = (String) receivedMessages[0].getContent();
+        assertTrue(emailContent.contains(banDuration.toString()), "Email body does not contain the verification token.");
+        String emailSubject = receivedMessages[0].getSubject();
+        assertTrue(emailSubject.contains("Blacklist"), "Email body does not contain \"Blacklist\".");
+        assertTrue(emailSubject.contains("MyChess"), "Email Subject does not contain \"MyChess\".");
 
     }
 
     @Test
     void test_sendWhitelistEmail_Success() throws MessagingException, IOException {
 
-        String to =  "recipient@example.com";
+        String to = "recipient@example.com";
         String username = "username";
         String reason = "This is a legitimate reason";
 
@@ -111,12 +111,13 @@ public class EmailServiceIntegrationTest {
         assertEquals(to, receivedMessages[0].getRecipients(MimeMessage.RecipientType.TO)[0].toString(), "Recipient does not match.");
         // assert email content & body
         String emailContent = (String) receivedMessages[0].getContent();
-        String emailSubject =  receivedMessages[0].getSubject();
+        String emailSubject = receivedMessages[0].getSubject();
         assertTrue(emailContent.contains(reason), "Email body does not contain the verification token.");
         assertTrue(emailSubject.contains("Whitelist"), "Email body does not contain \"Whitelist\".");
         assertTrue(emailSubject.contains("MyChess"), "Email Subject does not contain \"MyChess\".");
 
     }
+
     @Test
     void test_sendPasswordResetEmail_Success() throws MessagingException, IOException {
 

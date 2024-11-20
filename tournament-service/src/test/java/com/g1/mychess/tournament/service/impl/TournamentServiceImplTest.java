@@ -6,8 +6,8 @@ import com.g1.mychess.tournament.client.PlayerServiceClient;
 import com.g1.mychess.tournament.dto.MatchmakingDTO;
 import com.g1.mychess.tournament.dto.PlayerDTO;
 import com.g1.mychess.tournament.dto.TournamentDTO;
-import com.g1.mychess.tournament.dto.TournamentNotificationDTO;
-import com.g1.mychess.tournament.exception.PlayerBlacklistedException;
+import com.g1.mychess.tournament.exception.*;
+import com.g1.mychess.tournament.mapper.TournamentMapper;
 import com.g1.mychess.tournament.model.TimeControlSetting;
 import com.g1.mychess.tournament.model.Tournament;
 import com.g1.mychess.tournament.repository.TournamentPlayerRepository;
@@ -115,6 +115,30 @@ public class TournamentServiceImplTest {
     }
 
     @Test
+    void findTournamentByName_NotFound(){
+        String tournamentName = "Non-Existent Tournament";
+
+        when(tournamentRepository.findByName(tournamentName)).thenReturn(Optional.empty());
+
+        Exception expectedException = assertThrows(IllegalArgumentException.class, () ->
+                tournamentService.findTournamentByName(tournamentName));
+
+        assertEquals("Tournament not found with name: " + tournamentName, expectedException.getMessage());
+    }
+
+    @Test
+    void findTournamentById_NotFound(){
+        long tournamentId = 999L;
+
+        when(tournamentRepository.findById(tournamentId)).thenReturn(Optional.empty());
+
+        Exception expectedException = assertThrows(IllegalArgumentException.class, () ->
+                tournamentService.findTournamentById(tournamentId));
+
+        assertEquals("Tournament not found with tournament id: " + tournamentId, expectedException.getMessage());
+    }
+
+    @Test
     void testSignUpToTournament_Success() {
         // Arrange
         long tournamentId = 1L;
@@ -191,6 +215,41 @@ public class TournamentServiceImplTest {
     }
 
     @Test
+    void testSignUpToTournament_AlreadySignedUp() {
+        // Arrange
+        long tournamentId = 1L;
+        long playerId = 2L;
+
+        Tournament tournament = new Tournament();
+        tournament.setId(tournamentId);
+        tournament.setParticipants(new HashSet<>());
+        tournament.setMinRating(1000); // Add this line
+        tournament.setMaxRating(2000); // Add this line
+
+        when(tournamentRepository.findById(tournamentId)).thenReturn(Optional.of(tournament));
+        when(tournamentPlayerRepository.existsByTournamentIdAndPlayerId(tournamentId, playerId)).thenReturn(true);
+
+        PlayerDTO playerDTO = new PlayerDTO(
+                playerId,
+                false,
+                "playerUsername",
+                25,
+                "MALE",
+                1500.0,
+                200.0,
+                0.06
+        );
+
+
+        // Assert
+        Exception expectedException = assertThrows(PlayerAlreadySignedUpException.class, () ->
+                tournamentService.signUpToTournament(tournamentId, playerId));
+
+        assertEquals("Player is already signed up for this tournament.", expectedException.getMessage());
+    }
+
+
+    @Test
     public void testUpdateTournament_Success() {
         // Arrange
         TournamentDTO tournamentDTO = new TournamentDTO();
@@ -221,6 +280,62 @@ public class TournamentServiceImplTest {
     }
 
     @Test
+    public void testUpdateTournament_NotExist() {
+        // Arrange
+        TournamentDTO tournamentDTO = new TournamentDTO();
+        tournamentDTO.setId(1L);
+        tournamentDTO.setName("Updated Tournament");
+        tournamentDTO.setFormat("SWISS");
+        tournamentDTO.setStatus(Tournament.TournamentStatus.UPCOMING.name());
+
+        TimeControlSetting timeControlSetting = new TimeControlSetting(30, 0); // 30 minutes base time, no increment
+        tournamentDTO.setTimeControlSetting(timeControlSetting);
+
+        Tournament tournament = new Tournament();
+        tournament.setId(1L);
+        tournament.setAdminId(1L);
+
+        // Act
+        when(tournamentRepository.findById(1L)).thenReturn(Optional.empty());
+
+        // Assert
+        Exception expectedException = assertThrows(IllegalArgumentException.class, () ->
+                tournamentService.updateTournament(tournamentDTO, mockRequest));
+        assertEquals("Tournament not found with ID: " + tournamentDTO.getId(), expectedException.getMessage());
+    }
+
+    @Test
+    public void testUpdateTournament_Unauthorized() {
+        // Arrange
+        TournamentDTO tournamentDTO = new TournamentDTO();
+        tournamentDTO.setId(1L);
+        tournamentDTO.setName("Updated Tournament");
+        tournamentDTO.setFormat("SWISS");
+        tournamentDTO.setStatus(Tournament.TournamentStatus.UPCOMING.name());
+
+        TimeControlSetting timeControlSetting = new TimeControlSetting(30, 0); // 30 minutes base time, no increment
+        tournamentDTO.setTimeControlSetting(timeControlSetting);
+
+        Tournament tournament = new Tournament();
+        tournament.setId(1L);
+        tournament.setAdminId(1L);
+
+        long adminId = 999L;
+
+        // Act
+        when(tournamentRepository.findById(1L)).thenReturn(Optional.of(tournament));
+        when(authenticationService.getUserIdFromRequest(mockRequest)).thenReturn(999L);
+
+        // Assert
+        Exception expectedException = assertThrows(UnauthorizedActionException.class, () ->
+                tournamentService.updateTournament(tournamentDTO, mockRequest));
+        assertEquals("Only the tournament admin can update the tournament.", expectedException.getMessage());
+    }
+
+    // ... (Include other test methods, adjusting them similarly)
+
+    // Example for testCompleteTournament_Success
+    @Test
     void testCompleteTournament_Success() {
         // Arrange
         long tournamentId = 1L;
@@ -243,4 +358,6 @@ public class TournamentServiceImplTest {
         assertEquals(Tournament.TournamentStatus.COMPLETED, tournament.getStatus());
         verify(matchServiceClient).finalizeTournament(any(MatchmakingDTO.class), eq("mock-jwt-token"));
     }
+
+
 }

@@ -2,6 +2,7 @@ package com.g1.mychess.tournament.repository;
 
 import com.g1.mychess.tournament.model.TournamentPlayer;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Optional;

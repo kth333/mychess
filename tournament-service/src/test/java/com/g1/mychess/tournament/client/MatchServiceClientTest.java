@@ -59,5 +59,5 @@ public class MatchServiceClientTest {
         mockWebServer.shutdown();
     }
 
-    // Not implemented
+    // Not implemented, client does contain business logic.
 }

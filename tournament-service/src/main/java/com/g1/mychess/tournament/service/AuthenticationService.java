@@ -3,6 +3,7 @@ package com.g1.mychess.tournament.service;
 import com.g1.mychess.tournament.exception.UnauthorizedActionException;
 import com.g1.mychess.tournament.util.JwtUtil;
 import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 /**
