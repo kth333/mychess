@@ -33,6 +33,7 @@ public class JwtRequestFilter extends OncePerRequestFilter {
      *
      * @param jwtUtil the JwtUtil used to extract and validate the JWT
      */
+    @Autowired
     public JwtRequestFilter(JwtUtil jwtUtil) {
         this.jwtUtil = jwtUtil;
     }

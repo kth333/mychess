@@ -33,11 +33,11 @@ import java.util.List;
 @Service
 public class PlayerServiceImpl implements PlayerService {
 
-    private final PlayerRepository playerRepository;
-    private final ProfileRepository profileRepository;
-    private final PlayerRatingHistoryRepository playerRatingHistoryRepository;
-    private final EmailServiceClient emailServiceClient;
-    private final FollowRepository followRepository;
+    private PlayerRepository playerRepository;
+    private ProfileRepository profileRepository;
+    private PlayerRatingHistoryRepository playerRatingHistoryRepository;
+    private EmailServiceClient emailServiceClient;
+    private FollowRepository followRepository;
 
     /**
      * Constructs a new PlayerServiceImpl.

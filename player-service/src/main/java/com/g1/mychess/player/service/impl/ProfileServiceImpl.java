@@ -32,9 +32,9 @@ import java.util.List;
 @Service
 public class ProfileServiceImpl implements ProfileService {
 
-    private final PlayerRepository playerRepository;
-    private final ProfileRepository profileRepository;
-    private final PlayerRatingHistoryRepository playerRatingHistoryRepository;
+    private PlayerRepository playerRepository;
+    private ProfileRepository profileRepository;
+    private PlayerRatingHistoryRepository playerRatingHistoryRepository;
 
     /**
      * Constructor for ProfileServiceImpl.

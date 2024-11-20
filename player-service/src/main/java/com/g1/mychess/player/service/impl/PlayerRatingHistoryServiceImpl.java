@@ -11,6 +11,7 @@ import com.g1.mychess.player.repository.PlayerRepository;
 import com.g1.mychess.player.service.PlayerRatingHistoryService;
 import jakarta.transaction.Transactional;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -26,8 +27,8 @@ import java.util.List;
 @Service
 public class PlayerRatingHistoryServiceImpl implements PlayerRatingHistoryService {
 
-    private final PlayerRepository playerRepository;
-    private final PlayerRatingHistoryRepository playerRatingHistoryRepository;
+    private PlayerRepository playerRepository;
+    private PlayerRatingHistoryRepository playerRatingHistoryRepository;
 
     /**
      * Constructor for dependency injection.
